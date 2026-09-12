@@ -157,6 +157,15 @@ def fetch_user_team(t_id, gw):
     picks_res = requests.get(picks_url).json()
     entry_res = requests.get(entry_url).json()
 
+    # בדיקה האם הופעל Free Hit במחזור הקודם
+    is_fh = picks_res.get("active_chip") == "free_hit"
+    if is_fh and last_gw > 1:
+      base_gw = last_gw - 1
+      base_url = (
+          f"https://fantasy.premierleague.com/api/entry/{t_id}/event/{base_gw}/picks/"
+      )
+      picks_res = requests.get(base_url).json()
+
     bank = picks_res.get("entry_history", {}).get("bank", 0) / 10
     picks = picks_res.get("picks", [])
     team_name = entry_res.get("name", "הקבוצה שלי")
@@ -170,14 +179,89 @@ my_picks, bank_balance, my_team_name, my_rank = fetch_user_team(
     team_id, next_gw
 )
 
+if not my_picks:
+  st.warning("לא ניתן למשוך את נתוני הקבוצה. ודא שמספר הקבוצה תקין.")
+  st.stop()
+
+# הכנת רשימת השחקנים הבסיסית
+current_squad_ids = [p["element"] for p in my_picks]
+
+# --- רכיב עריכת חילופים שבוצעו לקראת GW4 בסרגל הצד ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("🔄 עדכון חילופים שבוצעו ל-GW4")
+st.sidebar.caption("בחר שחקנים שהחלפת לקראת המחזור הקרוב:")
+
+num_transfers = st.sidebar.selectbox(
+    "כמה חילופים ביצעת?", [0, 1, 2, 3], index=1
+)
+
+# שמות כל שחקני הליגה לבחירה
+all_player_names = {
+    p["name"] + f" ({p['team']}) - £{p['cost']}m": pid
+    for pid, p in all_players.items()
+}
+player_options = sorted(list(all_player_names.keys()))
+
+transfers_made = []
+for i in range(num_transfers):
+  st.sidebar.markdown(f"**חילוף #{i+1}**")
+
+  # שחקנים שקיימים כרגע בסגל
+  squad_names = [
+      all_players[pid]["name"] + f" ({all_players[pid]['team']})"
+      for pid in current_squad_ids
+      if pid in all_players
+  ]
+  p_out_name = st.sidebar.selectbox(
+      f"שחקן שיצא (OUT #{i+1}):", ["ללא שינוי"] + squad_names, key=f"out_{i}"
+  )
+
+  p_in_name = st.sidebar.selectbox(
+      f"שחקן שנכנס (IN #{i+1}):",
+      ["בחר שחקן..."] + player_options,
+      key=f"in_{i}",
+  )
+
+  if p_out_name != "ללא שינוי" and p_in_name != "בחר שחקן...":
+    out_id = next(
+        pid
+        for pid in current_squad_ids
+        if all_players[pid]["name"] + f" ({all_players[pid]['team']})"
+        == p_out_name
+    )
+    in_id = all_player_names[p_in_name]
+    transfers_made.append((out_id, in_id))
+
+# החלת החילופים על הסגל בפועל ועדכון הבנק
+for out_id, in_id in transfers_made:
+  for p in my_picks:
+    if p["element"] == out_id:
+      bank_balance += all_players[out_id]["cost"] - all_players[in_id]["cost"]
+      p["element"] = in_id
+      break
+
+# הרכבת רשימות 11 פותחים וספסל
+starters = []
+bench = []
+for p in my_picks:
+  pid = p["element"]
+  p_info = all_players.get(pid)
+  if p_info:
+    item = {**p_info, "is_cap": p["is_captain"], "is_vc": p["is_vice_captain"]}
+    if p["position"] <= 11:
+      starters.append(item)
+    else:
+      bench.append(item)
+
+# תצוגת ראשית
 st.title(f"⚽ FPL Command Center | {my_team_name or 'Top 50K Engine'}")
 st.caption(f"הכנה למחזור {next_gw} | סנכרון חי לסגל: **{team_id}**")
 
-# עיבוד בטוח של הדירוג ללא שגיאות פירמוט
-if isinstance(my_rank, int):
-  rank_display = f"{my_rank:,}"
-else:
-  rank_display = str(my_rank) if my_rank else "—"
+rank_display = (
+    f"{my_rank:,}"
+    if isinstance(my_rank, int)
+    else (str(my_rank) if my_rank else "—")
+)
 
 m1, m2, m3, m4 = st.columns(4)
 m1.markdown(
@@ -193,7 +277,7 @@ m2.markdown(
 )
 m3.markdown(
     '<div class="metric-box"><div style="color:#f59e0b;font-size:11px;">יתרה'
-    ' בבנק</div><div'
+    ' בבנק מעודכנת</div><div'
     f' style="font-size:16px;font-weight:bold;">£{bank_balance:.1f}m</div></div>',
     unsafe_allow_html=True,
 )
@@ -206,28 +290,9 @@ m4.markdown(
 
 st.write("")
 
-if not my_picks:
-  st.warning(
-      "לא ניתן למשוך את נתוני הקבוצה. ודא שמספר הקבוצה (Team ID) תקין בסרגל"
-      " הצד."
-  )
-  st.stop()
-
-starters = []
-bench = []
-for p in my_picks:
-  pid = p["element"]
-  p_info = all_players.get(pid)
-  if p_info:
-    item = {**p_info, "is_cap": p["is_captain"], "is_vc": p["is_vice_captain"]}
-    if p["position"] <= 11:
-      starters.append(item)
-    else:
-      bench.append(item)
-
 tab_squad, tab_transfer, tab_health, tab_chat = st.tabs([
     "🟢 הסגל שלי על המגרש",
-    "🎯 מחשבון חילוף אופטימלי",
+    "🎯 מחשבון חילוף נוסף",
     "🚦 רמזור בריאות הסגל",
     "💬 צ'אט בוט אישי (Top 50K)",
 ])
@@ -247,8 +312,8 @@ def build_card(p, is_bench=False):
 
 
 with tab_squad:
-  st.subheader("📋 ההרכב הפותח שלך")
-  st.caption("מסודר לפי ה-11 שפתחו במחזור האחרון:")
+  st.subheader("📋 ההרכב הפותח שלך ל-GW4")
+  st.caption("כולל החילופים שהגדרת בסרגל הצד:")
 
   gk_line = [p for p in starters if p["pos_code"] == 1]
   def_line = [p for p in starters if p["pos_code"] == 2]
@@ -276,10 +341,8 @@ with tab_squad:
   )
 
 with tab_transfer:
-  st.subheader("🎯 החילוף המומלץ ביותר לסגל שלך")
-  st.caption(
-      "איתור החוליה החלשה ביותר בקבוצה מול יעד הרכש הטוב בליגה שעומד בתקציב שלך:"
-  )
+  st.subheader("🎯 מחשבון החילוף הטוב ביותר לסגל הנוכחי")
+  st.caption("בודק מי החוליה החלשה ביותר שנותרה בסגל שלך מול שחקני הרכש בליגה:")
 
   all_my_players = starters + bench
   weak_link = min(
@@ -333,7 +396,6 @@ with tab_transfer:
 
 with tab_health:
   st.subheader("🚦 ניתוח מצב 15 השחקנים שלך")
-
   greens = [
       p
       for p in all_my_players
@@ -373,16 +435,15 @@ with tab_health:
 with tab_chat:
   st.subheader(f"💬 יועץ ה-AI האישי של {my_team_name}")
   st.caption(
-      "הסוכן מעודכן ב-15 השחקנים שלך, ביתרת הבנק ובשחקני הרכש הטובים בליגה."
+      "הסוכן מעודכן ב-15 השחקנים שלך, ביתרת הבנק ובחילופים שהגדרת לקראת מחזור 4."
   )
 
   if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
         "content": (
-            f"היי! אני מחובר לקבוצה שלך ({my_team_name}) עם יתרת בנק של"
-            f" £{bank_balance:.1f}m. שאל אותי כל שאלה: חילופים, התלבטות קפטן או"
-            " ניהול הספסל למחזור הקרוב."
+            f"היי! אני מחובר לסגל המעודכן שלך לקראת מחזור 4 (יתרה בבנק:"
+            f" £{bank_balance:.1f}m). שאל אותי כל שאלה: הרכב סופי, קפטן או ספסל."
         ),
     }]
 
@@ -390,7 +451,7 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.write(msg["content"])
 
-  if prompt := st.chat_input("שאל את המאמן (למשל: מי החילוף הכי דחוף אצלי?)..."):
+  if prompt := st.chat_input("שאל את המאמן..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.write(prompt)
@@ -413,7 +474,7 @@ with tab_chat:
       system_instruction = f"""
 אתה מאמן ואסטרטג FPL מוביל בעולם המכוון למקום ב-Top 50,000.
 מחזור המשחקים הקרוב: {next_gw}.
-פרטי הקבוצה של המשתמש:
+פרטי הקבוצה המעודכנת לקראת מחזור {next_gw}:
 שם קבוצה: {my_team_name}, דירוג נוכחי: {rank_display}, יתרה בבנק: £{bank_balance:.1f}m.
 15 השחקנים של המשתמש:
 {json.dumps(my_squad_summary, ensure_ascii=False)}
@@ -450,13 +511,8 @@ with tab_chat:
             continue
 
       if not reply:
-        reply = (
-            "⚠️ עומס רגעי בשרתי ה-AI של גוגל. המתן מספר שניות ושלח את השאלה"
-            " שוב."
-        )
+        reply = "⚠️ עומס רגעי בשרת. נסה שוב בעוד מספר שניות."
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
       st.write(reply)
-
-
