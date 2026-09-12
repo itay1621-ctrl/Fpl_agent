@@ -3,8 +3,8 @@ import requests
 import streamlit as st
 
 st.set_page_config(
-    page_title="FPL Elite Scout | Top 100K Engine",
-    page_icon="⚽",
+    page_title="FPL Top 50K Engine | Target Radar",
+    page_icon="🏆",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -13,46 +13,23 @@ st.markdown(
     """
 <style>
 .main { direction: rtl; text-align: right; background-color: #0b0f19; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-
-/* מגרש כדורגל */
-.pitch {
-    background: radial-gradient(circle, #1a3821 0%, #0d1e12 100%);
-    border: 2px solid #234e2c;
-    border-radius: 14px;
-    padding: 16px 6px;
-    margin: 12px 0;
-    box-shadow: inset 0 0 35px rgba(0,0,0,0.6);
+.metric-box { background: #162032; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #243550; }
+.target-card {
+    background: #111a28;
+    border: 1px solid #1e2e46;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
-.pitch-row {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 4px;
-}
-.p-card {
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid #334155;
-    border-radius: 8px;
-    padding: 6px 4px;
-    text-align: center;
-    width: 84px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-}
-.cap-border { border: 2px solid #facc15 !important; }
-.p-name { font-weight: bold; font-size: 11px; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-team { font-size: 9px; color: #94a3b8; margin: 1px 0; }
-.p-fxt { font-size: 9px; font-weight: bold; padding: 1px 4px; border-radius: 3px; display: inline-block; }
-
-.fdr-2 { background: #15803d; color: #fff; }
-.fdr-3 { background: #475569; color: #fff; }
-.fdr-4 { background: #b91c1c; color: #fff; }
-.fdr-5 { background: #7f1d1d; color: #fff; }
-
-/* כרטיסים */
-.scout-card { background: #0e2a38; border-right: 4px solid #38bdf8; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
-.trap-card { background: #221013; border-right: 4px solid #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
-.metric-box { background: #1e293b; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #334155; }
+.tier-1 { border-right: 4px solid #10b981; }
+.tier-2 { border-right: 4px solid #38bdf8; }
+.tier-3 { border-right: 4px solid #f59e0b; }
+.badge { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-left: 4px; }
+.badge-fdr-2 { background: #15803d; color: #fff; }
+.badge-fdr-3 { background: #475569; color: #fff; }
+.badge-fdr-4 { background: #b91c1c; color: #fff; }
+.badge-fdr-5 { background: #7f1d1d; color: #fff; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -60,7 +37,7 @@ st.markdown(
 
 
 @st.cache_data(ttl=600)
-def load_all_fpl_data():
+def load_top50k_data():
   base = "https://fantasy.premierleague.com/api/"
   bootstrap = requests.get(f"{base}bootstrap-static/").json()
   fixtures = requests.get(f"{base}fixtures/").json()
@@ -74,271 +51,235 @@ def load_all_fpl_data():
       next_gw = ev["id"]
       break
 
-  # 1. חישוב עוצמת התקפה קבוצתית (סך שערים שהקבוצה כבשה עד כה)
-  team_goals = {t_id: 0 for t_id in teams}
-  for el in elements:
-    team_goals[el["team"]] += el["goals_scored"]
-
-  pos_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
-  all_players = []
+  elite_defenses = ["ARS", "MCI", "LIV", "NEW", "CHE"]
+  pos_map = {1: "שוערים", 2: "הגנה", 3: "קישור", 4: "התקפה"}
+  records = []
 
   for el in elements:
-    if el["status"] == "u":
+    if el["status"] != "a":
       continue
 
-    # לוח משחקים
+    team_short = teams[el["team"]]["short_name"]
+
     upcoming = []
     fdr_list = []
     for f in fixtures:
       if f["event"] in [next_gw, next_gw + 1, next_gw + 2]:
         if f["team_h"] == el["team"]:
           opp = teams[f["team_a"]]["short_name"]
-          diff = f["team_h_difficulty"]
           upcoming.append(f"{opp}(H)")
-          fdr_list.append(diff)
+          fdr_list.append(f["team_h_difficulty"])
         elif f["team_a"] == el["team"]:
           opp = teams[f["team_h"]]["short_name"]
-          diff = f["team_a_difficulty"]
           upcoming.append(f"{opp}(A)")
-          fdr_list.append(diff)
+          fdr_list.append(f["team_a_difficulty"])
 
     avg_fdr = sum(fdr_list) / len(fdr_list) if fdr_list else 3.0
     form = float(el["form"])
     xgi = float(el.get("expected_goal_involvements", 0.0))
     threat = float(el.get("threat", 0.0))
     cost = el["now_cost"] / 10
-
-    # מומנטום רשתות וסקאוט: קניות נטו של שחקנים למחזור הנוכחי
+    goals_assists = el["goals_scored"] + el["assists"]
     net_transfers = el.get("transfers_in_event", 0) - el.get(
         "transfers_out_event", 0
     )
-    # נרמול מומנטום סקאוט (0 עד 3 נקודות)
-    scout_buzz = max(-2.0, min(3.5, net_transfers / 50000.0))
 
-    # מקדם התקפה קבוצתית (צ'לסי, סיטי, ארסנל וכו')
-    t_goals = team_goals.get(el["team"], 0)
-    team_attack_boost = 1.3 if t_goals >= 5 else 1.0
+    # אלגוריתם מותאם ל-Top 50K
+    # הגנה: עדיפות מוחלטת להגנות עלית + מגנים מייצרי מצבים
+    # התקפה: שילוב מומנטום, xGI ויכולת קבוצתית
+    def_boost = (
+        1.3
+        if (el["element_type"] in [1, 2] and team_short in elite_defenses)
+        else 0.85
+    )
+    att_boost = (
+        1.2
+        if (el["element_type"] in [3, 4] and (form >= 4.5 or goals_assists >= 2))
+        else 1.0
+    )
 
-    # אלגוריתם משוקלל: מומנטום סקאוט + עוצמת התקפה קבוצתית + איום ממשי (Threat) + xGI
-    composite_score = (
-        (xgi * 1.5)
-        + (threat * 0.02)
-        + (form * 1.1)
-        + scout_buzz
-        + ((5.2 - avg_fdr) * 1.3)
-    ) * (team_attack_boost if el["element_type"] in [3, 4] else 1.0)
+    score = (
+        (form * 1.4)
+        + (xgi * 1.3)
+        + (threat * 0.015)
+        + ((5.3 - avg_fdr) * 1.4)
+        + (1.2 if net_transfers > 35000 else 0.0)
+    )
 
-    # מדד בועה (פער קיצוני בין שערים בפועל ל-xGI)
-    goals_assists = el["goals_scored"] + el["assists"]
-    bubble_index = round((goals_assists - xgi) * (avg_fdr / 2.5), 2)
+    score *= def_boost if el["element_type"] in [1, 2] else att_boost
 
-    next_match_str = upcoming[0] if upcoming else "—"
-    next_fdr = fdr_list[0] if fdr_list else 3
+    # נימוק טקטי מותאם
+    if el["element_type"] == 1:
+      reason = "שוער יציב מאחורי הגנה איכותית"
+    elif el["element_type"] == 2:
+      if threat > 40:
+        reason = "מגן התקפי עם איום שער/בישול + סיכוי לקלין שיט"
+      elif team_short in elite_defenses:
+        reason = "עוגן רשת נקייה מהגנת צמרת"
+      else:
+        reason = "מחיר נגיש ולוח ירוק"
+    elif el["element_type"] in [3, 4]:
+      if form >= 5.5:
+        reason = "כושר כיבוש לוהט וסיומת קטלנית"
+      elif xgi >= 1.4:
+        reason = "מייצר מדדי xG/xA גבוהים ברציפות"
+      elif net_transfers > 60000:
+        reason = "מוקד רכש מרכזי של קהילת הסקאוט"
+      else:
+        reason = "לוח משחקים נוח ומשקל התקפי גבוה"
 
-    all_players.append({
+    records.append({
         "ID": el["id"],
         "שם": el["web_name"],
-        "קבוצה": teams[el["team"]]["short_name"],
-        "עמדה": pos_map[el["element_type"]],
+        "קבוצה": team_short,
+        "עמדה_שם": pos_map[el["element_type"]],
         "עמדה_קוד": el["element_type"],
         "מחיר": cost,
         "כושר": form,
         "xGI": xgi,
-        "שערים_בישולים": goals_assists,
-        "איום_Opta": threat,
-        "קניות_נטו": net_transfers,
+        "מעורבות_בשערים": goals_assists,
         "בעלות %": float(el["selected_by_percent"]),
-        "סטטוס": el["status"],
-        "סיכוי שיתוף": (
-            el["chance_of_playing_next_round"]
-            if el["chance_of_playing_next_round"] is not None
-            else 100
-        ),
-        "ציון אלגוריתם": round(composite_score, 2),
-        "מדד בועה": bubble_index,
-        "FDR ממוצע": round(avg_fdr, 2),
-        "משחק הבא": next_match_str,
-        "next_fdr": next_fdr,
-        "3 משחקים": " | ".join(upcoming),
+        "ציון": round(score, 2),
+        "נימוק": reason,
+        "משחק_קרוב": upcoming[0] if upcoming else "—",
+        "fdr_קרוב": fdr_list[0] if fdr_list else 3,
+        "לוח_3_משחקים": " | ".join(upcoming),
     })
 
-  return pd.DataFrame(all_players), next_gw
+  return pd.DataFrame(records), next_gw
 
 
-df, next_gw = load_all_fpl_data()
+df, next_gw = load_top50k_data()
 
-st.title("⚽ FPL Elite Decision Engine")
+# כותרת עליונה
+st.title("🏆 FPL Top 50K Target Radar")
 st.caption(
-    f"מודל EV משולב סנטימנט סקאוט ועוצמת התקפה לקראת GW{next_gw} | יעד: Top 100K"
+    f"בנק השחקנים המובילים לרכש לקראת GW{next_gw} — בחר את ההעברה המתאימה"
+    " לתקציב שלך"
 )
 
-col1, col2, col3 = st.columns(3)
-with col1:
-  st.markdown(
-      '<div class="metric-box"><div'
-      ' style="color:#38bdf8;font-size:11px;">מחזור יעד</div><div'
-      f' style="font-size:16px;font-weight:bold;">GW {next_gw}</div></div>',
-      unsafe_allow_html=True,
-  )
-with col2:
-  st.markdown(
-      '<div class="metric-box"><div'
-      ' style="color:#10b981;font-size:11px;">שקלול שוק</div><div'
-      ' style="font-size:16px;font-weight:bold;">Opta + Scout Buzz</div></div>',
-      unsafe_allow_html=True,
-  )
-with col3:
-  st.markdown(
-      '<div class="metric-box"><div'
-      ' style="color:#f59e0b;font-size:11px;">יעד עולמי</div><div'
-      ' style="font-size:16px;font-weight:bold;">Top 100K 🏆</div></div>',
-      unsafe_allow_html=True,
-  )
+c1, c2, c3 = st.columns(3)
+c1.markdown(
+    '<div class="metric-box"><div'
+    ' style="color:#38bdf8;font-size:11px;">מחזור יעד</div><div'
+    f' style="font-size:16px;font-weight:bold;">GW {next_gw}</div></div>',
+    unsafe_allow_html=True,
+)
+c2.markdown(
+    '<div class="metric-box"><div'
+    ' style="color:#10b981;font-size:11px;">יעד עולמי</div><div'
+    ' style="font-size:16px;font-weight:bold;">Top 50,000 🔥</div></div>',
+    unsafe_allow_html=True,
+)
+c3.markdown(
+    '<div class="metric-box"><div'
+    ' style="color:#f59e0b;font-size:11px;">אסטרטגיה</div><div'
+    ' style="font-size:16px;font-weight:bold;">רכש מותאם אישית</div></div>',
+    unsafe_allow_html=True,
+)
 
 st.write("")
 
-tab_pitch, tab_scout, tab_trap, tab_captain = st.tabs([
-    "🟢 הרכב מגרש (3-4-3)",
-    "🔥 מוקדי סקאוט ורשתות",
-    "🚨 רדאר בועות ומלכודות",
-    "👑 זירת הקפטנים",
+tab_fwds, tab_mids, tab_defs, tab_gks, tab_captain = st.tabs([
+    "⚡ חלוצים (FWD)",
+    "🎯 קשרים (MID)",
+    "🛡️ שחקני הגנה (DEF)",
+    "🧤 שוערים (GK)",
+    "👑 קפטן GW" + str(next_gw),
 ])
 
-fit_df = df[(df["סטטוס"] == "a") & (df["סיכוי שיתוף"] == 100)]
 
-# טאב 1: מגרש
-with tab_pitch:
-  st.subheader("📋 ההרכב האופטימלי על המגרש (£100m)")
-  st.caption("משקלל כוח התקפה קבוצתי, מומנטום קניות ואיום ממשי:")
-
-  best_gk = (
-      fit_df[fit_df["עמדה_קוד"] == 1]
-      .sort_values(by="ציון אלגוריתם", ascending=False)
-      .head(1)
-  )
-  best_defs = (
-      fit_df[fit_df["עמדה_קוד"] == 2]
-      .sort_values(by="ציון אלגוריתם", ascending=False)
-      .head(3)
-  )
-  best_mids = (
-      fit_df[fit_df["עמדה_קוד"] == 3]
-      .sort_values(by="ציון אלגוריתם", ascending=False)
-      .head(4)
-  )
-  best_fwds = (
-      fit_df[fit_df["עמדה_קוד"] == 4]
-      .sort_values(by="ציון אלגוריתם", ascending=False)
-      .head(3)
+def display_targets(pos_code, top_n=6):
+  subset = (
+      df[df["עמדה_קוד"] == pos_code]
+      .sort_values(by="ציון", ascending=False)
+      .head(top_n)
   )
 
-  def build_card(p, is_cap=False):
-    c_cls = "p-card cap-border" if is_cap else "p-card"
-    c_badge = "👑 " if is_cap else ""
-    return (
-        f'<div class="{c_cls}">'
-        f'<div class="p-name">{c_badge}{p["שם"]}</div>'
-        f'<div class="p-team">{p["קבוצה"]} | £{p["מחיר"]}m</div>'
-        f'<div class="p-fxt fdr-{p["next_fdr"]}">{p["משחק הבא"]}</div>'
-        "</div>"
-    )
+  for i, (_, p) in enumerate(subset.iterrows()):
+    tier_class = "tier-1" if i < 2 else ("tier-2" if i < 4 else "tier-3")
+    fdr_badge = f'<span class="badge badge-fdr-{p["fdr_קרוב"]}">{p["משחק_קרוב"]}</span>'
 
-  fwds_h = "".join(build_card(r) for _, r in best_fwds.iterrows())
-  mids_h = "".join(
-      build_card(r, is_cap=(i == 0))
-      for i, (_, r) in enumerate(best_mids.iterrows())
-  )
-  defs_h = "".join(build_card(r) for _, r in best_defs.iterrows())
-  gk_h = "".join(build_card(r) for _, r in best_gk.iterrows())
-
-  pitch_html = (
-      f'<div class="pitch">'
-      f'<div class="pitch-row">{fwds_h}</div>'
-      f'<div class="pitch-row">{mids_h}</div>'
-      f'<div class="pitch-row">{defs_h}</div>'
-      f'<div class="pitch-row">{gk_h}</div>'
-      f"</div>"
-  )
-  st.markdown(pitch_html, unsafe_allow_html=True)
-
-# טאב 2: סקאוט ורשתות
-with tab_scout:
-  st.subheader("🔥 השחקנים המטורגטים ביותר ע״י קהילת הסקאוט והרשתות")
-  st.markdown("שחקנים שנמצאים במומנטום קניות נטו חיובי חזק לקראת המחזור:")
-
-  scout_targets = fit_df.sort_values(by="קניות_נטו", ascending=False).head(6)
-
-  for _, s in scout_targets.iterrows():
     st.markdown(
-        f'<div class="scout-card"><strong style="color:#7dd3fc; font-size:13px;">⭐'
-        f" {s['שם']} ({s['קבוצה']}) - {s['עמדה']} | £{s['מחיר']}m</strong><br><span"
-        f" style=\"font-size:11px; color:#e2e8f0;\">קניות נטו המחזור:"
-        f" <b>+{s['קניות_נטו']:,}</b> | בעלות: <b>{s['בעלות %']}%</b><br>📅"
-        f" משחקים קרובים: <b>{s['3 משחקים']}</b></span><br><span"
-        ' style="font-size:10px; color:#38bdf8; font-weight:bold;">פסיקת'
-        " קונצנזוס: יעד רכש מובהק של מנג'רי הטופ.</span></div>",
+        f"""
+        <div class="target-card {tier_class}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold; font-size:15px; color:#f8fafc;">
+                    {p['שם']} <span style="font-size:12px; color:#94a3b8;">({p['קבוצה']})</span>
+                </span>
+                <span style="font-size:14px; font-weight:bold; color:#38bdf8;">£{p['מחיר']}m</span>
+            </div>
+            <div style="margin: 6px 0; font-size:12px; color:#cbd5e1;">
+                💡 <b>נימוק:</b> {p['נימוק']}
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:#94a3b8; border-top: 1px solid #1e293b; padding-top:6px; margin-top:6px;">
+                <span>כושר: <b>{p['כושר']}</b> | xGI: <b>{p['xGI']}</b> | בעלות: <b>{p['בעלות %']}%</b></span>
+                <div>3 משחקים: {p['לוח_3_משחקים']} {fdr_badge}</div>
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
-# טאב 3: רדאר בועות
-with tab_trap:
-  st.subheader("🚨 אזהרת בועות: ממי להתרחק למרות ההייפ?")
-  bubbles = (
-      df[
-          (df["שערים_בישולים"] >= 2)
-          & (df["מדד בועה"] > 1.1)
-          & (df["בעלות %"] > 6)
-      ]
-      .sort_values(by="מדד בועה", ascending=False)
-      .head(5)
-  )
 
-  for _, b in bubbles.iterrows():
-    st.markdown(
-        f'<div class="trap-card"><strong style="color:#fca5a5; font-size:13px;">⛔'
-        f" {b['שם']} ({b['קבוצה']}) - £{b['מחיר']}m</strong><br><span"
-        f" style=\"font-size:11px; color:#cbd5e1;\">מעורבות בשערים:"
-        f" <b>{b['שערים_בישולים']}</b> | סך xGI שייצר: <b>{b['xGI']}</b><br>📅"
-        f" משחקים קרובים: <b>{b['3 משחקים']}</b></span><br><span"
-        ' style="font-size:10px; color:#ef4444; font-weight:bold;">פסיקת סוכן:'
-        " בועה. לא מומלץ לקנייה.</span></div>",
-        unsafe_allow_html=True,
-    )
+with tab_fwds:
+  st.subheader("החלוצים המומלצים ביותר להביא")
+  st.caption("מדורגים לפי שקלול כושר הבקעה, xGI ולוח משחקים קרוב:")
+  display_targets(4, top_n=6)
 
-# טאב 4: קפטן
+with tab_mids:
+  st.subheader("הקשרים המומלצים ביותר להביא")
+  st.caption("עוגנים מובילים וקשרי כנף התקפיים בעלי מעורבות גבוהה בשערים:")
+  display_targets(3, top_n=7)
+
+with tab_defs:
+  st.subheader("שחקני ההגנה המומלצים ביותר להביא")
+  st.caption("הגנות צמרת עם סיכויי רשת נקייה גבוהים ומגנים עם פוטנציאל התקפי:")
+  display_targets(2, top_n=6)
+
+with tab_gks:
+  st.subheader("השוערים המומלצים ביותר להביא")
+  st.caption("שוערים יציבים לקבוצות שלא מחליפות שוער כל שבוע:")
+  display_targets(1, top_n=4)
+
 with tab_captain:
-  st.subheader("👑 קרב קפטן: עוגן מול דיפרנשיאל")
+  st.subheader("👑 בחירת קפטן למחזור הקרוב (Top 50K Standard)")
 
-  premiums = fit_df[fit_df["מחיר"] >= 7.5].sort_values(
-      by=["ציון אלגוריתם", "כושר"], ascending=False
+  premiums = df[df["מחיר"] >= 7.5].sort_values(
+      by=["ציון", "כושר"], ascending=False
   )
   shield = premiums.iloc[0]
   diff_cand = premiums[premiums["בעלות %"] < 18]
   sword = diff_cand.iloc[0] if not diff_cand.empty else premiums.iloc[1]
 
-  c1, c2 = st.columns(2)
-  with c1:
+  col_a, col_b = st.columns(2)
+  with col_a:
     st.markdown(
-        f'<div style="background:#0f2a24; border:1px solid #059669; padding:12px;'
-        ' border-radius:10px;"><span style="background:#059669; color:white;'
-        ' padding:2px 6px; border-radius:3px; font-size:9px;'
-        ' font-weight:bold;">🛡️ קפטן מגן (Shield)</span><h4 style="margin:6px'
-        f' 0; color:#ecfdf5;">{shield["שם"]} ({shield["קבוצה"]})</h4><p'
-        ' style="font-size:11px; color:#a7f3d0; margin:0;">בעלות:'
-        f' <b>{shield["בעלות %"]}%</b> | ציון שוק: <b>{shield["ציון אלגוריתם"]}</b><br>משחק:'
-        f' <b>{shield["משחק הבא"]}</b></p></div>',
+        f"""
+        <div style="background:#0f2a24; border:1px solid #059669; padding:12px; border-radius:10px;">
+            <span style="background:#059669; color:white; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:bold;">🛡️ קפטן מגן (Shield)</span>
+            <h4 style="margin:6px 0; color:#ecfdf5;">{shield['שם']} ({shield['קבוצה']})</h4>
+            <p style="font-size:11px; color:#a7f3d0; margin:0;">
+            בעלות: <b>{shield['בעלות %']}%</b> | מחיר: £{shield['מחיר']}m<br>
+            משחק הבא: <b>{shield['משחק_קרוב']}</b><br>
+            💡 נימוק: {shield['נימוק']}
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-
-  with c2:
+  with col_b:
     st.markdown(
-        f'<div style="background:#2a1e0f; border:1px solid #d97706; padding:12px;'
-        ' border-radius:10px;"><span style="background:#d97706; color:white;'
-        ' padding:2px 6px; border-radius:3px; font-size:9px;'
-        ' font-weight:bold;">⚔️ קפטן דיפרנשיאל (Sword)</span><h4'
-        f' style="margin:6px 0; color:#fffbeb;">{sword["שם"]}'
-        f' ({sword["קבוצה"]})</h4><p style="font-size:11px; color:#fde68a;'
-        f' margin:0;">בעלות: <b>{sword["בעלות %"]}% בלבד</b> | xGI:'
-        f' <b>{sword["xGI"]}</b><br>משחק: <b>{sword["משחק הבא"]}</b></p></div>',
+        f"""
+        <div style="background:#2a1e0f; border:1px solid #d97706; padding:12px; border-radius:10px;">
+            <span style="background:#d97706; color:white; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:bold;">⚔️ קפטן דיפרנשיאל (Sword)</span>
+            <h4 style="margin:6px 0; color:#fffbeb;">{sword['שם']} ({sword['קבוצה']})</h4>
+            <p style="font-size:11px; color:#fde68a; margin:0;">
+            בעלות: <b>{sword['בעלות %']}% בלבד</b> | מחיר: £{sword['מחיר']}m<br>
+            משחק הבא: <b>{sword['משחק_קרוב']}</b><br>
+            💡 נימוק: {sword['נימוק']}
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
