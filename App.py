@@ -173,6 +173,12 @@ my_picks, bank_balance, my_team_name, my_rank = fetch_user_team(
 st.title(f"⚽ FPL Command Center | {my_team_name or 'Top 50K Engine'}")
 st.caption(f"הכנה למחזור {next_gw} | סנכרון חי לסגל: **{team_id}**")
 
+# עיבוד בטוח של הדירוג ללא שגיאות פירמוט
+if isinstance(my_rank, int):
+  rank_display = f"{my_rank:,}"
+else:
+  rank_display = str(my_rank) if my_rank else "—"
+
 m1, m2, m3, m4 = st.columns(4)
 m1.markdown(
     '<div class="metric-box"><div style="color:#38bdf8;font-size:11px;">מחזור'
@@ -181,9 +187,8 @@ m1.markdown(
     unsafe_allow_html=True,
 )
 m2.markdown(
-    '<div class="metric-box"><div'
-    ' style="color:#10b981;font-size:11px;">דירוג כללי</div><div'
-    f' style="font-size:16px;font-weight:bold;">{my_rank:, if isinstance(my_rank, int) else my_rank}</div></div>',
+    '<div class="metric-box"><div style="color:#10b981;font-size:11px;">דירוג'
+    f' כללי</div><div style="font-size:16px;font-weight:bold;">{rank_display}</div></div>',
     unsafe_allow_html=True,
 )
 m3.markdown(
@@ -409,7 +414,7 @@ with tab_chat:
 אתה מאמן ואסטרטג FPL מוביל בעולם המכוון למקום ב-Top 50,000.
 מחזור המשחקים הקרוב: {next_gw}.
 פרטי הקבוצה של המשתמש:
-שם קבוצה: {my_team_name}, דירוג נוכחי: {my_rank}, יתרה בבנק: £{bank_balance:.1f}m.
+שם קבוצה: {my_team_name}, דירוג נוכחי: {rank_display}, יתרה בבנק: £{bank_balance:.1f}m.
 15 השחקנים של המשתמש:
 {json.dumps(my_squad_summary, ensure_ascii=False)}
 
@@ -453,4 +458,5 @@ with tab_chat:
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
       st.write(reply)
+
 
