@@ -1,9 +1,10 @@
+import json
 import pandas as pd
 import requests
 import streamlit as st
 
 st.set_page_config(
-    page_title="FPL Top 50K Engine | Target Radar",
+    page_title="FPL Top 50K Engine & AI Chat",
     page_icon="🏆",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -20,7 +21,6 @@ st.markdown(
     border-radius: 10px;
     padding: 12px;
     margin-bottom: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 .tier-1 { border-right: 4px solid #10b981; }
 .tier-2 { border-right: 4px solid #38bdf8; }
@@ -30,6 +30,7 @@ st.markdown(
 .badge-fdr-3 { background: #475569; color: #fff; }
 .badge-fdr-4 { background: #b91c1c; color: #fff; }
 .badge-fdr-5 { background: #7f1d1d; color: #fff; }
+.stChatMessage { direction: rtl; text-align: right; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -84,9 +85,6 @@ def load_top50k_data():
         "transfers_out_event", 0
     )
 
-    # אלגוריתם מותאם ל-Top 50K
-    # הגנה: עדיפות מוחלטת להגנות עלית + מגנים מייצרי מצבים
-    # התקפה: שילוב מומנטום, xGI ויכולת קבוצתית
     def_boost = (
         1.3
         if (el["element_type"] in [1, 2] and team_short in elite_defenses)
@@ -105,28 +103,22 @@ def load_top50k_data():
         + ((5.3 - avg_fdr) * 1.4)
         + (1.2 if net_transfers > 35000 else 0.0)
     )
-
     score *= def_boost if el["element_type"] in [1, 2] else att_boost
 
-    # נימוק טקטי מותאם
     if el["element_type"] == 1:
-      reason = "שוער יציב מאחורי הגנה איכותית"
+      reason = "שוער יציב מאחורי הגנה חזקה"
     elif el["element_type"] == 2:
-      if threat > 40:
-        reason = "מגן התקפי עם איום שער/בישול + סיכוי לקלין שיט"
-      elif team_short in elite_defenses:
-        reason = "עוגן רשת נקייה מהגנת צמרת"
-      else:
-        reason = "מחיר נגיש ולוח ירוק"
+      reason = (
+          "מגן תוקף עם איום הבקעה/בישול"
+          if threat > 40
+          else "עוגן רשת נקייה מהגנת צמרת"
+      )
     elif el["element_type"] in [3, 4]:
-      if form >= 5.5:
-        reason = "כושר כיבוש לוהט וסיומת קטלנית"
-      elif xgi >= 1.4:
-        reason = "מייצר מדדי xG/xA גבוהים ברציפות"
-      elif net_transfers > 60000:
-        reason = "מוקד רכש מרכזי של קהילת הסקאוט"
-      else:
-        reason = "לוח משחקים נוח ומשקל התקפי גבוה"
+      reason = (
+          "כושר הבקעה לוהט"
+          if form >= 5.5
+          else ("יוצר מדדי xG/xA גבוהים" if xgi >= 1.4 else "לוח נוח ומומנטום")
+      )
 
     records.append({
         "ID": el["id"],
@@ -151,41 +143,25 @@ def load_top50k_data():
 
 df, next_gw = load_top50k_data()
 
-# כותרת עליונה
-st.title("🏆 FPL Top 50K Target Radar")
-st.caption(
-    f"בנק השחקנים המובילים לרכש לקראת GW{next_gw} — בחר את ההעברה המתאימה"
-    " לתקציב שלך"
+# סרגל צד - חיבור מפתח API
+st.sidebar.header("🤖 הגדרות סוכן AI")
+api_key = st.sidebar.text_input(
+    "הזן Google Gemini API Key:",
+    type="password",
+    help="מפתח חינמי מ-Google AI Studio",
 )
 
-c1, c2, c3 = st.columns(3)
-c1.markdown(
-    '<div class="metric-box"><div'
-    ' style="color:#38bdf8;font-size:11px;">מחזור יעד</div><div'
-    f' style="font-size:16px;font-weight:bold;">GW {next_gw}</div></div>',
-    unsafe_allow_html=True,
-)
-c2.markdown(
-    '<div class="metric-box"><div'
-    ' style="color:#10b981;font-size:11px;">יעד עולמי</div><div'
-    ' style="font-size:16px;font-weight:bold;">Top 50,000 🔥</div></div>',
-    unsafe_allow_html=True,
-)
-c3.markdown(
-    '<div class="metric-box"><div'
-    ' style="color:#f59e0b;font-size:11px;">אסטרטגיה</div><div'
-    ' style="font-size:16px;font-weight:bold;">רכש מותאם אישית</div></div>',
-    unsafe_allow_html=True,
-)
+st.title("🏆 FPL Top 50K Engine & AI Assistant")
+st.caption(f"הכנה למחזור {next_gw} | רדאר רכש + סוכן שיחה טקטי")
 
-st.write("")
-
-tab_fwds, tab_mids, tab_defs, tab_gks, tab_captain = st.tabs([
-    "⚡ חלוצים (FWD)",
-    "🎯 קשרים (MID)",
-    "🛡️ שחקני הגנה (DEF)",
-    "🧤 שוערים (GK)",
-    "👑 קפטן GW" + str(next_gw),
+# טאבים כולל צ'אט בוט
+tab_fwds, tab_mids, tab_defs, tab_gks, tab_captain, tab_chat = st.tabs([
+    "⚡ חלוצים",
+    "🎯 קשרים",
+    "🛡️ הגנה",
+    "🧤 שוערים",
+    "👑 קפטן",
+    "💬 צ'אט בוט AI",
 ])
 
 
@@ -195,11 +171,9 @@ def display_targets(pos_code, top_n=6):
       .sort_values(by="ציון", ascending=False)
       .head(top_n)
   )
-
   for i, (_, p) in enumerate(subset.iterrows()):
     tier_class = "tier-1" if i < 2 else ("tier-2" if i < 4 else "tier-3")
     fdr_badge = f'<span class="badge badge-fdr-{p["fdr_קרוב"]}">{p["משחק_קרוב"]}</span>'
-
     st.markdown(
         f"""
         <div class="target-card {tier_class}">
@@ -223,28 +197,23 @@ def display_targets(pos_code, top_n=6):
 
 
 with tab_fwds:
-  st.subheader("החלוצים המומלצים ביותר להביא")
-  st.caption("מדורגים לפי שקלול כושר הבקעה, xGI ולוח משחקים קרוב:")
+  st.subheader("החלוצים המובילים")
   display_targets(4, top_n=6)
 
 with tab_mids:
-  st.subheader("הקשרים המומלצים ביותר להביא")
-  st.caption("עוגנים מובילים וקשרי כנף התקפיים בעלי מעורבות גבוהה בשערים:")
+  st.subheader("הקשרים המובילים")
   display_targets(3, top_n=7)
 
 with tab_defs:
-  st.subheader("שחקני ההגנה המומלצים ביותר להביא")
-  st.caption("הגנות צמרת עם סיכויי רשת נקייה גבוהים ומגנים עם פוטנציאל התקפי:")
+  st.subheader("שחקני ההגנה המובילים")
   display_targets(2, top_n=6)
 
 with tab_gks:
-  st.subheader("השוערים המומלצים ביותר להביא")
-  st.caption("שוערים יציבים לקבוצות שלא מחליפות שוער כל שבוע:")
+  st.subheader("השוערים המובילים")
   display_targets(1, top_n=4)
 
 with tab_captain:
-  st.subheader("👑 בחירת קפטן למחזור הקרוב (Top 50K Standard)")
-
+  st.subheader("👑 בחירת קפטן למחזור הקרוב")
   premiums = df[df["מחיר"] >= 7.5].sort_values(
       by=["ציון", "כושר"], ascending=False
   )
@@ -255,31 +224,109 @@ with tab_captain:
   col_a, col_b = st.columns(2)
   with col_a:
     st.markdown(
-        f"""
-        <div style="background:#0f2a24; border:1px solid #059669; padding:12px; border-radius:10px;">
-            <span style="background:#059669; color:white; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:bold;">🛡️ קפטן מגן (Shield)</span>
-            <h4 style="margin:6px 0; color:#ecfdf5;">{shield['שם']} ({shield['קבוצה']})</h4>
-            <p style="font-size:11px; color:#a7f3d0; margin:0;">
-            בעלות: <b>{shield['בעלות %']}%</b> | מחיר: £{shield['מחיר']}m<br>
-            משחק הבא: <b>{shield['משחק_קרוב']}</b><br>
-            💡 נימוק: {shield['נימוק']}
-            </p>
-        </div>
-        """,
+        f'<div style="background:#0f2a24; border:1px solid #059669; padding:12px;'
+        ' border-radius:10px;"><span style="background:#059669; color:white;'
+        ' padding:2px 6px; border-radius:3px; font-size:9px;'
+        ' font-weight:bold;">🛡️ קפטן מגן</span><h4 style="margin:6px 0;'
+        f' color:#ecfdf5;">{shield["שם"]} ({shield["קבוצה"]})</h4><p'
+        ' style="font-size:11px; color:#a7f3d0; margin:0;">בעלות:'
+        f' <b>{shield["בעלות %"]}%</b> | מחיר: £{shield["מחיר"]}m<br>משחק הבא:'
+        f' <b>{shield["משחק_קרוב"]}</b><br>💡 נימוק:'
+        f' {shield["נימוק"]}</p></div>',
         unsafe_allow_html=True,
     )
   with col_b:
     st.markdown(
-        f"""
-        <div style="background:#2a1e0f; border:1px solid #d97706; padding:12px; border-radius:10px;">
-            <span style="background:#d97706; color:white; padding:2px 6px; border-radius:3px; font-size:9px; font-weight:bold;">⚔️ קפטן דיפרנשיאל (Sword)</span>
-            <h4 style="margin:6px 0; color:#fffbeb;">{sword['שם']} ({sword['קבוצה']})</h4>
-            <p style="font-size:11px; color:#fde68a; margin:0;">
-            בעלות: <b>{sword['בעלות %']}% בלבד</b> | מחיר: £{sword['מחיר']}m<br>
-            משחק הבא: <b>{sword['משחק_קרוב']}</b><br>
-            💡 נימוק: {sword['נימוק']}
-            </p>
-        </div>
-        """,
+        f'<div style="background:#2a1e0f; border:1px solid #d97706; padding:12px;'
+        ' border-radius:10px;"><span style="background:#d97706; color:white;'
+        ' padding:2px 6px; border-radius:3px; font-size:9px;'
+        ' font-weight:bold;">⚔️ קפטן דיפרנשיאל</span><h4 style="margin:6px 0;'
+        f' color:#fffbeb;">{sword["שם"]} ({sword["קבוצה"]})</h4><p'
+        ' style="font-size:11px; color:#fde68a; margin:0;">בעלות:'
+        f' <b>{sword["בעלות %"]}% בלבד</b> | מחיר: £{sword["מחיר"]}m<br>משחק'
+        f' הבא: <b>{sword["משחק_קרוב"]}</b><br>💡 נימוק:'
+        f' {sword["נימוק"]}</p></div>',
         unsafe_allow_html=True,
     )
+
+# --- טאב צ'אט בוט AI ---
+with tab_chat:
+  st.subheader("💬 שאל את סוכן ה-Top 50K")
+  st.caption(
+      "הסוכן מסתמך על נתוני ה-xGI, מחירי השחקנים ולוח המשחקים המעודכנים"
+      " באפליקציה."
+  )
+
+  if "messages" not in st.session_state:
+    st.session_state.messages = [{
+        "role": "assistant",
+        "content": (
+            "שלום! אני סוכן ה-FPL שלך ל-Top 50K. שאל אותי כל שאלה: התלבטות בין"
+            " שחקנים, המלצות לפי תקציב, חילופים או צ'יפים."
+        ),
+    }]
+
+  # הצגת היסטוריית שיחה
+  for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+      st.write(msg["content"])
+
+  # קבלת שאלה מהמשתמש
+  if prompt := st.chat_input("שאל שאלה טקטית (למשל: את מי להביא עד 6.5 מיליון?)..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+      st.write(prompt)
+
+    if not api_key:
+      reply = (
+          "⚠️ **נא להזין מפתח Gemini API בסרגל הצד (Sidebar)** כדי להפעיל את"
+          " מנוע השיחה החינמי."
+      )
+    else:
+      # הכנת תקציר נתוני השחקנים החמים כהקשר ל-AI
+      top_context = (
+          df.sort_values(by="ציון", ascending=False)
+          .head(25)[
+              [
+                  "שם",
+                  "קבוצה",
+                  "עמדה_שם",
+                  "מחיר",
+                  "כושר",
+                  "xGI",
+                  "לוח_3_משחקים",
+                  "נימוק",
+              ]
+          ]
+          .to_dict(orient="records")
+      )
+
+      system_instruction = f"""
+            אתה סוכן AI מומחה ואסטרטג עליון ב-Fantasy Premier League המכוון ל-Top 50,000 בעולם.
+            מחזור היעד הקרוב הוא מחזור {next_gw}.
+            ענה בעברית בצורה חדה, ממוקדת, מקצועית ומבוססת נתונים (EV, xGI, מחיר ולוח משחקים).
+            להלן נתוני השחקנים המובילים בליגה כרגע:
+            {json.dumps(top_context, ensure_ascii=False)}
+            """
+
+      url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+      headers = {"Content-Type": "application/json"}
+      payload = {
+          "contents": [
+              {"role": "user", "parts": [{"text": system_instruction}]},
+              {"role": "user", "parts": [{"text": prompt}]},
+          ]
+      }
+
+      try:
+        res = requests.post(url, headers=headers, json=payload)
+        if res.status_code == 200:
+          reply = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+          reply = f"שגיאה בתקשורת עם ה-AI (קוד {res.status_code}). ודא שהמפתח תקין."
+      except Exception as e:
+        reply = "שגיאת רשת בעת פנייה למודל."
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    with st.chat_message("assistant"):
+      st.write(reply)
