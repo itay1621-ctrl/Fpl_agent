@@ -114,7 +114,6 @@ def fetch_league_data():
           upcoming.append(f"{opp}(A)")
           fdr_list.append(f["team_a_difficulty"])
 
-    # שקלול דועך של לוח המשחקים (50% קרוב, 30% הבא, 20% אחריו)
     weights = [0.50, 0.30, 0.20]
     weighted_fdr = 0.0
     for i, fdr in enumerate(fdr_list[:3]):
@@ -128,13 +127,11 @@ def fetch_league_data():
     cost = el["now_cost"] / 10
     threat = float(el.get("threat", 0.0))
 
-    # נרמול פר 90 דקות (מסנן עיוותי רוטציה)
     if mins >= 60:
       xgi_per_90 = (expected_gi / mins) * 90
     else:
       xgi_per_90 = expected_gi
 
-    # זיהוי סטטיסטי: קנייה בשפל (Buy Low) או מלכודת התלהבות (Trap)
     tag_status = None
     if expected_gi >= 1.2 and actual_gi <= 1:
       tag_status = "BUY_LOW"
@@ -145,11 +142,9 @@ def fetch_league_data():
     else:
       buy_low_bonus = 0.0
 
-    # מקדם יציבות דקות (Nailedness)
     mins_per_gw = mins / max(1, (next_gw - 1))
     nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
 
-    # חישוב הציון המשוקלל הסופי
     score = (
         (xgi_per_90 * 3.2)
         + (form * 1.3)
@@ -158,7 +153,6 @@ def fetch_league_data():
         + buy_low_bonus
     )
 
-    # בונוס התקפי/הגנתי לפי פרופיל
     if el["element_type"] in [1, 2]:
       if team_short in elite_defenses:
         score *= 1.3
@@ -170,7 +164,6 @@ def fetch_league_data():
 
     score *= nailed_mult
 
-    # נימוק טקטי מנומק
     if tag_status == "BUY_LOW":
       reason = f"הזדמנות קנייה בשפל: מייצר שערים צפויים ברצף (xGI: {expected_gi:.1f}) אך טרם תוגמל במספרים בפועל."
     elif tag_status == "OVERPERFORMING_TRAP":
@@ -222,7 +215,6 @@ all_players, next_gw = fetch_league_data()
 st.sidebar.header("⚙️ ניהול סגל והגדרות")
 team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
 
-# תמיכה ב-Streamlit Secrets או הזנה ידנית
 secret_key = ""
 try:
   secret_key = st.secrets.get("GEMINI_API_KEY", "")
@@ -640,10 +632,10 @@ with tab_health:
         unsafe_allow_html=True,
     )
 
-# --- טאב 5: צ'אט AI אישי מבוסס מדע ---
+# --- טאב 5: צ'אט AI אישי מבוסס מדע (מתוקן ויציב) ---
 with tab_chat:
   st.subheader(f"💬 יועץ ה-AI האישי של {my_team_name}")
-  st.caption("הסוכן מעודכן בנתוני ה-xGI/90, ביתרת הבנק ובתוכנית ה-Wildcard שלך.")
+  st.caption("הסוכן מעודכן בנתוני ה-xGI/90, ביתרת הבנק ובתוכנית הצ'יפים שלך.")
 
   if "messages" not in st.session_state:
     st.session_state.messages = [{
@@ -651,7 +643,7 @@ with tab_chat:
         "content": (
             f"היי! אני מחובר לסגל שלך ({my_team_name}) עם יתרת בנק של"
             f" £{bank_balance:.1f}m. שאל אותי כל שאלה: חילופים, ניתוח קפטן או"
-            " אסטרטגיה למחזור הקרוב."
+            " אסטרטגיה למחזורים הקרובים."
         ),
     }]
 
@@ -659,15 +651,16 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.write(msg["content"])
 
-  if prompt := st.chat_input("שאל את המאמן (למשל: האם כדאי לשמור חילוף?)..."):
+  if prompt := st.chat_input("שאל את המאמן (למשל: מי החילוף הכי דחוף אצלי?)..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.write(prompt)
 
-    if not api_key:
+    clean_key = api_key.strip() if api_key else ""
+    if not clean_key:
       reply = (
-          "⚠️ נא להזין מפתח Gemini API בסרגל הצד (או ב-Streamlit Secrets)"
-          " להפעלת הצ'אט."
+          "⚠️ נא להזין מפתח Gemini API בסרגל הצד (Sidebar) או ב-Streamlit"
+          " Secrets."
       )
     else:
       my_squad_summary = [
@@ -682,6 +675,7 @@ with tab_chat:
           }
           for p in all_my_players
       ]
+
       system_instruction = f"""
 אתה מאמן ואסטרטג FPL ברמת Top 50,000 עולמי.
 מחזור נוכחי: {next_gw}.
@@ -692,40 +686,46 @@ with tab_chat:
 
 הנחיות לתשובה:
 1. היה חד, טקטי ומבוסס מדע (xGI per 90, FDR דועך, תוחלת שערים EV).
-2. אל תמליץ על שחקנים רק כי הבקיעו במחזור שעבר אם ה-xGI שלהם נמוך (הימנע מ-Trap).
+2. אל תמליץ על שחקנים רק כי הבקיעו במחזור שעבר אם ה-xGI שלהם נמוך.
 3. קח בחשבון שימור חילופים (Roll Transfer) מול קנסות מינוס 4.
 4. ענה בעברית רהוטה וקולעת.
 """
-      models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
+
+      combined_prompt = f"{system_instruction}\n\n---\nשאלת המשתמש:\n{prompt}"
+
+      models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash"]
       reply = None
+      error_detail = ""
+
       for model_name in models_to_try:
         if reply:
           break
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={clean_key}"
         headers = {"Content-Type": "application/json"}
         payload = {
             "contents": [
-                {"role": "user", "parts": [{"text": system_instruction}]},
-                {"role": "user", "parts": [{"text": prompt}]},
+                {"role": "user", "parts": [{"text": combined_prompt}]}
             ]
         }
-        for _ in range(3):
-          try:
-            res = requests.post(url, headers=headers, json=payload, timeout=12)
-            if res.status_code == 200:
-              reply = res.json()["candidates"][0]["content"]["parts"][0]["text"]
-              break
-            elif res.status_code in [503, 429]:
-              time.sleep(1.5)
-              continue
-            else:
-              break
-          except Exception:
+
+        try:
+          res = requests.post(url, headers=headers, json=payload, timeout=15)
+          if res.status_code == 200:
+            data = res.json()
+            reply = data["candidates"][0]["content"]["parts"][0]["text"]
+            break
+          else:
+            err_data = res.json().get("error", {})
+            error_detail = (
+                f"{err_data.get('message', 'HTTP ' + str(res.status_code))}"
+            )
             time.sleep(1.0)
-            continue
+        except Exception as e:
+          error_detail = str(e)
+          time.sleep(1.0)
 
       if not reply:
-        reply = "⚠️ עומס רגעי בשרת ה-AI. נסה שוב בעוד מספר שניות."
+        reply = f"⚠️ שגיאת תקשורת עם ה-AI: {error_detail}\n\n(ודא שמפתח ה-API תקין ומוגדר כראוי ב-Google AI Studio)."
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
