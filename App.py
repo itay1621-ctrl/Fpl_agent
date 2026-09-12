@@ -3,13 +3,12 @@ import requests
 import streamlit as st
 
 st.set_page_config(
-    page_title="FPL Elite Scout | Road to Top 100K",
+    page_title="FPL Elite Scout | Top 100K Engine",
     page_icon="⚽",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# עיצוב מותאם מובייל ומגרש ללא בעיות רינדור
 st.markdown(
     """
 <style>
@@ -20,15 +19,15 @@ st.markdown(
     background: radial-gradient(circle, #1a3821 0%, #0d1e12 100%);
     border: 2px solid #234e2c;
     border-radius: 14px;
-    padding: 18px 6px;
-    margin: 15px 0;
+    padding: 16px 6px;
+    margin: 12px 0;
     box-shadow: inset 0 0 35px rgba(0,0,0,0.6);
 }
 .pitch-row {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     gap: 4px;
 }
 .p-card {
@@ -37,7 +36,7 @@ st.markdown(
     border-radius: 8px;
     padding: 6px 4px;
     text-align: center;
-    width: 82px;
+    width: 84px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
 }
 .cap-border { border: 2px solid #facc15 !important; }
@@ -50,9 +49,9 @@ st.markdown(
 .fdr-4 { background: #b91c1c; color: #fff; }
 .fdr-5 { background: #7f1d1d; color: #fff; }
 
-/* כרטיסי מידע ובועות */
+/* כרטיסים */
+.scout-card { background: #0e2a38; border-right: 4px solid #38bdf8; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
 .trap-card { background: #221013; border-right: 4px solid #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
-.gem-card { background: #0c2417; border-right: 4px solid #10b981; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
 .metric-box { background: #1e293b; border-radius: 8px; padding: 8px; text-align: center; border: 1px solid #334155; }
 </style>
 """,
@@ -75,6 +74,11 @@ def load_all_fpl_data():
       next_gw = ev["id"]
       break
 
+  # 1. חישוב עוצמת התקפה קבוצתית (סך שערים שהקבוצה כבשה עד כה)
+  team_goals = {t_id: 0 for t_id in teams}
+  for el in elements:
+    team_goals[el["team"]] += el["goals_scored"]
+
   pos_map = {1: "GK", 2: "DEF", 3: "MID", 4: "FWD"}
   all_players = []
 
@@ -82,6 +86,7 @@ def load_all_fpl_data():
     if el["status"] == "u":
       continue
 
+    # לוח משחקים
     upcoming = []
     fdr_list = []
     for f in fixtures:
@@ -99,17 +104,32 @@ def load_all_fpl_data():
 
     avg_fdr = sum(fdr_list) / len(fdr_list) if fdr_list else 3.0
     form = float(el["form"])
-    xp = float(el["ep_next"]) if el.get("ep_next") else 0.0
     xgi = float(el.get("expected_goal_involvements", 0.0))
-    goals_assists = el["goals_scored"] + el["assists"]
+    threat = float(el.get("threat", 0.0))
     cost = el["now_cost"] / 10
 
-    # אלגוריתם ציון מאוזן לטווח ארוך
-    composite_score = (
-        (xp * 1.6) + (form * 1.1) + (xgi * 1.2) + ((5.2 - avg_fdr) * 1.4)
+    # מומנטום רשתות וסקאוט: קניות נטו של שחקנים למחזור הנוכחי
+    net_transfers = el.get("transfers_in_event", 0) - el.get(
+        "transfers_out_event", 0
     )
+    # נרמול מומנטום סקאוט (0 עד 3 נקודות)
+    scout_buzz = max(-2.0, min(3.5, net_transfers / 50000.0))
 
-    # מדד בועה (פער בין שערים/בישולים ל-xGI + לוח קשה)
+    # מקדם התקפה קבוצתית (צ'לסי, סיטי, ארסנל וכו')
+    t_goals = team_goals.get(el["team"], 0)
+    team_attack_boost = 1.3 if t_goals >= 5 else 1.0
+
+    # אלגוריתם משוקלל: מומנטום סקאוט + עוצמת התקפה קבוצתית + איום ממשי (Threat) + xGI
+    composite_score = (
+        (xgi * 1.5)
+        + (threat * 0.02)
+        + (form * 1.1)
+        + scout_buzz
+        + ((5.2 - avg_fdr) * 1.3)
+    ) * (team_attack_boost if el["element_type"] in [3, 4] else 1.0)
+
+    # מדד בועה (פער קיצוני בין שערים בפועל ל-xGI)
+    goals_assists = el["goals_scored"] + el["assists"]
     bubble_index = round((goals_assists - xgi) * (avg_fdr / 2.5), 2)
 
     next_match_str = upcoming[0] if upcoming else "—"
@@ -125,7 +145,8 @@ def load_all_fpl_data():
         "כושר": form,
         "xGI": xgi,
         "שערים_בישולים": goals_assists,
-        "נקודות צפויות": xp,
+        "איום_Opta": threat,
+        "קניות_נטו": net_transfers,
         "בעלות %": float(el["selected_by_percent"]),
         "סטטוס": el["status"],
         "סיכוי שיתוף": (
@@ -147,7 +168,9 @@ def load_all_fpl_data():
 df, next_gw = load_all_fpl_data()
 
 st.title("⚽ FPL Elite Decision Engine")
-st.caption(f"תוכנית פעולה אסטרטגית לקראת GW{next_gw} | יעד: Top 100,000")
+st.caption(
+    f"מודל EV משולב סנטימנט סקאוט ועוצמת התקפה לקראת GW{next_gw} | יעד: Top 100K"
+)
 
 col1, col2, col3 = st.columns(3)
 with col1:
@@ -160,8 +183,8 @@ with col1:
 with col2:
   st.markdown(
       '<div class="metric-box"><div'
-      ' style="color:#10b981;font-size:11px;">פילוסופיה</div><div'
-      ' style="font-size:16px;font-weight:bold;">אנטי-הייפ (EV)</div></div>',
+      ' style="color:#10b981;font-size:11px;">שקלול שוק</div><div'
+      ' style="font-size:16px;font-weight:bold;">Opta + Scout Buzz</div></div>',
       unsafe_allow_html=True,
   )
 with col3:
@@ -174,11 +197,11 @@ with col3:
 
 st.write("")
 
-tab_pitch, tab_trap, tab_captain, tab_strategy = st.tabs([
+tab_pitch, tab_scout, tab_trap, tab_captain = st.tabs([
     "🟢 הרכב מגרש (3-4-3)",
+    "🔥 מוקדי סקאוט ורשתות",
     "🚨 רדאר בועות ומלכודות",
     "👑 זירת הקפטנים",
-    "🧭 אסטרטגיה וצ'יפים",
 ])
 
 fit_df = df[(df["סטטוס"] == "a") & (df["סיכוי שיתוף"] == 100)]
@@ -186,7 +209,7 @@ fit_df = df[(df["סטטוס"] == "a") & (df["סיכוי שיתוף"] == 100)]
 # טאב 1: מגרש
 with tab_pitch:
   st.subheader("📋 ההרכב האופטימלי על המגרש (£100m)")
-  st.caption("משקלל xGI, כושר ולוח משחקים ירוק:")
+  st.caption("משקלל כוח התקפה קבוצתי, מומנטום קניות ואיום ממשי:")
 
   best_gk = (
       fit_df[fit_df["עמדה_קוד"] == 1]
@@ -238,18 +261,32 @@ with tab_pitch:
   )
   st.markdown(pitch_html, unsafe_allow_html=True)
 
-# טאב 2: בועות ומלכודות
-with tab_trap:
-  st.subheader("🚨 ניתוח בועות: ממי להתרחק עכשיו?")
-  st.markdown(
-      "אזהרה לגבי שחקנים וקבוצות שנמצאים במומנטום מקרי מעל ה-xGI ומול לוח קשה"
-      " מתקרב:"
-  )
+# טאב 2: סקאוט ורשתות
+with tab_scout:
+  st.subheader("🔥 השחקנים המטורגטים ביותר ע״י קהילת הסקאוט והרשתות")
+  st.markdown("שחקנים שנמצאים במומנטום קניות נטו חיובי חזק לקראת המחזור:")
 
+  scout_targets = fit_df.sort_values(by="קניות_נטו", ascending=False).head(6)
+
+  for _, s in scout_targets.iterrows():
+    st.markdown(
+        f'<div class="scout-card"><strong style="color:#7dd3fc; font-size:13px;">⭐'
+        f" {s['שם']} ({s['קבוצה']}) - {s['עמדה']} | £{s['מחיר']}m</strong><br><span"
+        f" style=\"font-size:11px; color:#e2e8f0;\">קניות נטו המחזור:"
+        f" <b>+{s['קניות_נטו']:,}</b> | בעלות: <b>{s['בעלות %']}%</b><br>📅"
+        f" משחקים קרובים: <b>{s['3 משחקים']}</b></span><br><span"
+        ' style="font-size:10px; color:#38bdf8; font-weight:bold;">פסיקת'
+        " קונצנזוס: יעד רכש מובהק של מנג'רי הטופ.</span></div>",
+        unsafe_allow_html=True,
+    )
+
+# טאב 3: רדאר בועות
+with tab_trap:
+  st.subheader("🚨 אזהרת בועות: ממי להתרחק למרות ההייפ?")
   bubbles = (
       df[
           (df["שערים_בישולים"] >= 2)
-          & (df["מדד בועה"] > 1.2)
+          & (df["מדד בועה"] > 1.1)
           & (df["בעלות %"] > 6)
       ]
       .sort_values(by="מדד בועה", ascending=False)
@@ -261,45 +298,22 @@ with tab_trap:
         f'<div class="trap-card"><strong style="color:#fca5a5; font-size:13px;">⛔'
         f" {b['שם']} ({b['קבוצה']}) - £{b['מחיר']}m</strong><br><span"
         f" style=\"font-size:11px; color:#cbd5e1;\">מעורבות בשערים:"
-        f" <b>{b['שערים_בישולים']}</b> | סך xGI בפועל: <b>{b['xGI']}</b><br>📅"
+        f" <b>{b['שערים_בישולים']}</b> | סך xGI שייצר: <b>{b['xGI']}</b><br>📅"
         f" משחקים קרובים: <b>{b['3 משחקים']}</b></span><br><span"
         ' style="font-size:10px; color:#ef4444; font-weight:bold;">פסיקת סוכן:'
-        " בועה. אל תקנה / שקול מכירה!</span></div>",
+        " בועה. לא מומלץ לקנייה.</span></div>",
         unsafe_allow_html=True,
     )
 
-  st.write("")
-  st.subheader("💎 מציאות מתחת לרדאר (Under-performing xGI)")
-  gems = (
-      fit_df[
-          (fit_df["xGI"] > fit_df["שערים_בישולים"])
-          & (fit_df["FDR ממוצע"] <= 2.8)
-          & (fit_df["מחיר"] <= 8.0)
-      ]
-      .sort_values(by="ציון אלגוריתם", ascending=False)
-      .head(4)
-  )
-
-  for _, g in gems.iterrows():
-    st.markdown(
-        f'<div class="gem-card"><strong style="color:#6ee7b7; font-size:13px;">✅'
-        f" {g['שם']} ({g['קבוצה']}) - £{g['מחיר']}m</strong><br><span"
-        f" style=\"font-size:11px; color:#cbd5e1;\">ייצר xGI של <b>{g['xGI']}</b>"
-        f" | לוח משחקים: <b>{g['3 משחקים']}</b></span><br><span"
-        ' style="font-size:10px; color:#10b981; font-weight:bold;">פסיקת סוכן:'
-        " פוטנציאל התפוצצות נקודות קרוב.</span></div>",
-        unsafe_allow_html=True,
-    )
-
-# טאב 3: קפטן
+# טאב 4: קפטן
 with tab_captain:
-  st.subheader("👑 קרב קפטן ראשי")
+  st.subheader("👑 קרב קפטן: עוגן מול דיפרנשיאל")
 
   premiums = fit_df[fit_df["מחיר"] >= 7.5].sort_values(
-      by=["נקודות צפויות", "ציון אלגוריתם"], ascending=False
+      by=["ציון אלגוריתם", "כושר"], ascending=False
   )
   shield = premiums.iloc[0]
-  diff_cand = premiums[premiums["בעלות %"] < 15]
+  diff_cand = premiums[premiums["בעלות %"] < 18]
   sword = diff_cand.iloc[0] if not diff_cand.empty else premiums.iloc[1]
 
   c1, c2 = st.columns(2)
@@ -308,10 +322,10 @@ with tab_captain:
         f'<div style="background:#0f2a24; border:1px solid #059669; padding:12px;'
         ' border-radius:10px;"><span style="background:#059669; color:white;'
         ' padding:2px 6px; border-radius:3px; font-size:9px;'
-        ' font-weight:bold;">🛡️ קפטן מגן</span><h4 style="margin:6px 0;'
-        f' color:#ecfdf5;">{shield["שם"]} ({shield["קבוצה"]})</h4><p'
+        ' font-weight:bold;">🛡️ קפטן מגן (Shield)</span><h4 style="margin:6px'
+        f' 0; color:#ecfdf5;">{shield["שם"]} ({shield["קבוצה"]})</h4><p'
         ' style="font-size:11px; color:#a7f3d0; margin:0;">בעלות:'
-        f' <b>{shield["בעלות %"]}%</b> | xP: <b>{shield["נקודות צפויות"]}</b><br>משחק:'
+        f' <b>{shield["בעלות %"]}%</b> | ציון שוק: <b>{shield["ציון אלגוריתם"]}</b><br>משחק:'
         f' <b>{shield["משחק הבא"]}</b></p></div>',
         unsafe_allow_html=True,
     )
@@ -321,20 +335,10 @@ with tab_captain:
         f'<div style="background:#2a1e0f; border:1px solid #d97706; padding:12px;'
         ' border-radius:10px;"><span style="background:#d97706; color:white;'
         ' padding:2px 6px; border-radius:3px; font-size:9px;'
-        ' font-weight:bold;">⚔️ קפטן דיפרנשיאל</span><h4 style="margin:6px 0;'
-        f' color:#fffbeb;">{sword["שם"]} ({sword["קבוצה"]})</h4><p'
-        ' style="font-size:11px; color:#fde68a; margin:0;">בעלות:'
-        f' <b>{sword["בעלות %"]}% בלבד</b> | xGI: <b>{sword["xGI"]}</b><br>משחק:'
-        f' <b>{sword["משחק הבא"]}</b></p></div>',
+        ' font-weight:bold;">⚔️ קפטן דיפרנשיאל (Sword)</span><h4'
+        f' style="margin:6px 0; color:#fffbeb;">{sword["שם"]}'
+        f' ({sword["קבוצה"]})</h4><p style="font-size:11px; color:#fde68a;'
+        f' margin:0;">בעלות: <b>{sword["בעלות %"]}% בלבד</b> | xGI:'
+        f' <b>{sword["xGI"]}</b><br>משחק: <b>{sword["משחק הבא"]}</b></p></div>',
         unsafe_allow_html=True,
     )
-
-# טאב 4: אסטרטגיה
-with tab_strategy:
-  st.subheader("🧭 חוקי המאקרו ל-Top 100K")
-  st.markdown("""
-    * **צבירת חילופים (Roll Transfers):** השאיפה היא להחזיק תמיד ב-2 חילופים חינמיים כדי לאפשר תמרון כפול בעת הצורך.
-    * **אפס מינוסים (-4):** מינוס מותר רק כשיש 3 פציעות בו-זמנית. הימנעות ממינוסים שווה 30-50 נקודות יתרון בעונה.
-    * **תזמון צ'יפים:** שמור Triple Captain ו-Bench Boost אך ורק ל-Double Gameweeks בחצי השני של העונה.
-    """)
-
