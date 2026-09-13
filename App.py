@@ -175,11 +175,13 @@ def fetch_league_data():
         avg_fdr = sum(fdr_list) / len(fdr_list) if fdr_list else 3.0
 
         mins = el.get("minutes", 0)
+        starts = el.get("starts", 0)
         actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
         expected_gi = float(el.get("expected_goal_involvements", 0.0))
         form = float(el.get("form", 0.0))
         cost = el["now_cost"] / 10
         threat = float(el.get("threat", 0.0))
+        selected_by = float(el["selected_by_percent"])
 
         status = el.get("status", "a")
         chance_raw = el.get("chance_of_playing_next_round")
@@ -192,25 +194,37 @@ def fetch_league_data():
         else:
             chance = 100
 
-        total_gws = max(1, next_gw - 1)
-        starts = el.get("starts", 0)
-        start_ratio = starts / total_gws if total_gws > 0 else 1.0
-        mins_per_gw = mins / total_gws
+        # שקלול מעמד טקטי, פדיגרי וסבירות פתיחה
+        name_str = el["web_name"].lower()
+        is_elite_banker = (
+            cost >= 8.0
+            or selected_by >= 25.0
+            or any(k in name_str for k in ["haaland", "fernandes", "salah", "saka", "palmer", "watkins", "foden"])
+        )
+        is_regular_starter = (
+            (cost >= 5.5 and el["element_type"] in [1, 2])
+            or (cost >= 7.0)
+            or (starts >= 2 and (mins / max(1, starts)) >= 65)
+        )
 
         if chance == 0:
             start_prob = 0
-        elif start_ratio >= 0.85 or mins_per_gw >= 68:
-            base_tactical = 99 if start_ratio >= 0.95 else 95
-            start_prob = int(round(base_tactical * (chance / 100.0)))
-        elif start_ratio >= 0.60 or mins_per_gw >= 48:
-            base_tactical = 85
-            start_prob = int(round(base_tactical * (chance / 100.0)))
-        elif mins_per_gw >= 25 or starts >= 1:
-            base_tactical = 50
-            start_prob = int(round(base_tactical * (chance / 100.0)))
+        elif chance <= 25:
+            start_prob = 20
+        elif chance <= 50:
+            start_prob = 50
+        elif chance <= 75:
+            start_prob = 75
         else:
-            base_tactical = 15
-            start_prob = int(round(base_tactical * (chance / 100.0)))
+            # שחקן כשיר רפואית לחלוטין (chance == 100)
+            if is_elite_banker:
+                start_prob = 99
+            elif is_regular_starter:
+                start_prob = 92
+            elif mins >= 90 or starts >= 1:
+                start_prob = 82
+            else:
+                start_prob = 35
 
         xgi_per_90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
 
@@ -224,7 +238,7 @@ def fetch_league_data():
         else:
             buy_low_bonus = 0.0
 
-        nailed_mult = 1.15 if mins_per_gw >= 68 else 0.85
+        nailed_mult = 1.15 if is_elite_banker or is_regular_starter else 0.85
         score = ((xgi_per_90 * 3.2) + (form * 1.3) + (weighted_fdr * 1.8) + (threat * 0.015) + buy_low_bonus)
         if el["element_type"] in [1, 2]:
             if team_short in elite_defenses:
@@ -274,7 +288,7 @@ def fetch_league_data():
             "total_points": el.get("total_points", 0),
             "xgi": expected_gi,
             "xgi_p90": round(xgi_per_90, 2),
-            "selected_by": float(el["selected_by_percent"]),
+            "selected_by": selected_by,
             "goals_assists": actual_gi,
             "score": round(score, 2),
             "xp": predicted_xp,
