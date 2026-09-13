@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# עיצוב מותאם עברית (RTL), רווחים נקיים ומניעת צפיפות
+# --- עיצוב CSS: RTL מלא, התאמת BiDi וכרטיסי חסרונות בולטים ---
 st.markdown("""
 <style>
 .main {
@@ -66,8 +66,7 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
     border: 1px solid #334155;
     border-radius: 12px;
     padding: 16px;
-    margin-top: 14px;
-    margin-bottom: 14px;
+    margin: 12px 0;
 }
 .stat-pill {
     background: #1e293b;
@@ -82,10 +81,21 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
     background: #231215;
     border-right: 4px solid #ef4444;
     border-radius: 8px;
-    padding: 10px 12px;
+    padding: 10px 14px;
     margin-bottom: 8px;
-    font-size: 12px;
+    font-size: 13px;
     color: #fca5a5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.penalty-tag {
+    background: #7f1d1d;
+    color: #fecaca;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
 }
 .badge { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; }
 .badge-buylow { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
@@ -100,7 +110,7 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
 </style>
 """, unsafe_allow_html=True)
 
-# 1. טעינת נתוני ליגה
+# 1. טעינת נתוני הליגה וחישוב מודל עילית (xGI/90 ו-Weighted FDR)
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -228,7 +238,7 @@ def fetch_league_data():
 
 all_players, next_gw = fetch_league_data()
 
-# 2. משיכת נתוני קבוצה
+# 2. משיכת נתוני הקבוצה
 team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
 
 @st.cache_data(ttl=300)
@@ -255,7 +265,7 @@ if not raw_picks:
     st.warning("לא ניתן למשוך את נתוני הקבוצה. אנא ודא שמספר הקבוצה תקין.")
     st.stop()
 
-# 3. ניהול סגל גלובלי יציב ב-Session State (מאפשר שינויים מיידיים ועדכון ניקוד)
+# 3. ניהול סגל גלובלי ב-Session State
 if "user_squad" not in st.session_state or st.session_state.get("synced_team_id") != team_id:
     st.session_state.user_squad = [dict(p) for p in raw_picks]
     st.session_state.user_bank = initial_bank
@@ -294,56 +304,112 @@ formation_is_valid = (
 
 starting_xp_total = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
 
-# 4. כיול ציון סגל ריאליסטי (FPL Review / Scout Benchmark)
-# בנצ'מרק של הרכב אופטימלי סביב 57 xP
-benchmark_xp = 57.0
-calibrated_base = (starting_xp_total / benchmark_xp) * 88.0
-squad_flaws = []
+# 4. מודל כיול ציון סגל ריאליסטי (72–82) עם פירוט חסרונות שקוף
+# נקודת מוצא: סגל אופטימלי מייצר כ-60 xP שמניבים ציון בסיס של 84
+benchmark_xp = 60.0
+base_score = (starting_xp_total / benchmark_xp) * 84.0
 
+squad_flaws = []
+total_penalty = 0.0
+
+# א. בדיקת כשירות ופציעות בהרכב
 for p in starters:
     if p["status"] != "a" or p["chance"] < 100:
-        pen = 5.0 if p["chance"] <= 25 else 2.5
-        calibrated_base -= pen
-        squad_flaws.append({"type": "פציעה/כשירות בהרכב", "text": f"<b>{p['name']} ({p['team']})</b> בסיכון שיתוף ({p['chance']}%)."})
-    elif p["next_fdr"] >= 4 and p["pos_code"] in [1, 2]:
-        calibrated_base -= 2.0
-        squad_flaws.append({"type": "משחק הגנה קשה", "text": f"<b>{p['name']}</b> פוגש יריבה קשה ({p['next_match']}, FDR {p['next_fdr']})."})
-    elif p["tag"] == "OVERPERFORMING_TRAP":
-        calibrated_base -= 1.0
-        squad_flaws.append({"type": "סכנת דעיכה", "text": f"<b>{p['name']}</b> ביצועים מעל ל-xGI, צפויה נסיגה לממוצע."})
+        pen = 6.5 if p["chance"] <= 25 else 4.0
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "סיכון כשירות בהרכב הפותח",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך בספק/פצוע ({p['chance']}% סיכוי שיתוף)."
+        })
 
-dead_bench_count = sum(1 for bp in bench if bp["status"] != "a" or bp["chance"] < 50)
-if dead_bench_count >= 2:
-    calibrated_base -= 3.0
-    squad_flaws.append({"type": "ספסל מושבת", "text": f"ישנם {dead_bench_count} שחקני ספסל פצועים/מושבתים ללא גיבוי."})
+# ב. בדיקת ספסל מושבת (מבטל רשת ביטחון לחילוף אוטומטי)
+for bp in bench:
+    if bp["status"] != "a" or bp["chance"] < 100:
+        pen = 3.0
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "ספסל מושבת (ללא גיבוי)",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{bp['name']} ({bp['team']})</b> בספסל אינו כשיר במלואו ({bp['chance']}%) - אין רשת ביטחון לחילוף אוטומטי."
+        })
+
+# ג. שחקני הגנה מול התקפות צמרת (FDR 4 או 5)
+for p in starters:
+    if p["pos_code"] in [1, 2] and p["next_fdr"] >= 4:
+        pen = 4.0
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "משחק הגנה בסיכון ספיגה גבוה",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']} ({p['pos']})</b> פוגש יריבה קשה ({p['next_match']}, דרגת קושי FDR {p['next_fdr']}) - סיכוי נמוך לרשת נקייה."
+        })
+
+# ד. שחקני התקפה מול הגנת ברזל (FDR 5)
+for p in starters:
+    if p["pos_code"] in [3, 4] and p["next_fdr"] >= 5:
+        pen = 2.5
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "משחק התקפי קשה במיוחד",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']} ({p['team']})</b> מתמודד מול הגנת ברזל ({p['next_match']}) - תקרת נקודות מוגבלת."
+        })
+
+# ה. כושר ירוד (Form < 2.5) בהרכב
+for p in starters:
+    if p["status"] == "a" and p["form"] < 2.5 and p["pos_code"] in [3, 4]:
+        pen = 2.0
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "כושר הבקעה נמוך",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']}</b> בתקופת בצורת (כושר {p['form']}) ותפוקה דלה במחזורים האחרונים."
+        })
+
+# ו. מלכודת שחקן מעל המצופה (Trap)
+for p in starters:
+    if p["tag"] == "OVERPERFORMING_TRAP":
+        pen = 1.5
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "סכנת דעיכה לממוצע (Trap)",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']}</b> הבקיע מעבר למצבים הממשיים שייצר - צפויה נסיגה בתפוקת הנקודות."
+        })
 
 if not formation_is_valid:
-    calibrated_base -= 8.0
-    squad_flaws.append({"type": "מערך לא חוקי", "text": "המערך אינו חוקי לפי חוקי FPL."})
+    pen = 8.0
+    total_penalty += pen
+    squad_flaws.append({
+        "type": "מערך לא חוקי",
+        "penalty": f"-{pen:.1f}",
+        "text": "המערך הנוכחי אינו חוקי לפי חוקי FPL (חובה שוער 1, 3–5 מגנים ולפחות חלוץ 1)."
+    })
 
-# ציון סגל ריאלי של קבוצה תחרותית: 82–92
-squad_rating = int(max(60, min(96, calibrated_base)))
+# ציון סופי מכויל (טווח ריאליסטי ממוצע 72–82)
+squad_rating = int(max(48, min(86, base_score - total_penalty)))
 
-if squad_rating >= 88:
-    rating_status = "🌟 סגל עילית (Top 50K Benchmark)"
+if squad_rating >= 80:
+    rating_status = "🌟 סגל עילית מכויל (מוכן ל-Top 50K)"
     rating_color = "#10b981"
-elif squad_rating >= 80:
-    rating_status = "🟢 סגל תחרותי וחזק מאוד"
-    rating_color = "#38bdf8"
 elif squad_rating >= 72:
-    rating_status = "🟡 סגל סביר עם נקודות סיכון בודדות"
+    rating_status = "🟢 סגל תחרותי וחזק (עם נקודות תורפה קלות)"
+    rating_color = "#38bdf8"
+elif squad_rating >= 62:
+    rating_status = "🟡 סגל מאוזן עם מוקדי סיכון הדורשים טיפול"
     rating_color = "#f59e0b"
 else:
-    rating_status = "🔴 סגל דורש טיפול מיידי"
+    rating_status = "🔴 סגל במצב חירום (דורש ריענון מיידי)"
     rating_color = "#ef4444"
 
-# 5. תצוגת ראש עמוד ומדדים
+# 5. תצוגת מדדים עליונה
 st.title(f"⚽ FPL Command Center | {my_team_name}")
-st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון סגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)
+st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)
 
 rank_disp = f"{my_rank:,}" if isinstance(my_rank, int) else (str(my_rank) if my_rank else "—")
 m1, m2, m3, m4 = st.columns(4)
-m1.markdown(f'<div class="metric-box"><div style="color:#38bdf8;font-size:12px;margin-bottom:4px;">ציון סגל (Scout Benchmark)</div><div style="font-size:20px;font-weight:bold;color:{rating_color};">{squad_rating} / 100</div></div>', unsafe_allow_html=True)
+m1.markdown(f'<div class="metric-box"><div style="color:#38bdf8;font-size:12px;margin-bottom:4px;">ציון סגל (מכויל ריאלי)</div><div style="font-size:20px;font-weight:bold;color:{rating_color};">{squad_rating} / 100</div></div>', unsafe_allow_html=True)
 m2.markdown(f'<div class="metric-box"><div style="color:#10b981;font-size:12px;margin-bottom:4px;">תחזית נקודות למחזור (xP)</div><div style="font-size:20px;font-weight:bold;color:#fff;">{starting_xp_total:.1f} נק׳</div></div>', unsafe_allow_html=True)
 m3.markdown(f'<div class="metric-box"><div style="color:#f59e0b;font-size:12px;margin-bottom:4px;">יתרה בבנק</div><div style="font-size:20px;font-weight:bold;color:#fff;"><span class="ltr-box">£{st.session_state.user_bank:.1f}m</span></div></div>', unsafe_allow_html=True)
 m4.markdown(f'<div class="metric-box"><div style="color:#a855f7;font-size:12px;margin-bottom:4px;">דירוג כללי</div><div style="font-size:20px;font-weight:bold;color:#fff;"><span class="ltr-box">{rank_disp}</span></div></div>', unsafe_allow_html=True)
@@ -391,7 +457,7 @@ with tab_squad:
 
     st.write("---")
     st.markdown("### 🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל")
-    st.caption("בחר שחקן להורדה ושחקן להעלאה. הניקוד, ה-xP והציון יתעדכנו מיידית:")
+    st.caption("בחר שחקן להורדה ושחקן להעלאה. הניקוד, תחזית ה-xP וציון הסגל יתעדכנו מיידית:")
 
     starters_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — xP: {p['xp']}" for p in starters}
     bench_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — xP: {p['xp']}" for p in bench}
@@ -415,16 +481,14 @@ with tab_squad:
                 st.success("החילוף בוצע בהצלחה!")
                 st.rerun()
 
-# טאב 2: עדכון חילופים מהיר ומרווח
+# טאב 2: עדכון חילופים מהיר
 with tab_manual:
     st.subheader("🔄 עדכון חילוף בשוק (ממוין לפי נקודות ומסונן עמדה)")
-    st.caption("בחר שחקן להוצאה ושחקן להכנסה. הניקוד מוצג באופן ברור בראש כל אפשרות:")
-
     all_current = starters + bench
     current_ids = [p["id"] for p in all_current]
 
     def is_risky(p):
-        return p["status"] != "a" or p["chance"] < 100 or p["next_fdr"] >= 4 or p["form"] < 2.0 or p["tag"] == "OVERPERFORMING_TRAP"
+        return p["status"] != "a" or p["chance"] < 100 or p["next_fdr"] >= 4 or p["form"] < 2.5 or p["tag"] == "OVERPERFORMING_TRAP"
 
     risky_out = sorted([p for p in all_current if is_risky(p)], key=lambda x: x["total_points"], reverse=True)
     safe_out = sorted([p for p in all_current if not is_risky(p)], key=lambda x: x["total_points"], reverse=True)
@@ -478,7 +542,6 @@ with tab_manual:
             st.warning("לא נמצאו מועמדים תואמים בתקציב זה.")
             p_in = None
 
-    # כרטיס השוואה לפני אישור
     if p_in:
         st.markdown('<div class="compare-card">', unsafe_allow_html=True)
         st.markdown("#### ⚖️ השוואת חילוף ראש-בראש")
@@ -517,14 +580,14 @@ with tab_manual:
             st.session_state.transfers_log = []
             st.rerun()
 
-# טאב 3: מדד עוצמה וחסרונות הסגל
+# טאב 3: מדד עוצמה וחסרונות הסגל (מפורט עם קנסות)
 with tab_projection:
-    st.subheader(f"📊 ניתוח עומק: עוצמת סגל מכוילת וחסרונות (GW {next_gw})")
+    st.subheader(f"📊 ניתוח עומק: ציון סגל ופירוט החסרונות (GW {next_gw})")
     c_rate1, c_rate2 = st.columns([1, 2])
     with c_rate1:
         st.markdown(
             f'<div style="background:#111a28;border:1px solid #1e2e46;border-radius:12px;padding:16px;text-align:center;">'
-            f'<div style="color:#94a3b8;font-size:13px;">ציון סגל מכויל (Scout Rating)</div>'
+            f'<div style="color:#94a3b8;font-size:13px;">ציון סגל מכויל (מחושב מול בנצ\'מרק)</div>'
             f'<div style="font-size:36px;font-weight:bold;color:{rating_color};margin:8px 0;">{squad_rating} <span style="font-size:16px;color:#64748b;">/ 100</span></div>'
             f'<div style="font-size:12px;font-weight:bold;color:{rating_color};">{rating_status}</div>'
             f'</div>',
@@ -544,12 +607,20 @@ with tab_projection:
         )
 
     st.write("")
-    st.markdown(f"#### ⚠️ חסרונות ומוקדי סיכון בסגל ({len(squad_flaws)})")
+    st.markdown(f"#### ⚠️ חסרונות הסגל שהורידו נקודות מהציון ({len(squad_flaws)} מוקדים אותרו)")
+    st.caption("להלן הגורמים המדויקים שהורידו נקודות מהציון הכללי ומייצרים סיכון נקודות במחזור:")
+
     if squad_flaws:
         for f in squad_flaws:
-            st.markdown(f'<div class="flaw-card"><b>[{f["type"]}]:</b> {f["text"]}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="flaw-card">'
+                f'<div><b>[{f["type"]}]:</b> {f["text"]}</div>'
+                f'<div class="penalty-tag">{f["penalty"]} נק׳</div>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
     else:
-        st.success("לא זוהו חסרונות משמעותיים בסגל הנוכחי! סגל מאוזן ויציב.")
+        st.success("לא זוהו חסרונות בסגל הנוכחי! הסגל מאוזן ויציב לחלוטין.")
 
     st.write("")
     st.markdown("#### 📋 פירוט שחקני ההרכב הפותח")
@@ -665,7 +736,7 @@ with tab_transfer:
 
         st.markdown(
             f'<div class="compare-card">'
-            f'<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e293b;padding-bottom:8px;margin-bottom:10px;">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1e2e46;padding-bottom:8px;margin-bottom:10px;">'
             f'<div><span style="font-weight:bold;font-size:16px;color:#f8fafc;">{sc["title"]}</span> <span class="badge" style="background:#1e293b;color:#94a3b8;">{sc["tag"]}</span></div>'
             f'<div style="font-size:13px;font-weight:bold;color:#10b981;">תוספת תוחלת: +{delta_xp} xP ({rec_text})</div>'
             f'</div>'
