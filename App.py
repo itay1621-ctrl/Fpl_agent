@@ -307,7 +307,6 @@ for i in range(num_transfers):
     in_id = all_player_names[p_in_name]
     transfers_made.append((out_id, in_id))
 
-# החלת החילופים על הסגל ועדכון הבנק
 for out_id, in_id in transfers_made:
   for p in my_picks:
     if p["element"] == out_id:
@@ -367,7 +366,6 @@ m4.markdown(
 
 st.write("")
 
-# טאבים מרכזיים
 tab_squad, tab_targets, tab_transfer, tab_health, tab_chat = st.tabs([
     "🟢 הסגל על המגרש",
     "🌟 רדאר רכש עילית",
@@ -632,7 +630,7 @@ with tab_health:
         unsafe_allow_html=True,
     )
 
-# --- טאב 5: צ'אט AI אישי מבוסס מדע (מתוקן ויציב) ---
+# --- טאב 5: צ'אט AI אישי (מעודכן ל-Gemini 2.5 Flash + זיהוי אוטומטי) ---
 with tab_chat:
   st.subheader(f"💬 יועץ ה-AI האישי של {my_team_name}")
   st.caption("הסוכן מעודכן בנתוני ה-xGI/90, ביתרת הבנק ובתוכנית הצ'יפים שלך.")
@@ -651,7 +649,7 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.write(msg["content"])
 
-  if prompt := st.chat_input("שאל את המאמן (למשל: מי החילוף הכי דחוף אצלי?)..."):
+  if prompt := st.chat_input("שאל את המאמן (למשל: מי להכניס במקום מגווייר?)..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.write(prompt)
@@ -693,13 +691,37 @@ with tab_chat:
 
       combined_prompt = f"{system_instruction}\n\n---\nשאלת המשתמש:\n{prompt}"
 
-      models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash"]
+      # רשימת מודלים מעודכנת לפי הנחיות גוגל העדכניות
+      models_to_try = [
+          "gemini-2.5-flash",
+          "gemini-2.5-flash-lite",
+          "gemini-2.5-pro",
+      ]
+
+      # זיהוי דינמי של המודלים הפתוחים עבור המפתח
+      try:
+        list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={clean_key}"
+        list_res = requests.get(list_url, timeout=3)
+        if list_res.status_code == 200:
+          avail = [
+              m["name"].replace("models/", "")
+              for m in list_res.json().get("models", [])
+              if "generateContent" in m.get("supportedGenerationMethods", [])
+          ]
+          flash_models = [m for m in avail if "flash" in m]
+          if flash_models:
+            models_to_try = flash_models + [
+                m for m in avail if m not in flash_models
+            ]
+          elif avail:
+            models_to_try = avail
+      except Exception:
+        pass
+
       reply = None
       error_detail = ""
 
-      for model_name in models_to_try:
-        if reply:
-          break
+      for model_name in models_to_try[:3]:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={clean_key}"
         headers = {"Content-Type": "application/json"}
         payload = {
@@ -719,13 +741,13 @@ with tab_chat:
             error_detail = (
                 f"{err_data.get('message', 'HTTP ' + str(res.status_code))}"
             )
-            time.sleep(1.0)
+            time.sleep(0.8)
         except Exception as e:
           error_detail = str(e)
-          time.sleep(1.0)
+          time.sleep(0.8)
 
       if not reply:
-        reply = f"⚠️ שגיאת תקשורת עם ה-AI: {error_detail}\n\n(ודא שמפתח ה-API תקין ומוגדר כראוי ב-Google AI Studio)."
+        reply = f"⚠️ שגיאת תקשורת עם ה-AI: {error_detail}"
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
