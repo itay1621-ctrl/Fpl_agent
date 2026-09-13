@@ -438,30 +438,30 @@ team_id = st.session_state.user_team_id
 @st.cache_data(ttl=300)
 def fetch_user_team(t_id, gw):
     try:
-        last_gw = max(1, gw - 1)[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
-        base = "https://fantasy.premierleague.com/api/[span_6](start_span)[span_7](start_span)"[span_6](end_span)[span_7](end_span)
-        picks_url = f"{base}entry/{t_id}/event/{last_gw}/picks/[span_8](start_span)[span_9](start_span)"[span_8](end_span)[span_9](end_span)
-        picks_res = requests.get(picks_url).json()[span_10](start_span)[span_10](end_span)[span_11](start_span)[span_11](end_span)
-        entry_url = f"{base}entry/{t_id}/[span_12](start_span)[span_13](start_span)"[span_12](end_span)[span_13](end_span)
-        entry_res = requests.get(entry_url).json()[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span)
+        last_gw = max(1, gw - 1)[span_3](start_span)[span_3](end_span)[span_4](start_span)[span_4](end_span)
+        base = "https://fantasy.premierleague.com/api/[span_5](start_span)[span_6](start_span)"[span_5](end_span)[span_6](end_span)
+        picks_url = f"{base}entry/{t_id}/event/{last_gw}/picks/[span_7](start_span)[span_8](start_span)"[span_7](end_span)[span_8](end_span)
+        picks_res = requests.get(picks_url).json()[span_9](start_span)[span_9](end_span)[span_10](start_span)[span_10](end_span)
+        entry_url = f"{base}entry/{t_id}/[span_11](start_span)[span_12](start_span)"[span_11](end_span)[span_12](end_span)
+        entry_res = requests.get(entry_url).json()[span_13](start_span)[span_13](end_span)[span_14](start_span)[span_14](end_span)
 
-        if picks_res.get("active_chip") == "free_hit" and last_gw > 1:[span_16](start_span)[span_16](end_span)[span_17](start_span)[span_17](end_span)
-            base_gw = last_gw - 1[span_18](start_span)[span_18](end_span)[span_19](start_span)[span_19](end_span)
-            base_url = f"{base}entry/{t_id}/event/{base_gw}/picks/[span_20](start_span)[span_21](start_span)"[span_20](end_span)[span_21](end_span)
-            picks_res = requests.get(base_url).json()[span_22](start_span)[span_22](end_span)[span_23](start_span)[span_23](end_span)
+        if picks_res.get("active_chip") == "free_hit" and last_gw > 1:[span_15](start_span)[span_15](end_span)[span_16](start_span)[span_16](end_span)
+            base_gw = last_gw - 1[span_17](start_span)[span_17](end_span)[span_18](start_span)[span_18](end_span)
+            base_url = f"{base}entry/{t_id}/event/{base_gw}/picks/[span_19](start_span)[span_20](start_span)"[span_19](end_span)[span_20](end_span)
+            picks_res = requests.get(base_url).json()[span_21](start_span)[span_21](end_span)[span_22](start_span)[span_22](end_span)
 
-        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
-        picks = picks_res.get("picks", [])[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)
+        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10[span_23](start_span)[span_23](end_span)[span_24](start_span)[span_24](end_span)
+        picks = picks_res.get("picks", [])[span_25](start_span)[span_25](end_span)[span_26](start_span)[span_26](end_span)
         team_name = entry_res.get("name", f"Team {t_id}")
-        rank = entry_res.get("summary_overall_rank", "—")[span_28](start_span)[span_28](end_span)[span_29](start_span)[span_29](end_span)
-        return picks, bank, team_name, rank[span_30](start_span)[span_30](end_span)[span_31](start_span)[span_31](end_span)
+        rank = entry_res.get("summary_overall_rank", "—")[span_27](start_span)[span_27](end_span)[span_28](start_span)[span_28](end_span)
+        return picks, bank, team_name, rank[span_29](start_span)[span_29](end_span)[span_30](start_span)[span_30](end_span)
     except Exception:
-        return None, 0.0, None, None[span_32](start_span)[span_32](end_span)[span_33](start_span)[span_33](end_span)
+        return None, 0.0, None, None[span_31](start_span)[span_31](end_span)[span_32](start_span)[span_32](end_span)
 
 
 raw_picks, initial_bank, my_team_name, my_rank = fetch_user_team(
     team_id, next_gw
-)[span_34](start_span)[span_34](end_span)[span_35](start_span)[span_35](end_span)
+)[span_33](start_span)[span_33](end_span)[span_34](start_span)[span_34](end_span)
 if not raw_picks:
     st.error(f"❌ לא ניתן למשוך נתונים עבור מזהה {team_id}. ודא שהמספר תקין.")
     if st.button("🔄 חזרה להזנת ID"):
@@ -475,31 +475,31 @@ if (
     "user_squad" not in st.session_state
     or st.session_state.get("synced_team_id") != team_id
 ):
-    st.session_state.user_squad = [dict(p) for p in raw_picks][span_36](start_span)[span_36](end_span)
+    st.session_state.user_squad = [dict(p) for p in raw_picks][span_35](start_span)[span_35](end_span)
     st.session_state.user_bank = initial_bank
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
 
-starters = [][span_37](start_span)[span_37](end_span)[span_38](start_span)[span_38](end_span)
-bench = [][span_39](start_span)[span_39](end_span)[span_40](start_span)[span_40](end_span)
+starters = [][span_36](start_span)[span_36](end_span)[span_37](start_span)[span_37](end_span)
+bench = [][span_38](start_span)[span_38](end_span)[span_39](start_span)[span_39](end_span)
 for p in st.session_state.user_squad:
-    pid = p["element"][span_41](start_span)[span_41](end_span)[span_42](start_span)[span_42](end_span)
-    p_info = all_players.get(pid)[span_43](start_span)[span_43](end_span)[span_44](start_span)[span_44](end_span)
+    pid = p["element"][span_40](start_span)[span_40](end_span)[span_41](start_span)[span_41](end_span)
+    p_info = all_players.get(pid)[span_42](start_span)[span_42](end_span)[span_43](start_span)[span_43](end_span)
     if p_info:
         item = {
             **p_info,
-            "is_cap": p.get("is_captain", False),[span_45](start_span)[span_45](end_span)[span_46](start_span)[span_46](end_span)
-            "is_vc": p.get("is_vice_captain", False),[span_47](start_span)[span_47](end_span)[span_48](start_span)[span_48](end_span)
-            "position": p["position"],[span_49](start_span)[span_49](end_span)[span_50](start_span)[span_50](end_span)
+            "is_cap": p.get("is_captain", False),[span_44](start_span)[span_44](end_span)[span_45](start_span)[span_45](end_span)
+            "is_vc": p.get("is_vice_captain", False),[span_46](start_span)[span_46](end_span)[span_47](start_span)[span_47](end_span)
+            "position": p["position"],[span_48](start_span)[span_48](end_span)[span_49](start_span)[span_49](end_span)
         }
-        if p["position"] <= 11:[span_51](start_span)[span_51](end_span)[span_52](start_span)[span_52](end_span)
-            starters.append(item)[span_53](start_span)[span_53](end_span)[span_54](start_span)[span_54](end_span)
+        if p["position"] <= 11:[span_50](start_span)[span_50](end_span)[span_51](start_span)[span_51](end_span)
+            starters.append(item)[span_52](start_span)[span_52](end_span)[span_53](start_span)[span_53](end_span)
         else:
-            bench.append(item)[span_55](start_span)[span_55](end_span)[span_56](start_span)[span_56](end_span)
+            bench.append(item)[span_54](start_span)[span_54](end_span)[span_55](start_span)[span_55](end_span)
 
-pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}[span_57](start_span)[span_57](end_span)[span_58](start_span)[span_58](end_span)
-for p in starters:[span_59](start_span)[span_59](end_span)[span_60](start_span)[span_60](end_span)
-    pos_counts[p["pos_code"]] += 1[span_61](start_span)[span_61](end_span)[span_62](start_span)[span_62](end_span)
+pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}[span_56](start_span)[span_56](end_span)[span_57](start_span)[span_57](end_span)
+for p in starters:[span_58](start_span)[span_58](end_span)[span_59](start_span)[span_59](end_span)
+    pos_counts[p["pos_code"]] += 1[span_60](start_span)[span_60](end_span)[span_61](start_span)[span_61](end_span)
 
 formation_valid = (
     pos_counts[1] == 1
@@ -507,11 +507,11 @@ formation_valid = (
     and (2 <= pos_counts[3] <= 5)
     and (1 <= pos_counts[4] <= 3)
     and len(starters) == 11
-)[span_63](start_span)[span_63](end_span)
+)[span_62](start_span)[span_62](end_span)
 
 starting_xp_total = sum(
     p["xp"] * (2 if p.get("is_cap") else 1) for p in starters
-)[span_64](start_span)[span_64](end_span)
+)[span_63](start_span)[span_63](end_span)
 
 # חישוב ציון מכויל וחסרונות
 benchmark_xp = 60.0
@@ -657,8 +657,8 @@ t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_health = st.tabs([
 
 
 def render_pitch_card(p, is_bench=False):
-    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")[span_65](start_span)[span_65](end_span)[span_66](start_span)[span_66](end_span)
-    bench_class = "card-bench" if is_bench else "[span_67](start_span)[span_68](start_span)"[span_67](end_span)[span_68](end_span)
+    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")[span_64](start_span)[span_64](end_span)[span_65](start_span)[span_65](end_span)
+    bench_class = "card-bench" if is_bench else "[span_66](start_span)[span_67](start_span)"[span_66](end_span)[span_67](end_span)
 
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
@@ -671,7 +671,7 @@ def render_pitch_card(p, is_bench=False):
             f'<div class="prob-badge prob-yellow">🟡 בספק {p["start_prob"]}%</div>'
         )
     else:
-        status_class = "cap-gold" if p.get("is_cap") else "[span_69](start_span)[span_70](start_span)"[span_69](end_span)[span_70](end_span)
+        status_class = "cap-gold" if p.get("is_cap") else "[span_68](start_span)[span_69](start_span)"[span_68](end_span)[span_69](end_span)
         status_pill = (
             f'<div class="prob-badge prob-green">🟢 {p["start_prob"]}% פותח</div>'
         )
@@ -695,38 +695,38 @@ with t_squad:
     st.caption(
         f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | סך תוחלת"
         f" נקודות: **{starting_xp_total:.1f}**"
-    )[span_71](start_span)[span_71](end_span)
+    )[span_70](start_span)[span_70](end_span)
 
     fwd_h = "".join(
         render_pitch_card(p) for p in starters if p["pos_code"] == 4
-    )[span_72](start_span)[span_72](end_span)[span_73](start_span)[span_73](end_span)
+    )[span_71](start_span)[span_71](end_span)[span_72](start_span)[span_72](end_span)
     mid_h = "".join(
         render_pitch_card(p) for p in starters if p["pos_code"] == 3
-    )[span_74](start_span)[span_74](end_span)[span_75](start_span)[span_75](end_span)
+    )[span_73](start_span)[span_73](end_span)[span_74](start_span)[span_74](end_span)
     def_h = "".join(
         render_pitch_card(p) for p in starters if p["pos_code"] == 2
-    )[span_76](start_span)[span_76](end_span)[span_77](start_span)[span_77](end_span)
-    gk_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 1)[span_78](start_span)[span_78](end_span)[span_79](start_span)[span_79](end_span)
+    )[span_75](start_span)[span_75](end_span)[span_76](start_span)[span_76](end_span)
+    gk_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 1)[span_77](start_span)[span_77](end_span)[span_78](start_span)[span_78](end_span)
 
     st.markdown(
         '<div class="pitch">'
-        f'<div class="pitch-row">{fwd_h}</div>[span_80](start_span)[span_81](start_span)'[span_80](end_span)[span_81](end_span)
-        f'<div class="pitch-row">{mid_h}</div>[span_82](start_span)[span_83](start_span)'[span_82](end_span)[span_83](end_span)
-        f'<div class="pitch-row">{def_h}</div>[span_84](start_span)[span_85](start_span)'[span_84](end_span)[span_85](end_span)
-        f'<div class="pitch-row">{gk_h}</div>[span_86](start_span)[span_87](start_span)'[span_86](end_span)[span_87](end_span)
+        f'<div class="pitch-row">{fwd_h}</div>[span_79](start_span)[span_80](start_span)'[span_79](end_span)[span_80](end_span)
+        f'<div class="pitch-row">{mid_h}</div>[span_81](start_span)[span_82](start_span)'[span_81](end_span)[span_82](end_span)
+        f'<div class="pitch-row">{def_h}</div>[span_83](start_span)[span_84](start_span)'[span_83](end_span)[span_84](end_span)
+        f'<div class="pitch-row">{gk_h}</div>[span_85](start_span)[span_86](start_span)'[span_85](end_span)[span_86](end_span)
         "</div>",
         unsafe_allow_html=True,
     )
 
     st.caption("🪑 שחקני הספסל:")
-    bench_h = "".join(render_pitch_card(p, is_bench=True) for p in bench)[span_88](start_span)[span_88](end_span)
+    bench_h = "".join(render_pitch_card(p, is_bench=True) for p in bench)[span_87](start_span)[span_87](end_span)
     st.markdown(
         f'<div style="display:flex; justify-content:center; gap:8px;'
         f' margin-bottom:12px;">{bench_h}</div>',
         unsafe_allow_html=True,
     )
 
-    with st.expander("🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל"):[span_89](start_span)[span_89](end_span)
+    with st.expander("🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל"):[span_88](start_span)[span_88](end_span)
         starters_opts = {
             p["id"]: (
                 f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | xP: {p['xp']}"
@@ -740,43 +740,43 @@ with t_squad:
             for p in bench
         }
 
-        sc1, sc2, sc3 = st.columns([1.5, 1.5, 1])[span_90](start_span)[span_90](end_span)
+        sc1, sc2, sc3 = st.columns([1.5, 1.5, 1])[span_89](start_span)[span_89](end_span)
         with sc1:
             sub_out_id = st.selectbox(
                 "שחקן הרכב שיורד:",
                 list(starters_opts.keys()),
                 format_func=lambda x: starters_opts[x],
-            )[span_91](start_span)[span_91](end_span)
+            )[span_90](start_span)[span_90](end_span)
         with sc2:
             sub_in_id = st.selectbox(
                 "שחקן ספסל שעולה:",
                 list(bench_opts.keys()),
                 format_func=lambda x: bench_opts[x],
-            )[span_92](start_span)[span_92](end_span)
+            )[span_91](start_span)[span_91](end_span)
         with sc3:
+            st.write("")[span_92](start_span)[span_92](end_span)
             st.write("")[span_93](start_span)[span_93](end_span)
-            st.write("")[span_94](start_span)[span_94](end_span)
-            if st.button("בצע חילוף 🔁", use_container_width=True):[span_95](start_span)[span_95](end_span)
+            if st.button("בצע חילוף 🔁", use_container_width=True):[span_94](start_span)[span_94](end_span)
                 sim = [
                     p["pos_code"] for p in starters if p["id"] != sub_out_id
-                ] + [all_players[sub_in_id]["pos_code"]][span_96](start_span)[span_96](end_span)
+                ] + [all_players[sub_in_id]["pos_code"]][span_95](start_span)[span_95](end_span)
                 if (
                     sim.count(1) != 1
                     or not (3 <= sim.count(2) <= 5)
                     or not (1 <= sim.count(4) <= 3)
-                ):[span_97](start_span)[span_97](end_span)
-                    st.error("חילוף לא חוקי (חובה שוער 1, 3–5 מגנים ולפחות חלוץ 1).")[span_98](start_span)[span_98](end_span)
+                ):[span_96](start_span)[span_96](end_span)
+                    st.error("חילוף לא חוקי (חובה שוער 1, 3–5 מגנים ולפחות חלוץ 1).")[span_97](start_span)[span_97](end_span)
                 else:
                     p_o = next(
                         p
                         for p in st.session_state.user_squad
                         if p["element"] == sub_out_id
-                    )[span_99](start_span)[span_99](end_span)
+                    )[span_98](start_span)[span_98](end_span)
                     p_i = next(
                         p for p in st.session_state.user_squad if p["element"] == sub_in_id
-                    )[span_100](start_span)[span_100](end_span)
-                    p_o["position"], p_i["position"] = p_i["position"], p_o["position"][span_101](start_span)[span_101](end_span)
-                    st.rerun()[span_102](start_span)[span_102](end_span)
+                    )[span_99](start_span)[span_99](end_span)
+                    p_o["position"], p_i["position"] = p_i["position"], p_o["position"][span_100](start_span)[span_100](end_span)
+                    st.rerun()[span_101](start_span)[span_101](end_span)
 
 # טאב 2: מעבדת חילופים
 with t_transfers:
