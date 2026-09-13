@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS מותאם אישית: RTL מלא ותמיכה בתצוגת מובייל נקייה ---
+# --- עיצוב CSS מותאם אישית: RTL מלא, כרטיסי מובייל וכרטיסי המלצה חכמים ---
 st.markdown(
     """
 <style>
@@ -78,6 +78,24 @@ div[data-testid="stMarkdownContainer"] p {
 .tier-1 { border-right: 5px solid #10b981; }
 .tier-2 { border-right: 5px solid #38bdf8; }
 .tier-3 { border-right: 5px solid #f59e0b; }
+
+.rec-pill {
+    background: #0d1e19;
+    border: 1px solid #059669;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+
+.flaw-card {
+    background: #231215;
+    border-right: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #fecaca;
+}
 
 .transfer-scenario-card {
     background: #0f172a;
@@ -192,7 +210,6 @@ def fetch_league_data():
 
     score *= nailed_mult
 
-    # חישוב תוחלת נקודות (xP)
     base_appearance = 2.0 if el["status"] == "a" else 0.5
     next_match_fdr = fdr_list[0] if fdr_list else 3
     clean_sheet_probs = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}
@@ -262,7 +279,7 @@ def fetch_league_data():
 
 all_players, next_gw = fetch_league_data()
 
-# הגדרת מספר קבוצה בסרגל הצד (מינימלי ופשוט)
+# הגדרת מספר קבוצה בסרגל הצד (מינימלי)
 team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
 
 
@@ -306,13 +323,11 @@ if not raw_picks:
   )
   st.stop()
 
-# הכנת רשימות לבחירת חילופים
 base_squad_ids = [p["element"] for p in raw_picks]
 all_player_names = {
     f"{p['name']} ({p['team']}) - £{p['cost']}m": pid
     for pid, p in all_players.items()
 }
-player_options = sorted(list(all_player_names.keys()))
 
 # --- 3. סנכרון חילופים ידניים מתוך Session State ---
 transfers_applied = []
@@ -329,7 +344,8 @@ for idx in range(num_active_transfers):
       out_id = next(
           pid
           for pid in base_squad_ids
-          if f"{all_players[pid]['name']} ({all_players[pid]['team']})"
+          if f"{all_players[pid]['name']} ({all_players[pid]['team']}) -"
+          f" £{all_players[pid]['cost']}m"
           == sel_out
       )
       in_id = all_player_names[sel_in]
@@ -356,24 +372,111 @@ for p in my_picks:
     else:
       bench.append(item)
 
-# חישוב נקודות צפויות וציון סגל
+# חישוב נקודות צפויות
 starting_xp_total = 0.0
 for p in starters:
   mult = 2 if p.get("is_cap") else 1
   starting_xp_total += p["xp"] * mult
 
-avg_starters_score = sum(p["score"] for p in starters) / max(1, len(starters))
-squad_rating = min(98, max(45, int(avg_starters_score * 8.2)))
+# --- מנוע כיול ציון ריאלי וזיהוי חסרונות הסגל ---
+base_rating = 90.0
+squad_flaws = []
 
-if squad_rating >= 84:
-  rating_status = "🌟 סגל עילית (מוכן ל-Top 50K)"
+# 1. פציעות והשעיות בהרכב
+for p in starters:
+  if p["status"] != "a" or p["chance"] < 100:
+    penalty = 8 if p["chance"] == 0 else 5
+    base_rating -= penalty
+    squad_flaws.append({
+        "type": "פציעה/כשירות בהרכב",
+        "severity": "high",
+        "text": (
+            f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך מוגדר עם"
+            f" {p['chance']}% סיכויי כשירות בלבד (סיכון ל-0 נקודות)."
+        ),
+    })
+
+# 2. פציעות והשבתות בספסל
+for p in bench:
+  if p["status"] != "a" or p["chance"] < 100:
+    base_rating -= 4
+    squad_flaws.append({
+        "type": "ספסל מושבת",
+        "severity": "medium",
+        "text": (
+            f"<b>{p['name']} ({p['team']})</b> בספסל פצוע/מושבת ({p['chance']}%),"
+            " מה שמבטל גיבוי אוטומטי במקרה של היעדרות בהרכב."
+        ),
+    })
+
+# 3. משחקים קשים לשחקני הגנה בהרכב (FDR 4-5)
+for p in starters:
+  if p["pos_code"] in [1, 2] and p["next_fdr"] >= 4:
+    base_rating -= 4.5
+    squad_flaws.append({
+        "type": "משחק הגנתי קשה",
+        "severity": "high",
+        "text": (
+            f"<b>{p['name']} ({p['pos']})</b> פוגש יריבה קשה"
+            f" ({p['next_match']}, FDR {p['next_fdr']}) עם סיכוי נמוך מאוד"
+            " לרשת נקייה (Clean Sheet)."
+        ),
+    })
+
+# 4. שחקני התקפה עם משחקים קשים במיוחד (FDR 5)
+for p in starters:
+  if p["pos_code"] in [3, 4] and p["next_fdr"] >= 5:
+    base_rating -= 3.0
+    squad_flaws.append({
+        "type": "משחק התקפי קשה",
+        "severity": "medium",
+        "text": (
+            f"<b>{p['name']} ({p['team']})</b> מתמודד מול הגנת ברזל"
+            f" ({p['next_match']}), מה שמגביל את תקרת הנקודות הצפויה."
+        ),
+    })
+
+# 5. שחקנים בכושר ירוד (Form < 2.8) בהרכב
+for p in starters:
+  if p["status"] == "a" and p["form"] < 2.8 and p["pos_code"] in [3, 4]:
+    base_rating -= 2.5
+    squad_flaws.append({
+        "type": "כושר הבקעה נמוך",
+        "severity": "low",
+        "text": (
+            f"<b>{p['name']}</b> בכושר מדאיג (Form {p['form']}) ותפוקת מעורבות"
+            " שערים נמוכה במחזורים האחרונים."
+        ),
+    })
+
+# 6. מלכודת שחקן שכבש מעל המצופה (Trap)
+for p in starters:
+  if p["tag"] == "OVERPERFORMING_TRAP":
+    base_rating -= 2.0
+    squad_flaws.append({
+        "type": "סכנת דעיכה לממוצע",
+        "severity": "low",
+        "text": (
+            f"<b>{p['name']}</b> מעל המצופה סטטיסטית (כבש ללא xGI תומך) - סיכון"
+            " לנפילת תפוקה במחזורים הקרובים."
+        ),
+    })
+
+# ציון סופי מכויל
+squad_rating = max(42, min(94, int(base_rating)))
+
+if squad_rating >= 83:
+  rating_status = "🌟 סגל עילית (Top 50K Ready)"
   rating_color = "#10b981"
 elif squad_rating >= 72:
-  rating_status = "🟢 סגל תחרותי וחזק"
+  rating_status = "🟢 סגל תחרותי וחזק (עם נקודות תורפה בודדות)"
   rating_color = "#38bdf8"
-else:
-  rating_status = "🟡 סגל מאוזן עם מוקדי סיכון"
+elif squad_rating >= 60:
+  rating_status = "🟡 סגל סביר עם מוקדי סיכון הדורשים טיפול"
   rating_color = "#f59e0b"
+else:
+  rating_status = "🔴 סגל במצב חירום (דורש ריענון מיידי / צ'יפ)"
+  rating_color = "#ef4444"
 
 # --- שורת מדדים ראשית ---
 st.title(f"⚽ FPL Command Center | {my_team_name}")
@@ -392,9 +495,9 @@ rank_display = (
 m1, m2, m3, m4 = st.columns(4)
 m1.markdown(
     '<div class="metric-box"><div style="color:#38bdf8; font-size:12px;'
-    ' margin-bottom:4px;">ציון עוצמת סגל</div><div style="font-size:18px;'
-    f' font-weight:bold; color:{rating_color};">{squad_rating} /'
-    " 100</div></div>",
+    ' margin-bottom:4px;">ציון עוצמת סגל ריאלי</div><div'
+    f' style="font-size:18px; font-weight:bold; color:{rating_color};">{squad_rating}'
+    " / 100</div></div>",
     unsafe_allow_html=True,
 )
 m2.markdown(
@@ -421,12 +524,12 @@ m4.markdown(
 
 st.write("")
 
-# --- טאבים ראשיים ללא צ'אט AI ---
+# --- טאבים ראשיים ---
 tab_squad, tab_manual, tab_projection, tab_targets, tab_transfer, tab_health = (
     st.tabs([
         "🟢 הסגל על המגרש",
-        "🔄 עדכון חילופים שבוצעו",
-        "📊 מדד עוצמה ותחזית נקודות",
+        "🔄 עדכון חילופים מהיר",
+        "📊 מדד עוצמה וחסרונות הסגל",
         "🌟 רדאר רכש עילית",
         "🎯 הצעות חילוף לתקציב שלי",
         "🚦 רמזור בריאות הסגל",
@@ -484,72 +587,172 @@ with tab_squad:
       unsafe_allow_html=True,
   )
 
-# --- טאב 2: עדכון חילופים ידני במסך הראשי ---
+# --- טאב 2: עדכון חילופים מהיר + המלצות חכמות בצד ---
 with tab_manual:
-  st.subheader("🔄 עדכון חילופים שביצעת לקראת המחזור")
-  st.markdown(
-      """
-    <div style="background:#111a28; border-right:4px solid #38bdf8; border-radius:8px; padding:12px; margin-bottom:16px;">
-        💡 <b>מדוע צריך עדכון ידני?</b> ה-API הרשמי של ה-FPL נועל את החילופים החדשים עד לשעת הדד-ליין של המחזור.
-        כאן תוכל להגדיר את השחקנים שמכרת וקנית, וכל המערכת (המגרש, תחזית הנקודות, יתרת הבנק והצעות הרכש) תתעדכן מיידית!
-    </div>
-    """,
-      unsafe_allow_html=True,
-  )
-
-  col_sel, col_stat = st.columns([1, 2])
-  with col_sel:
-    num_tx = st.selectbox(
-        "כמה חילופים ביצעת לקראת המחזור?",
-        [0, 1, 2, 3],
-        index=st.session_state.get("sel_num_transfers", 0),
-        key="sel_num_transfers",
-    )
+  st.subheader("🔄 עדכון חילופים שביצעת (כולל המלצות חכמות בצד)")
 
   base_squad_names = [
-      f"{all_players[pid]['name']} ({all_players[pid]['team']})"
+      f"{all_players[pid]['name']} ({all_players[pid]['team']}) - £{all_players[pid]['cost']}m"
       for pid in base_squad_ids
       if pid in all_players
   ]
 
+  num_tx = st.selectbox(
+      "כמה חילופים ביצעת לקראת המחזור?",
+      [0, 1, 2, 3],
+      index=st.session_state.get("sel_num_transfers", 0),
+      key="sel_num_transfers",
+  )
+
   for i in range(num_tx):
-    st.markdown(f"#### חילוף #{i+1}")
-    c_out, c_in = st.columns(2)
+    st.markdown(f"--- \n#### חילוף #{i+1}")
+    c_out, c_rec, c_in = st.columns([1.1, 1.3, 1.2])
+
     with c_out:
-      st.selectbox(
-          f"שחקן שיצא מהקבוצה (OUT #{i+1}):",
+      sel_out_player = st.selectbox(
+          f"🔴 שחקן שיצא (OUT #{i+1}):",
           ["ללא שינוי"] + base_squad_names,
           key=f"transfer_out_{i}",
       )
+      if sel_out_player != "ללא שינוי":
+        out_pid = next(
+            pid
+            for pid in base_squad_ids
+            if f"{all_players[pid]['name']} ({all_players[pid]['team']}) -"
+            f" £{all_players[pid]['cost']}m"
+            == sel_out_player
+        )
+        out_p = all_players[out_pid]
+        max_budget_for_this = out_p["cost"] + bank_balance
+        st.markdown(
+            f"""
+            <div style="background:#1e1418; border-right:3px solid #ef4444; border-radius:6px; padding:8px; font-size:12px; margin-top:8px;">
+                <b>עמדה:</b> {out_p['pos']} | <b>שווי:</b> £{out_p['cost']}m<br>
+                <b>תקציב מקסימלי לרכש:</b> <span class="ltr-box" style="color:#38bdf8; font-weight:bold;">£{max_budget_for_this:.1f}m</span><br>
+                <b>משחק קרוב:</b> {out_p['next_match']} (FDR {out_p['next_fdr']})
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with c_rec:
+      if sel_out_player == "ללא שינוי":
+        st.info("👈 בחר שחקן יוצא כדי לראות כאן המלצות רכש (Recommended IN).")
+      else:
+        out_pid = next(
+            pid
+            for pid in base_squad_ids
+            if f"{all_players[pid]['name']} ({all_players[pid]['team']}) -"
+            f" £{all_players[pid]['cost']}m"
+            == sel_out_player
+        )
+        out_p = all_players[out_pid]
+        max_budget_for_this = out_p["cost"] + bank_balance
+
+        pos_candidates = [
+            p
+            for p in all_players.values()
+            if p["pos_code"] == out_p["pos_code"]
+            and p["id"] not in base_squad_ids
+            and p["status"] == "a"
+            and p["cost"] <= max_budget_for_this
+        ]
+        top_recs = sorted(
+            pos_candidates, key=lambda x: x["score"], reverse=True
+        )[:3]
+
+        st.markdown(
+            "<b>🌟 שחקנים מומלצים להחלפה זו (Recommended):</b>",
+            unsafe_allow_html=True,
+        )
+        if top_recs:
+          for rank_idx, rp in enumerate(top_recs, 1):
+            delta_val = rp["score"] - out_p["score"]
+            st.markdown(
+                f"""
+                <div class="rec-pill">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:bold; font-size:12px; color:#fff;">
+                            #{rank_idx} {rp['name']} <span style="font-size:10px; color:#94a3b8;">({rp['team']})</span>
+                        </span>
+                        <span class="ltr-box" style="font-size:11px; font-weight:bold; color:#38bdf8;">£{rp['cost']}m</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1; margin-top:3px;">
+                        <span>משחק: <b>{rp['next_match']}</b> | נק׳ צפויות: <b>{rp['xp']}</b></span>
+                        <span style="color:#10b981; font-weight:bold;">Δ+{delta_val:.1f}</span>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+          st.warning("לא נמצאו מועמדים מתאימים בתקציב זה.")
+
     with c_in:
-      st.selectbox(
-          f"שחקן שנכנס לקבוצה (IN #{i+1}):",
-          ["בחר שחקן..."] + player_options,
-          key=f"transfer_in_{i}",
-      )
+      if sel_out_player != "ללא שינוי":
+        out_pid = next(
+            pid
+            for pid in base_squad_ids
+            if f"{all_players[pid]['name']} ({all_players[pid]['team']}) -"
+            f" £{all_players[pid]['cost']}m"
+            == sel_out_player
+        )
+        out_p = all_players[out_pid]
+
+        search_query = st.text_input(
+            f"🔍 חיפוש (עמדת {out_p['pos']}):",
+            key=f"search_{i}",
+            placeholder="הקלד שם או קבוצה...",
+        ).strip()
+
+        all_pos_players = [
+            p
+            for p in all_players.values()
+            if p["pos_code"] == out_p["pos_code"]
+            and p["id"] not in base_squad_ids
+            and p["status"] == "a"
+        ]
+
+        if search_query:
+          all_pos_players = [
+              p
+              for p in all_pos_players
+              if search_query.lower() in p["name"].lower()
+              or search_query.lower() in p["team"].lower()
+          ]
+
+        all_pos_players = sorted(
+            all_pos_players, key=lambda x: x["score"], reverse=True
+        )
+        candidate_options = [
+            f"{p['name']} ({p['team']}) - £{p['cost']}m"
+            for p in all_pos_players
+        ]
+
+        st.selectbox(
+            f"🟢 שחקן שיכנס (IN #{i+1}):",
+            ["בחר שחקן..."] + candidate_options,
+            key=f"transfer_in_{i}",
+        )
+      else:
+        st.write("")
 
   if transfers_applied:
     st.success(
-        f"✅ הוחלו {len(transfers_applied)} חילופים בהצלחה! יתרת הבנק עודכנה ל-"
-        f" £{bank_balance:.1f}m, וכל הטאבים באתר מוצגים לפי הסגל המעודכן."
+        f"✅ הוחלו {len(transfers_applied)} חילופים! יתרת הבנק עודכנה ל-"
+        f" £{bank_balance:.1f}m, וכל ההרכב בכל הטאבים מוצג לפי השינוי."
     )
-  elif num_tx > 0:
-    st.info("בחר שחקן יוצא ושחקן נכנס כדי להחיל את השינוי על הסגל.")
 
-# --- טאב 3: מדד עוצמה ותחזית נקודות ---
+# --- טאב 3: מדד עוצמה ריאלי + הצגת חסרונות הסגל ---
 with tab_projection:
-  st.subheader(f"📊 ניתוח עומק: תחזית נקודות ועוצמת סגל (GW {next_gw})")
-  st.caption(
-      "מודל סטטיסטי המחשב את תוחלת הנקודות של כל שחקן בהרכב לפי עמדה, סיכויי"
-      " רשת נקייה, xGI ודרגת קושי:"
-  )
+  st.subheader(f"📊 ניתוח עומק: עוצמת סגל ריאלית וחסרונות (GW {next_gw})")
 
   c_rate1, c_rate2 = st.columns([1, 2])
   with c_rate1:
     st.markdown(
         f"""
         <div style="background:#111a28; border:1px solid #1e2e46; border-radius:12px; padding:16px; text-align:center;">
-            <div style="color:#94a3b8; font-size:13px;">ציון עוצמת הסגל שלך</div>
+            <div style="color:#94a3b8; font-size:13px;">ציון עוצמת סגל משוקלל</div>
             <div style="font-size:36px; font-weight:bold; color:{rating_color}; margin:8px 0;">{squad_rating} <span style="font-size:16px; color:#64748b;">/ 100</span></div>
             <div style="font-size:12px; font-weight:bold; color:{rating_color};">{rating_status}</div>
         </div>
@@ -571,6 +774,28 @@ with tab_projection:
         """,
         unsafe_allow_html=True,
     )
+
+  st.write("")
+
+  # בלוק חסרונות הסגל המודגש
+  st.markdown(
+      f"#### ⚠️ חסרונות ונקודות תורפה בסגל שמשכו את הציון למטה"
+      f" ({len(squad_flaws)})"
+  )
+  st.caption("הגורמים המרכזיים שמגבילים את הציון שלך ומייצרים סיכון נקודות:")
+
+  if squad_flaws:
+    for f in squad_flaws:
+      st.markdown(
+          f"""
+            <div class="flaw-card">
+                <b>[{f['type']}]:</b> {f['text']}
+            </div>
+            """,
+          unsafe_allow_html=True,
+      )
+  else:
+    st.success("לא זוהו חסרונות משמעותיים בסגל הנוכחי! סגל מאוזן ומושלם.")
 
   st.write("")
   st.markdown("#### 📋 פירוט נקודות צפויות לפי שחקני ההרכב הפותח")
