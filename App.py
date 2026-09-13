@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS: הדגשת פציעות, סבירות פתיחה והתאמת RTL ---
+# עיצוב מותאם עברית (RTL), הדגשת פציעות ומניעת צפיפות
 st.markdown("""
 <style>
 .main {
@@ -54,12 +54,10 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
     text-align: center;
     width: 88px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-    transition: transform 0.15s ease-in-out;
 }
 .cap-border { border: 2px solid #facc15 !important; }
 .bench-card { background: rgba(30, 41, 59, 0.7); border: 1px dashed #64748b; }
 
-/* סימוני פציעות וספק */
 .card-injured {
     border: 2px solid #ef4444 !important;
     background: rgba(69, 10, 10, 0.95) !important;
@@ -136,7 +134,7 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
 </style>
 """, unsafe_allow_html=True)
 
-# 1. טעינת נתוני ליגה, כשירות וסבירות פתיחה
+# 1. טעינת נתוני ליגה ומודל קבלת החלטות
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -184,7 +182,6 @@ def fetch_league_data():
         cost = el["now_cost"] / 10
         threat = float(el.get("threat", 0.0))
 
-        # חישוב כשירות רפואית מדויקת (תיקון באג שחקנים פצועים ללא ערך chance מפורש)
         status = el.get("status", "a")
         chance_raw = el.get("chance_of_playing_next_round")
         if chance_raw is not None:
@@ -196,7 +193,6 @@ def fetch_league_data():
         else:
             chance = 100
 
-        # חישוב סבירות לפתוח בהרכב באחוזים (%): מעמד טקטי + כשירות רפואית
         mins_per_gw = mins / max(1, (next_gw - 1))
         if mins_per_gw >= 75:
             tactical_rate = 95
@@ -294,9 +290,9 @@ def fetch_league_data():
 
 all_players, next_gw = fetch_league_data()
 
-# 2. משיכת נתוני הקבוצה
 team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")[span_4](start_span)[span_4](end_span)
 
+# 2. משיכת נתוני הקבוצה מה-API
 @st.cache_data(ttl=300)
 def fetch_user_team(t_id, gw):
     try:
@@ -328,7 +324,6 @@ if "user_squad" not in st.session_state or st.session_state.get("synced_team_id"
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
 
-# בניית רשימות שחקני הרכב וספסל
 starters = [][span_20](start_span)[span_20](end_span)
 bench = [][span_21](start_span)[span_21](end_span)
 for p in st.session_state.user_squad:
@@ -360,7 +355,7 @@ formation_is_valid = ([span_33](start_span)[span_33](end_span)
 
 starting_xp_total = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
 
-# 4. מודל כיול ציון סגל ריאליסטי (72–82) עם פירוט חסרונות מדויק
+# 4. כיול ציון סגל ריאליסטי (72–82) וניתוח חסרונות שקוף
 benchmark_xp = 60.0
 base_score = (starting_xp_total / benchmark_xp) * 84.0
 
@@ -451,7 +446,7 @@ else:
     rating_status = "🔴 סגל במצב חירום (דורש ריענון מיידי)"
     rating_color = "#ef4444"
 
-# 5. מדדים עליונים
+# 5. הצגת מדדים עליונים
 st.title(f"⚽ FPL Command Center | {my_team_name}")
 st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)[span_39](start_span)[span_39](end_span)
 
@@ -464,7 +459,6 @@ m4.markdown(f'<div class="metric-box"><div style="color:#a855f7;font-size:12px;m
 
 st.write("")
 
-# טאבים ראשיים
 tab_squad, tab_manual, tab_projection, tab_targets, tab_transfer, tab_health = st.tabs([
     "🟢 הסגל על המגרש",
     "🔄 עדכון חילופים מהיר",
@@ -474,12 +468,10 @@ tab_squad, tab_manual, tab_projection, tab_targets, tab_transfer, tab_health = s
     "🚦 רמזור בריאות הסגל",
 ])
 
-# כרטיס שחקן עם צביעת פציעות וסבירות פתיחה
 def build_card(p, is_bench=False):
     cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")[span_40](start_span)[span_40](end_span)
     bench_class = "bench-card" if is_bench else "[span_41](start_span)"[span_41](end_span)
 
-    # סיווג כשירות: אדום (פצוע/מושבת), צהוב (בספק), ירוק (כשיר)
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-injured"
         status_pill = f'<div class="prob-pill pill-red">🔴 פצוע {p["start_prob"]}%</div>'
@@ -545,7 +537,7 @@ with tab_squad:
                 st.success("החילוף בוצע בהצלחה!")
                 st.rerun()
 
-# טאב 2: עדכון חילופים מהיר
+# טאב 2: עדכון חילופים מהיר ומרווח
 with tab_manual:
     st.subheader("🔄 עדכון חילוף בשוק (ממוין לפי נקודות ומסונן עמדה)")
     all_current = starters + bench
