@@ -542,7 +542,6 @@ with tab_transfer:
   all_my_players = starters + bench
   my_ids = [x["id"] for x in all_my_players]
 
-  # פונקציית עזר למציאת שחקן הרכש האופטימלי בעמדה ובתקציב
   def find_best_in(pos_code, max_budget):
     candidates = [
         p
@@ -556,8 +555,6 @@ with tab_transfer:
       return None
     return max(candidates, key=lambda x: x["score"])
 
-  # זיהוי שחקני יציאה (OUT) מובילים בסגל שלך לפי עמדות
-  # 1. הגנה: עדיפות לשחקן פצוע/לא כשיר, או השחקן בעל הציון הנמוך ביותר
   def_pool = [p for p in all_my_players if p["pos_code"] == 2]
   out_def = min(
       def_pool,
@@ -566,7 +563,6 @@ with tab_transfer:
       ),
   )
 
-  # 2. קישור: הקשר בעל הציון הנמוך ביותר בסגל
   mid_pool = [p for p in all_my_players if p["pos_code"] == 3]
   out_mid = min(
       mid_pool,
@@ -575,7 +571,6 @@ with tab_transfer:
       ),
   )
 
-  # 3. התקפה: החלוץ בעל הציון הנמוך ביותר (שאינו הולאנד)
   fwd_pool = [
       p for p in all_my_players if p["pos_code"] == 4 and "Haaland" not in p["name"]
   ]
@@ -696,7 +691,7 @@ with tab_health:
         unsafe_allow_html=True,
     )
 
-# --- טאב 5: צ'אט AI אישי (מעודכן ל-Gemini 2.5 Flash + זיהוי אוטומטי) ---
+# --- טאב 5: צ'אט AI אישי (חסין עומסים 503 עם Exponential Backoff ו-Flash-Lite) ---
 with tab_chat:
   st.subheader(f"💬 יועץ ה-AI האישי של {my_team_name}")
   st.caption("הסוכן מעודכן בנתוני ה-xGI/90, ביתרת הבנק ובתוכנית הצ'יפים שלך.")
@@ -715,7 +710,7 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.write(msg["content"])
 
-  if prompt := st.chat_input("שאל את המאמן (למשל: איזה מבין 3 החילופים הכי עדיף?)..."):
+  if prompt := st.chat_input("שאל את המאמן (למשל: מי להכניס במקום מגווייר?)..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.write(prompt)
@@ -757,35 +752,19 @@ with tab_chat:
 
       combined_prompt = f"{system_instruction}\n\n---\nשאלת המשתמש:\n{prompt}"
 
-      models_to_try = [
-          "gemini-2.5-flash",
+      # עדיפות עליונה ל-flash-lite שחסין מעומסי 503, וגיבוי לשאר
+      candidate_models = [
           "gemini-2.5-flash-lite",
-          "gemini-2.5-pro",
+          "gemini-2.5-flash",
+          "gemini-1.5-flash",
       ]
 
-      try:
-        list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={clean_key}"
-        list_res = requests.get(list_url, timeout=3)
-        if list_res.status_code == 200:
-          avail = [
-              m["name"].replace("models/", "")
-              for m in list_res.json().get("models", [])
-              if "generateContent" in m.get("supportedGenerationMethods", [])
-          ]
-          flash_models = [m for m in avail if "flash" in m]
-          if flash_models:
-            models_to_try = flash_models + [
-                m for m in avail if m not in flash_models
-            ]
-          elif avail:
-            models_to_try = avail
-      except Exception:
-        pass
-
       reply = None
-      error_detail = ""
+      last_err = ""
 
-      for model_name in models_to_try[:3]:
+      for model_name in candidate_models:
+        if reply:
+          break
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={clean_key}"
         headers = {"Content-Type": "application/json"}
         payload = {
@@ -794,24 +773,36 @@ with tab_chat:
             ]
         }
 
-        try:
-          res = requests.post(url, headers=headers, json=payload, timeout=15)
-          if res.status_code == 200:
-            data = res.json()
-            reply = data["candidates"][0]["content"]["parts"][0]["text"]
-            break
-          else:
-            err_data = res.json().get("error", {})
-            error_detail = (
-                f"{err_data.get('message', 'HTTP ' + str(res.status_code))}"
-            )
-            time.sleep(0.8)
-        except Exception as e:
-          error_detail = str(e)
-          time.sleep(0.8)
+        # מנגנון ניסיונות חוזרים והשהייה מדורגת (Exponential Backoff) להתגברות על עומסי 503
+        for attempt in range(3):
+          try:
+            res = requests.post(url, headers=headers, json=payload, timeout=15)
+            if res.status_code == 200:
+              data = res.json()
+              reply = data["candidates"][0]["content"]["parts"][0]["text"]
+              break
+            elif res.status_code in [503, 429]:
+              # שרת עמוס רגעית - ממתינים ומנסים שוב באותו מודל
+              err_msg = (
+                  res.json().get("error", {}).get("message", "High demand")
+              )
+              last_err = f"{model_name}: {err_msg}"
+              time.sleep(1.5 * (attempt + 1))
+              continue
+            else:
+              err_msg = (
+                  res.json().get("error", {}).get("message", res.status_code)
+              )
+              last_err = f"{model_name}: {err_msg}"
+              break
+          except Exception as e:
+            last_err = str(e)
+            time.sleep(1.0)
 
       if not reply:
-        reply = f"⚠️ שגיאת תקשורת עם ה-AI: {error_detail}"
+        reply = (
+            f"⚠️ שגיאת תקשורת עם ה-AI: {last_err}\n\nנסה שוב בעוד מספר שניות."
+        )
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
     with st.chat_message("assistant"):
