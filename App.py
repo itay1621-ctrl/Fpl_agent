@@ -11,7 +11,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS: RTL מלא, התאמת BiDi וכרטיסי חסרונות בולטים ---
+# --- עיצוב CSS: הדגשת פציעות, סבירות פתיחה והתאמת RTL ---
 st.markdown("""
 <style>
 .main {
@@ -54,9 +54,35 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
     text-align: center;
     width: 88px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease-in-out;
 }
 .cap-border { border: 2px solid #facc15 !important; }
 .bench-card { background: rgba(30, 41, 59, 0.7); border: 1px dashed #64748b; }
+
+/* סימוני פציעות וספק */
+.card-injured {
+    border: 2px solid #ef4444 !important;
+    background: rgba(69, 10, 10, 0.95) !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important;
+}
+.card-doubt {
+    border: 2px solid #f59e0b !important;
+    background: rgba(69, 45, 10, 0.95) !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important;
+}
+
+.prob-pill {
+    font-size: 8.5px;
+    font-weight: bold;
+    padding: 1px 4px;
+    border-radius: 4px;
+    margin: 2px auto;
+    width: fit-content;
+}
+.pill-red { background: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
+.pill-yellow { background: #451a03; color: #fde68a; border: 1px solid #d97706; }
+.pill-green { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+
 .p-name { font-weight: bold; font-size: 11px; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-team { font-size: 9px; color: #94a3b8; margin: 1px 0; }
 .p-fxt { font-size: 9px; font-weight: bold; padding: 1px 4px; border-radius: 3px; display: inline-block; }
@@ -110,7 +136,7 @@ div[data-testid="stMarkdownContainer"] p { direction: rtl; text-align: right; }
 </style>
 """, unsafe_allow_html=True)
 
-# 1. טעינת נתוני הליגה וחישוב מודל עילית (xGI/90 ו-Weighted FDR)
+# 1. טעינת נתוני ליגה, כשירות וסבירות פתיחה
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -158,6 +184,35 @@ def fetch_league_data():
         cost = el["now_cost"] / 10
         threat = float(el.get("threat", 0.0))
 
+        # חישוב כשירות רפואית מדויקת (תיקון באג שחקנים פצועים ללא ערך chance מפורש)
+        status = el.get("status", "a")
+        chance_raw = el.get("chance_of_playing_next_round")
+        if chance_raw is not None:
+            chance = int(chance_raw)
+        elif status in ["i", "s", "u"]:
+            chance = 0
+        elif status == "d":
+            chance = 50
+        else:
+            chance = 100
+
+        # חישוב סבירות לפתוח בהרכב באחוזים (%): מעמד טקטי + כשירות רפואית
+        mins_per_gw = mins / max(1, (next_gw - 1))
+        if mins_per_gw >= 75:
+            tactical_rate = 95
+        elif mins_per_gw >= 55:
+            tactical_rate = 85
+        elif mins_per_gw >= 35:
+            tactical_rate = 65
+        elif mins_per_gw > 0:
+            tactical_rate = 40
+        else:
+            tactical_rate = 20
+
+        start_prob = int(round(tactical_rate * (chance / 100.0)))
+        if chance == 0:
+            start_prob = 0
+
         xgi_per_90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
 
         tag_status = None
@@ -170,9 +225,7 @@ def fetch_league_data():
         else:
             buy_low_bonus = 0.0
 
-        mins_per_gw = mins / max(1, (next_gw - 1))
         nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
-
         score = ((xgi_per_90 * 3.2) + (form * 1.3) + (weighted_fdr * 1.8) + (threat * 0.015) + buy_low_bonus)
         if el["element_type"] in [1, 2]:
             if team_short in elite_defenses:
@@ -185,7 +238,7 @@ def fetch_league_data():
 
         score *= nailed_mult
 
-        base_appearance = 2.0 if el["status"] == "a" else 0.5
+        base_appearance = 2.0 if chance >= 75 else (1.0 if chance >= 25 else 0.0)
         next_match_fdr = fdr_list[0] if fdr_list else 3
         cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_match_fdr, 0.22)
 
@@ -198,7 +251,9 @@ def fetch_league_data():
 
         if form >= 5.0:
             predicted_xp += 0.6
-        predicted_xp = round(max(1.0, predicted_xp), 1)
+        if chance < 100:
+            predicted_xp *= (chance / 100.0)
+        predicted_xp = round(max(0.0, predicted_xp), 1)
 
         if tag_status == "BUY_LOW":
             reason = "הזדמנות קנייה בשפל: מייצר מצבי כיבוש ברצף אך טרם תוגמל במספרים בפועל."
@@ -226,8 +281,9 @@ def fetch_league_data():
             "xp": predicted_xp,
             "tag": tag_status,
             "reason": reason,
-            "status": el["status"],
-            "chance": el["chance_of_playing_next_round"] if el["chance_of_playing_next_round"] is not None else 100,
+            "status": status,
+            "chance": chance,
+            "start_prob": start_prob,
             "next_match": upcoming[0] if upcoming else "—",
             "next_fdr": next_match_fdr,
             "avg_fdr": round(avg_fdr, 2),
@@ -239,31 +295,31 @@ def fetch_league_data():
 all_players, next_gw = fetch_league_data()
 
 # 2. משיכת נתוני הקבוצה
-team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
+team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")[span_4](start_span)[span_4](end_span)
 
 @st.cache_data(ttl=300)
 def fetch_user_team(t_id, gw):
     try:
-        last_gw = max(1, gw - 1)
-        base_url = "https://fantasy.premierleague.com/api/"
-        picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw}/picks/").json()
-        entry_res = requests.get(f"{base_url}entry/{t_id}/").json()
+        last_gw = max(1, gw - 1)[span_5](start_span)[span_5](end_span)
+        base_url = "https://fantasy.premierleague.com/api/[span_6](start_span)"[span_6](end_span)
+        picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw}/picks/").json()[span_7](start_span)[span_7](end_span)
+        entry_res = requests.get(f"{base_url}entry/{t_id}/").json()[span_8](start_span)[span_8](end_span)
 
-        if picks_res.get("active_chip") == "free_hit" and last_gw > 1:
-            picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw - 1}/picks/").json()
+        if picks_res.get("active_chip") == "free_hit" and last_gw > 1:[span_9](start_span)[span_9](end_span)
+            picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw - 1}/picks/").json()[span_10](start_span)[span_10](end_span)
 
-        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10
-        picks = picks_res.get("picks", [])
-        team_name = entry_res.get("name", "Itay7900")
-        rank = entry_res.get("summary_overall_rank", "—")
-        return picks, bank, team_name, rank
+        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10[span_11](start_span)[span_11](end_span)
+        picks = picks_res.get("picks", [])[span_12](start_span)[span_12](end_span)
+        team_name = entry_res.get("name", "Itay7900")[span_13](start_span)[span_13](end_span)
+        rank = entry_res.get("summary_overall_rank", "—")[span_14](start_span)[span_14](end_span)
+        return picks, bank, team_name, rank[span_15](start_span)[span_15](end_span)
     except Exception:
-        return None, 0.0, None, None
+        return None, 0.0, None, None[span_16](start_span)[span_16](end_span)
 
-raw_picks, initial_bank, my_team_name, my_rank = fetch_user_team(team_id, next_gw)
+raw_picks, initial_bank, my_team_name, my_rank = fetch_user_team(team_id, next_gw)[span_17](start_span)[span_17](end_span)
 if not raw_picks:
-    st.warning("לא ניתן למשוך את נתוני הקבוצה. אנא ודא שמספר הקבוצה תקין.")
-    st.stop()
+    st.warning("לא ניתן למשוך את נתוני הקבוצה. אנא ודא שמספר הקבוצה תקין.")[span_18](start_span)[span_18](end_span)
+    st.stop()[span_19](start_span)[span_19](end_span)
 
 # 3. ניהול סגל גלובלי ב-Session State
 if "user_squad" not in st.session_state or st.session_state.get("synced_team_id") != team_id:
@@ -273,46 +329,44 @@ if "user_squad" not in st.session_state or st.session_state.get("synced_team_id"
     st.session_state.transfers_log = []
 
 # בניית רשימות שחקני הרכב וספסל
-starters = []
-bench = []
+starters = [][span_20](start_span)[span_20](end_span)
+bench = [][span_21](start_span)[span_21](end_span)
 for p in st.session_state.user_squad:
-    pid = p["element"]
-    p_info = all_players.get(pid)
+    pid = p["element"][span_22](start_span)[span_22](end_span)
+    p_info = all_players.get(pid)[span_23](start_span)[span_23](end_span)
     if p_info:
         item = {
             **p_info,
-            "is_cap": p.get("is_captain", False),
-            "is_vc": p.get("is_vice_captain", False),
-            "position": p["position"],
+            "is_cap": p.get("is_captain", False),[span_24](start_span)[span_24](end_span)
+            "is_vc": p.get("is_vice_captain", False),[span_25](start_span)[span_25](end_span)
+            "position": p["position"],[span_26](start_span)[span_26](end_span)
         }
-        if p["position"] <= 11:
-            starters.append(item)
+        if p["position"] <= 11:[span_27](start_span)[span_27](end_span)
+            starters.append(item)[span_28](start_span)[span_28](end_span)
         else:
-            bench.append(item)
+            bench.append(item)[span_29](start_span)[span_29](end_span)
 
-pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}
-for p in starters:
-    pos_counts[p["pos_code"]] += 1
+pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}[span_30](start_span)[span_30](end_span)
+for p in starters:[span_31](start_span)[span_31](end_span)
+    pos_counts[p["pos_code"]] += 1[span_32](start_span)[span_32](end_span)
 
-formation_is_valid = (
-    pos_counts[1] == 1
-    and (3 <= pos_counts[2] <= 5)
-    and (2 <= pos_counts[3] <= 5)
-    and (1 <= pos_counts[4] <= 3)
-    and len(starters) == 11
+formation_is_valid = ([span_33](start_span)[span_33](end_span)
+    pos_counts[1] == 1[span_34](start_span)[span_34](end_span)
+    and (3 <= pos_counts[2] <= 5)[span_35](start_span)[span_35](end_span)
+    and (2 <= pos_counts[3] <= 5)[span_36](start_span)[span_36](end_span)
+    and (1 <= pos_counts[4] <= 3)[span_37](start_span)[span_37](end_span)
+    and len(starters) == 11[span_38](start_span)[span_38](end_span)
 )
 
 starting_xp_total = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
 
-# 4. מודל כיול ציון סגל ריאליסטי (72–82) עם פירוט חסרונות שקוף
-# נקודת מוצא: סגל אופטימלי מייצר כ-60 xP שמניבים ציון בסיס של 84
+# 4. מודל כיול ציון סגל ריאליסטי (72–82) עם פירוט חסרונות מדויק
 benchmark_xp = 60.0
 base_score = (starting_xp_total / benchmark_xp) * 84.0
 
 squad_flaws = []
 total_penalty = 0.0
 
-# א. בדיקת כשירות ופציעות בהרכב
 for p in starters:
     if p["status"] != "a" or p["chance"] < 100:
         pen = 6.5 if p["chance"] <= 25 else 4.0
@@ -320,10 +374,9 @@ for p in starters:
         squad_flaws.append({
             "type": "סיכון כשירות בהרכב הפותח",
             "penalty": f"-{pen:.1f}",
-            "text": f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך בספק/פצוע ({p['chance']}% סיכוי שיתוף)."
+            "text": f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך בספק/פצוע ({p['chance']}% כשירות רפואית | {p['start_prob']}% סבירות לפתוח)."
         })
 
-# ב. בדיקת ספסל מושבת (מבטל רשת ביטחון לחילוף אוטומטי)
 for bp in bench:
     if bp["status"] != "a" or bp["chance"] < 100:
         pen = 3.0
@@ -331,10 +384,9 @@ for bp in bench:
         squad_flaws.append({
             "type": "ספסל מושבת (ללא גיבוי)",
             "penalty": f"-{pen:.1f}",
-            "text": f"<b>{bp['name']} ({bp['team']})</b> בספסל אינו כשיר במלואו ({bp['chance']}%) - אין רשת ביטחון לחילוף אוטומטי."
+            "text": f"<b>{bp['name']} ({bp['team']})</b> בספסל אינו כשיר ({bp['chance']}%) - אין רשת ביטחון לחילוף אוטומטי במקרה של היעדרות."
         })
 
-# ג. שחקני הגנה מול התקפות צמרת (FDR 4 או 5)
 for p in starters:
     if p["pos_code"] in [1, 2] and p["next_fdr"] >= 4:
         pen = 4.0
@@ -345,7 +397,6 @@ for p in starters:
             "text": f"<b>{p['name']} ({p['pos']})</b> פוגש יריבה קשה ({p['next_match']}, דרגת קושי FDR {p['next_fdr']}) - סיכוי נמוך לרשת נקייה."
         })
 
-# ד. שחקני התקפה מול הגנת ברזל (FDR 5)
 for p in starters:
     if p["pos_code"] in [3, 4] and p["next_fdr"] >= 5:
         pen = 2.5
@@ -356,7 +407,6 @@ for p in starters:
             "text": f"<b>{p['name']} ({p['team']})</b> מתמודד מול הגנת ברזל ({p['next_match']}) - תקרת נקודות מוגבלת."
         })
 
-# ה. כושר ירוד (Form < 2.5) בהרכב
 for p in starters:
     if p["status"] == "a" and p["form"] < 2.5 and p["pos_code"] in [3, 4]:
         pen = 2.0
@@ -367,7 +417,6 @@ for p in starters:
             "text": f"<b>{p['name']}</b> בתקופת בצורת (כושר {p['form']}) ותפוקה דלה במחזורים האחרונים."
         })
 
-# ו. מלכודת שחקן מעל המצופה (Trap)
 for p in starters:
     if p["tag"] == "OVERPERFORMING_TRAP":
         pen = 1.5
@@ -387,7 +436,6 @@ if not formation_is_valid:
         "text": "המערך הנוכחי אינו חוקי לפי חוקי FPL (חובה שוער 1, 3–5 מגנים ולפחות חלוץ 1)."
     })
 
-# ציון סופי מכויל (טווח ריאליסטי ממוצע 72–82)
 squad_rating = int(max(48, min(86, base_score - total_penalty)))
 
 if squad_rating >= 80:
@@ -403,9 +451,9 @@ else:
     rating_status = "🔴 סגל במצב חירום (דורש ריענון מיידי)"
     rating_color = "#ef4444"
 
-# 5. תצוגת מדדים עליונה
+# 5. מדדים עליונים
 st.title(f"⚽ FPL Command Center | {my_team_name}")
-st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)
+st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)[span_39](start_span)[span_39](end_span)
 
 rank_disp = f"{my_rank:,}" if isinstance(my_rank, int) else (str(my_rank) if my_rank else "—")
 m1, m2, m3, m4 = st.columns(4)
@@ -426,23 +474,39 @@ tab_squad, tab_manual, tab_projection, tab_targets, tab_transfer, tab_health = s
     "🚦 רמזור בריאות הסגל",
 ])
 
+# כרטיס שחקן עם צביעת פציעות וסבירות פתיחה
 def build_card(p, is_bench=False):
-    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
-    cap_class = "cap-border" if p.get("is_cap") else ""
-    bench_class = "bench-card" if is_bench else ""
+    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")[span_40](start_span)[span_40](end_span)
+    bench_class = "bench-card" if is_bench else "[span_41](start_span)"[span_41](end_span)
+
+    # סיווג כשירות: אדום (פצוע/מושבת), צהוב (בספק), ירוק (כשיר)
+    if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
+        status_class = "card-injured"
+        status_pill = f'<div class="prob-pill pill-red">🔴 פצוע {p["start_prob"]}%</div>'
+    elif p["chance"] <= 75 or p["status"] == "d":
+        status_class = "card-doubt"
+        status_pill = f'<div class="prob-pill pill-yellow">🟡 בספק {p["start_prob"]}%</div>'
+    else:
+        status_class = "cap-border" if p.get("is_cap") else ""
+        status_pill = f'<div class="prob-pill pill-green">🟢 {p["start_prob"]}% פותח</div>'
+
+    if p.get("is_cap") and p["chance"] > 75:[span_42](start_span)[span_42](end_span)
+        status_class = "cap-border"
+
     return (
-        f'<div class="p-card {cap_class} {bench_class}">'
+        f'<div class="p-card {status_class} {bench_class}">'
         f'<div class="p-name">{cap_badge}{p["name"]}</div>'
         f'<div class="p-team"><span class="ltr-box">{p["team"]} | £{p["cost"]}m</span></div>'
         f'<div class="p-fxt fdr-{p["next_fdr"]}"><span class="ltr-box">{p["next_match"]}</span></div>'
-        f'<div style="font-size:9px;color:#38bdf8;margin-top:2px;">xP: {p["xp"]}</div>'
+        f'{status_pill}'
+        f'<div style="font-size:9px;color:#38bdf8;margin-top:1px;">xP: {p["xp"]}</div>'
         f'</div>'
     )
 
-# טאב 1: מגרש וחילופי הרכב-ספסל
+# טאב 1: מגרש חי וחילופי הרכב-ספסל
 with tab_squad:
     st.subheader(f"📋 ההרכב הפותח למחזור {next_gw}")
-    st.caption(f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | תחזית: **{starting_xp_total:.1f}** נקודות צפויות")
+    st.caption(f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | תחזית: **{starting_xp_total:.1f}** נקודות צפויות [אדום = פצוע | צהוב = בספק]")
 
     fwd_h = "".join(build_card(p) for p in starters if p["pos_code"] == 4)
     mid_h = "".join(build_card(p) for p in starters if p["pos_code"] == 3)
@@ -459,8 +523,8 @@ with tab_squad:
     st.markdown("### 🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל")
     st.caption("בחר שחקן להורדה ושחקן להעלאה. הניקוד, תחזית ה-xP וציון הסגל יתעדכנו מיידית:")
 
-    starters_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — xP: {p['xp']}" for p in starters}
-    bench_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — xP: {p['xp']}" for p in bench}
+    starters_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — {p['start_prob']}% פותח" for p in starters}
+    bench_map = {p["id"]: f"[{p['total_points']} נק׳] {p['name']} ({p['pos']} | {p['team']}) — {p['start_prob']}% פותח" for p in bench}
 
     cs1, cs2, cs3 = st.columns([1.5, 1.5, 1])
     with cs1:
@@ -497,7 +561,7 @@ with tab_manual:
     def format_out(pid):
         p = all_players[pid]
         badge = "⚠️ [מומלץ למכור] " if is_risky(p) else ""
-        return f"{badge}[{p['total_points']} נק׳] {p['name']} ({p['team']} - {p['pos']}) | £{p['cost']}m | xP: {p['xp']}"
+        return f"{badge}[{p['total_points']} נק׳] {p['name']} ({p['team']} - {p['pos']}) | {p['start_prob']}% פותח | £{p['cost']}m | xP: {p['xp']}"
 
     c_out, c_in = st.columns(2)
 
@@ -528,7 +592,7 @@ with tab_manual:
         def format_in(pid):
             p = all_players[pid]
             tag = "⭐ [מומלץ] " if pid in top_recs_ids else ""
-            return f"{tag}[{p['total_points']} נק׳] {p['name']} ({p['team']}) | £{p['cost']}m | xP: {p['xp']}"
+            return f"{tag}[{p['total_points']} נק׳] {p['name']} ({p['team']}) | £{p['cost']}m | xP: {p['xp']} | {p['start_prob']}% פותח"
 
         if final_in:
             sel_in = st.selectbox(
@@ -549,13 +613,13 @@ with tab_manual:
         with cp1:
             st.markdown(f"**🔴 שחקן יוצא: {p_out['name']}**")
             st.markdown(f'<div class="stat-pill"><span>סך נקודות העונה:</span><b>{p_out["total_points"]}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="stat-pill"><span>סבירות לפתוח:</span><b>{p_out["start_prob"]}%</b></div>', unsafe_allow_html=True)
             st.markdown(f'<div class="stat-pill"><span>תוחלת נקודות (xP):</span><b>{p_out["xp"]}</b></div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="stat-pill"><span>משחק קרוב:</span><b>{p_out["next_match"]} (FDR {p_out["next_fdr"]})</b></div>', unsafe_allow_html=True)
         with cp2:
             st.markdown(f"**🟢 שחקן נכנס: {p_in['name']}**")
             st.markdown(f'<div class="stat-pill"><span>סך נקודות העונה:</span><b>{p_in["total_points"]}</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="stat-pill"><span>סבירות לפתוח:</span><b>{p_in["start_prob"]}%</b></div>', unsafe_allow_html=True)
             st.markdown(f'<div class="stat-pill"><span>תוחלת נקודות (xP):</span><b>{p_in["xp"]}</b></div>', unsafe_allow_html=True)
-            st.markdown(f'<div class="stat-pill"><span>משחק קרוב:</span><b>{p_in["next_match"]} (FDR {p_in["next_fdr"]})</b></div>', unsafe_allow_html=True)
         with cp3:
             delta_xp = round(p_in["xp"] - p_out["xp"], 1)
             new_bank = round(st.session_state.user_bank + p_out["cost"] - p_in["cost"], 1)
@@ -580,7 +644,7 @@ with tab_manual:
             st.session_state.transfers_log = []
             st.rerun()
 
-# טאב 3: מדד עוצמה וחסרונות הסגל (מפורט עם קנסות)
+# טאב 3: מדד עוצמה וחסרונות הסגל (כולל סבירות פתיחה)
 with tab_projection:
     st.subheader(f"📊 ניתוח עומק: ציון סגל ופירוט החסרונות (GW {next_gw})")
     c_rate1, c_rate2 = st.columns([1, 2])
@@ -608,8 +672,6 @@ with tab_projection:
 
     st.write("")
     st.markdown(f"#### ⚠️ חסרונות הסגל שהורידו נקודות מהציון ({len(squad_flaws)} מוקדים אותרו)")
-    st.caption("להלן הגורמים המדויקים שהורידו נקודות מהציון הכללי ומייצרים סיכון נקודות במחזור:")
-
     if squad_flaws:
         for f in squad_flaws:
             st.markdown(
@@ -626,23 +688,24 @@ with tab_projection:
     st.markdown("#### 📋 פירוט שחקני ההרכב הפותח")
     xp_rows = []
     for p in starters:
-        is_c = " 👑 (קפטן)" if p.get("is_cap") else ""
-        mult = 2 if p.get("is_cap") else 1
+        is_c = " 👑 (קפטן)" if p.get("is_cap") else "[span_43](start_span)"[span_43](end_span)
+        mult = 2 if p.get("is_cap") else 1[span_44](start_span)[span_44](end_span)
         xp_rows.append({
-            "שחקן": f"{p['name']}{is_c}",
-            "עמדה": p["pos"],
-            "קבוצה": p["team"],
+            "שחקן": f"{p['name']}{is_c}",[span_45](start_span)[span_45](end_span)
+            "עמדה": p["pos"],[span_46](start_span)[span_46](end_span)
+            "קבוצה": p["team"],[span_47](start_span)[span_47](end_span)
             "סך נקודות העונה": p["total_points"],
-            "משחק קרוב": p["next_match"],
-            "דרגת קושי": f"FDR {p['next_fdr']}",
+            "סבירות פתיחה": f"{p['start_prob']}%",
+            "משחק קרוב": p["next_match"],[span_48](start_span)[span_48](end_span)
+            "דרגת קושי": f"FDR {p['next_fdr']}",[span_49](start_span)[span_49](end_span)
             "xGI ל-90 דק׳": p["xgi_p90"],
-            "נקודות צפויות": round(p["xp"] * mult, 1),
+            "נקודות צפויות": round(p["xp"] * mult, 1),[span_50](start_span)[span_50](end_span)
         })
     st.dataframe(pd.DataFrame(xp_rows).sort_values(by="סך נקודות העונה", ascending=False), use_container_width=True, hide_index=True)
 
 # טאב 4: רדאר רכש עילית
 with tab_targets:
-    st.subheader(f"🌟 יעדי רכש מובילים למחזור {next_gw} (Top 50K Algorithm)")
+    st.subheader(f"🌟 יעדי רכש מובילים למחזור {next_gw} (Top 50K Algorithm)")[span_51](start_span)[span_51](end_span)
     sub_fwd, sub_mid, sub_def, sub_gk, sub_cap = st.tabs([
         "⚡ חלוצים (FWD)",
         "🎯 קשרים (MID)",
@@ -664,7 +727,7 @@ with tab_targets:
                 f'</div>'
                 f'<div style="margin:6px 0;font-size:12px;color:#cbd5e1;">💡 <b>ניתוח מדעי:</b> {p["reason"]}</div>'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;border-top:1px solid #1e293b;padding-top:4px;">'
-                f'<span>xP קרוב: <b>{p["xp"]}</b> | כושר: <b>{p["form"]}</b></span>'
+                f'<span>סבירות פתיחה: <b>{p["start_prob"]}%</b> | xP: <b>{p["xp"]}</b> | כושר: <b>{p["form"]}</b></span>'
                 f'<div>משחק הבא: <span class="badge fdr-{p["next_fdr"]}"><span class="ltr-box">{p["next_match"]}</span></span></div>'
                 f'</div></div>',
                 unsafe_allow_html=True
@@ -688,8 +751,8 @@ with tab_targets:
                 f'<span style="background:#059669;color:white;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:bold;">🛡️ קפטן מגן (Shield)</span>'
                 f'<h4 style="margin:6px 0;color:#ecfdf5;">[{shield["total_points"]} נק׳] {shield["name"]} <span class="ltr-box">({shield["team"]})</span></h4>'
                 f'<p style="font-size:11px;color:#a7f3d0;margin:0;line-height:1.5;">'
-                f'בעלות: <span class="ltr-box"><b>{shield["selected_by"]}%</b></span> | xP קרוב: <b>{shield["xp"]}</b><br>'
-                f'משחק הבא: <span class="ltr-box"><b>{shield["next_match"]}</b></span><br>💡 {shield["reason"]}</p>'
+                f'בעלות: <span class="ltr-box"><b>{shield["selected_by"]}%</b></span> | סבירות פתיחה: <b>{shield["start_prob"]}%</b><br>'
+                f'משחק הבא: <span class="ltr-box"><b>{shield["next_match"]}</b></span> | xP קרוב: <b>{shield["xp"]}</b><br>💡 {shield["reason"]}</p>'
                 f'</div>',
                 unsafe_allow_html=True
             )
@@ -699,15 +762,15 @@ with tab_targets:
                 f'<span style="background:#d97706;color:white;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:bold;">⚔️ קפטן דיפרנשיאל (Sword)</span>'
                 f'<h4 style="margin:6px 0;color:#fffbeb;">[{sword["total_points"]} נק׳] {sword["name"]} <span class="ltr-box">({sword["team"]})</span></h4>'
                 f'<p style="font-size:11px;color:#fde68a;margin:0;line-height:1.5;">'
-                f'בעלות: <span class="ltr-box"><b>{sword["selected_by"]}% בלבד</b></span> | xP קרוב: <b>{sword["xp"]}</b><br>'
-                f'משחק הבא: <span class="ltr-box"><b>{sword["next_match"]}</b></span><br>💡 {sword["reason"]}</p>'
+                f'בעלות: <span class="ltr-box"><b>{sword["selected_by"]}% בלבד</b></span> | סבירות פתיחה: <b>{sword["start_prob"]}%</b><br>'
+                f'משחק הבא: <span class="ltr-box"><b>{sword["next_match"]}</b></span> | xP קרוב: <b>{sword["xp"]}</b><br>💡 {sword["reason"]}</p>'
                 f'</div>',
                 unsafe_allow_html=True
             )
 
 # טאב 5: הצעות חילוף מותאמות לתקציב
 with tab_transfer:
-    st.subheader("🎯 3 הצעות חילוף אופציונליות המותאמות לתקציב שלך")
+    st.subheader("🎯 3 הצעות חילוף אופציונליות המותאמות לתקציב שלך")[span_52](start_span)[span_52](end_span)
     all_my = starters + bench
     my_ids = [x["id"] for x in all_my]
 
@@ -743,11 +806,11 @@ with tab_transfer:
             f'<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">'
             f'<div style="flex:1;min-width:240px;background:#231114;border-right:4px solid #ef4444;border-radius:8px;padding:10px;">'
             f'<div style="font-size:11px;color:#fca5a5;font-weight:bold;">🔴 יוצא: {p_o["name"]} ({p_o["team"]})</div>'
-            f'<div style="font-size:12px;color:#cbd5e1;">סך נקודות: <b>{p_o["total_points"]}</b> | עלות: £{p_o["cost"]}m | xP: {p_o["xp"]}</div>'
+            f'<div style="font-size:12px;color:#cbd5e1;">סך נקודות: <b>{p_o["total_points"]}</b> | סבירות פתיחה: <b>{p_o["start_prob"]}%</b> | xP: {p_o["xp"]}</div>'
             f'</div>'
             f'<div style="flex:1;min-width:240px;background:#0c2417;border-right:4px solid #10b981;border-radius:8px;padding:10px;">'
             f'<div style="font-size:11px;color:#6ee7b7;font-weight:bold;">🟢 נכנס: {p_i["name"]} ({p_i["team"]})</div>'
-            f'<div style="font-size:12px;color:#cbd5e1;">סך נקודות: <b>{p_i["total_points"]}</b> | עלות: £{p_i["cost"]}m (בנק: <b>£{rem_b:.1f}m</b>) | xP: {p_i["xp"]}</div>'
+            f'<div style="font-size:12px;color:#cbd5e1;">סך נקודות: <b>{p_i["total_points"]}</b> | סבירות פתיחה: <b>{p_i["start_prob"]}%</b> (בנק: <b>£{rem_b:.1f}m</b>) | xP: {p_i["xp"]}</div>'
             f'</div></div>'
             f'<div style="font-size:12px;color:#94a3b8;margin-top:8px;">💡 <b>נימוק:</b> {p_i["reason"]}</div>'
             f'</div>',
@@ -756,17 +819,17 @@ with tab_transfer:
 
 # טאב 6: רמזור בריאות הסגל
 with tab_health:
-    st.subheader("🚦 רמזור בריאות ומוקשי הרכב")
-    reds = [p for p in all_my if p["status"] != "a" or p["chance"] < 100]
+    st.subheader("🚦 רמזור בריאות ומוקשי הרכב")[span_53](start_span)[span_53](end_span)
+    reds = [p for p in all_my if p["status"] != "a" or p["chance"] < 100][span_54](start_span)[span_54](end_span)
     yellows = [p for p in all_my if p["status"] == "a" and p["chance"] == 100 and (p["avg_fdr"] > 2.8 or p["form"] < 2.5)]
 
-    st.markdown(f"#### 🔴 מוקדי חירום בסגל ({len(reds)})")
+    st.markdown(f"#### 🔴 מוקדי חירום בסגל ({len(reds)})")[span_55](start_span)[span_55](end_span)
     if reds:
         for p in reds:
-            st.markdown(f'<div class="health-box health-red"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — סיכוי שיתוף: {p["chance"]}% | לוח: <span class="ltr-box">{p["fixtures"]}</span></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="health-box health-red"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — כשירות רפואית: {p["chance"]}% | סבירות לפתוח: <b>{p["start_prob"]}%</b> | לוח: <span class="ltr-box">{p["fixtures"]}</span></div>', unsafe_allow_html=True)
     else:
-        st.success("אין פציעות או השעיות ידועות בסגל!")
+        st.success("אין פציעות או השעיות ידועות בסגל!")[span_56](start_span)[span_56](end_span)
 
-    st.markdown(f"#### 🟡 תחת מעקב / לוח קשה ({len(yellows)})")
+    st.markdown(f"#### 🟡 תחת מעקב / לוח קשה ({len(yellows)})")[span_57](start_span)[span_57](end_span)
     for p in yellows:
-        st.markdown(f'<div class="health-box health-yellow"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — כושר: {p["form"]} | לוח: <span class="ltr-box">{p["fixtures"]}</span> (FDR ממוצע: {p["avg_fdr"]})</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="health-box health-yellow"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — סבירות פתיחה: <b>{p["start_prob"]}%</b> | כושר: {p["form"]} | לוח: <span class="ltr-box">{p["fixtures"]}</span> (FDR ממוצע: {p["avg_fdr"]})</div>', unsafe_allow_html=True)
