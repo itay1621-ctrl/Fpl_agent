@@ -279,7 +279,7 @@ def fetch_league_data():
 
 all_players, next_gw = fetch_league_data()
 
-# הגדרת מספר קבוצה בסרגל הצד (מינימלי)
+# הגדרת מספר קבוצה
 team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
 
 
@@ -329,7 +329,7 @@ all_player_names = {
     for pid, p in all_players.items()
 }
 
-# --- 3. סנכרון חילופים ידניים מתוך Session State ---
+# --- 3. סנכרון חילופים ידניים מהשוק מתוך Session State ---
 transfers_applied = []
 bank_balance = initial_bank
 my_picks = [dict(p) for p in raw_picks]
@@ -360,17 +360,49 @@ for out_id, in_id in transfers_applied:
       p["element"] = in_id
       break
 
+# --- 4. סנכרון חילופי ספסל <-> הרכב (Substitutions State) ---
+if "bench_swaps" not in st.session_state:
+  st.session_state.bench_swaps = []
+
+# החלת חילופי ספסל שמורים
+for p1_id, p2_id in st.session_state.bench_swaps:
+  p1_obj = next((p for p in my_picks if p["element"] == p1_id), None)
+  p2_obj = next((p for p in my_picks if p["element"] == p2_id), None)
+  if p1_obj and p2_obj:
+    p1_obj["position"], p2_obj["position"] = (
+        p2_obj["position"],
+        p1_obj["position"],
+    )
+
 starters = []
 bench = []
 for p in my_picks:
   pid = p["element"]
   p_info = all_players.get(pid)
   if p_info:
-    item = {**p_info, "is_cap": p["is_captain"], "is_vc": p["is_vice_captain"]}
+    item = {
+        **p_info,
+        "is_cap": p.get("is_captain", False),
+        "is_vc": p.get("is_vice_captain", False),
+        "position": p["position"],
+    }
     if p["position"] <= 11:
       starters.append(item)
     else:
       bench.append(item)
+
+# בדיקת חוקיות מערך
+pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+for p in starters:
+  pos_counts[p["pos_code"]] += 1
+
+formation_is_valid = (
+    pos_counts[1] == 1
+    and (3 <= pos_counts[2] <= 5)
+    and (2 <= pos_counts[3] <= 5)
+    and (1 <= pos_counts[4] <= 3)
+    and len(starters) == 11
+)
 
 # חישוב נקודות צפויות
 starting_xp_total = 0.0
@@ -378,92 +410,89 @@ for p in starters:
   mult = 2 if p.get("is_cap") else 1
   starting_xp_total += p["xp"] * mult
 
-# --- מנוע כיול ציון ריאלי וזיהוי חסרונות הסגל ---
-base_rating = 90.0
+# --- 5. חישוב ציון סגל ריאלי דינמי ורשימת חסרונות ---
+base_rating = 92.0
 squad_flaws = []
 
-# 1. פציעות והשעיות בהרכב
+# א. חסרונות בהרכב הפותח
 for p in starters:
   if p["status"] != "a" or p["chance"] < 100:
-    penalty = 8 if p["chance"] == 0 else 5
-    base_rating -= penalty
+    pen = 8.0 if p["chance"] == 0 else 5.0
+    base_rating -= pen
     squad_flaws.append({
         "type": "פציעה/כשירות בהרכב",
-        "severity": "high",
         "text": (
-            f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך מוגדר עם"
-            f" {p['chance']}% סיכויי כשירות בלבד (סיכון ל-0 נקודות)."
+            f"<b>{p['name']} ({p['team']})</b> פותח בהרכב אך בסיכון כשירות"
+            f" ({p['chance']}%)."
         ),
     })
 
-# 2. פציעות והשבתות בספסל
+# ב. חסרונות בספסל
 for p in bench:
   if p["status"] != "a" or p["chance"] < 100:
-    base_rating -= 4
+    base_rating -= 4.0
     squad_flaws.append({
         "type": "ספסל מושבת",
-        "severity": "medium",
         "text": (
             f"<b>{p['name']} ({p['team']})</b> בספסל פצוע/מושבת ({p['chance']}%),"
-            " מה שמבטל גיבוי אוטומטי במקרה של היעדרות בהרכב."
+            " מה שמבטל גיבוי אוטומטי."
         ),
     })
 
-# 3. משחקים קשים לשחקני הגנה בהרכב (FDR 4-5)
+# ג. קושי משחק הגנתי (FDR 4-5) בהרכב
 for p in starters:
   if p["pos_code"] in [1, 2] and p["next_fdr"] >= 4:
     base_rating -= 4.5
     squad_flaws.append({
         "type": "משחק הגנתי קשה",
-        "severity": "high",
         "text": (
             f"<b>{p['name']} ({p['pos']})</b> פוגש יריבה קשה"
-            f" ({p['next_match']}, FDR {p['next_fdr']}) עם סיכוי נמוך מאוד"
-            " לרשת נקייה (Clean Sheet)."
+            f" ({p['next_match']}, FDR {p['next_fdr']}) - סיכוי נמוך לרשת"
+            " נקייה."
         ),
     })
 
-# 4. שחקני התקפה עם משחקים קשים במיוחד (FDR 5)
+# ד. שחקני התקפה בהרכב מול משחק קשה במיוחד
 for p in starters:
   if p["pos_code"] in [3, 4] and p["next_fdr"] >= 5:
     base_rating -= 3.0
     squad_flaws.append({
         "type": "משחק התקפי קשה",
-        "severity": "medium",
         "text": (
             f"<b>{p['name']} ({p['team']})</b> מתמודד מול הגנת ברזל"
-            f" ({p['next_match']}), מה שמגביל את תקרת הנקודות הצפויה."
+            f" ({p['next_match']}) - תקרת נקודות נמוכה."
         ),
     })
 
-# 5. שחקנים בכושר ירוד (Form < 2.8) בהרכב
+# ה. כושר ירוד (Form < 2.8) בהרכב
 for p in starters:
   if p["status"] == "a" and p["form"] < 2.8 and p["pos_code"] in [3, 4]:
     base_rating -= 2.5
     squad_flaws.append({
         "type": "כושר הבקעה נמוך",
-        "severity": "low",
-        "text": (
-            f"<b>{p['name']}</b> בכושר מדאיג (Form {p['form']}) ותפוקת מעורבות"
-            " שערים נמוכה במחזורים האחרונים."
-        ),
+        "text": f"<b>{p['name']}</b> בכושר ירוד (Form {p['form']}) ותפוקה דלה.",
     })
 
-# 6. מלכודת שחקן שכבש מעל המצופה (Trap)
+# ו. מלכודת שחקן מעל המצופה
 for p in starters:
   if p["tag"] == "OVERPERFORMING_TRAP":
     base_rating -= 2.0
     squad_flaws.append({
         "type": "סכנת דעיכה לממוצע",
-        "severity": "low",
         "text": (
-            f"<b>{p['name']}</b> מעל המצופה סטטיסטית (כבש ללא xGI תומך) - סיכון"
-            " לנפילת תפוקה במחזורים הקרובים."
+            f"<b>{p['name']}</b> כבש מעבר למצבים הממשיים שייצר - סכנת ירידה"
+            " בתפוקה."
         ),
     })
 
-# ציון סופי מכויל
-squad_rating = max(42, min(94, int(base_rating)))
+# בונוסים על שחקנים מצטיינים בהרכב (שמעלים את הציון בחזרה)
+for p in starters:
+  if p["next_fdr"] == 2:
+    base_rating += 1.2
+  if p["xgi_p90"] >= 0.5:
+    base_rating += 1.5
+
+squad_rating = max(45, min(94, int(base_rating)))
 
 if squad_rating >= 83:
   rating_status = "🌟 סגל עילית (Top 50K Ready)"
@@ -495,7 +524,7 @@ rank_display = (
 m1, m2, m3, m4 = st.columns(4)
 m1.markdown(
     '<div class="metric-box"><div style="color:#38bdf8; font-size:12px;'
-    ' margin-bottom:4px;">ציון עוצמת סגל ריאלי</div><div'
+    ' margin-bottom:4px;">ציון עוצמת סגל משוקלל</div><div'
     f' style="font-size:18px; font-weight:bold; color:{rating_color};">{squad_rating}'
     " / 100</div></div>",
     unsafe_allow_html=True,
@@ -554,12 +583,12 @@ def build_card(p, is_bench=False):
   )
 
 
-# --- טאב 1: הסגל על המגרש ---
+# --- טאב 1: הסגל על המגרש + חילופי ספסל והרכב אינטראקטיביים ---
 with tab_squad:
   st.subheader(f"📋 ההרכב הפותח שלך למחזור {next_gw}")
   st.caption(
-      f"ההרכב צפוי להניב **{starting_xp_total:.1f}** נקודות (כולל בונוס קפטן"
-      " כפול):"
+      f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | תחזית:"
+      f" **{starting_xp_total:.1f}** נקודות (כולל בונוס קפטן כפול):"
   )
 
   gk_line = [p for p in starters if p["pos_code"] == 1]
@@ -586,6 +615,75 @@ with tab_squad:
       f' gap:8px;">{bench_h}</div>',
       unsafe_allow_html=True,
   )
+
+  st.write("")
+
+  # פיצ'ר חילוף בין ההרכב לספסל
+  with st.expander("🔄 בצע חילוף בין שחקן הרכב לשחקן ספסל", expanded=True):
+    st.caption(
+        "בחר שחקן הרכב שתרצה להוריד לספסל, ושחקן ספסל שתרצה להעלות ל-11."
+        " הציון ותחזית הנקודות יתעדכנו בהתאם:"
+    )
+
+    starter_options = {
+        f"{p['name']} ({p['pos']} - {p['team']})": p["id"] for p in starters
+    }
+    bench_options = {
+        f"{p['name']} ({p['pos']} - {p['team']})": p["id"] for p in bench
+    }
+
+    col_sub1, col_sub2, col_sub3 = st.columns([1.5, 1.5, 1])
+
+    with col_sub1:
+      sub_out_name = st.selectbox(
+          "שחקן הרכב שיוצא לספסל:", list(starter_options.keys())
+      )
+    with col_sub2:
+      sub_in_name = st.selectbox(
+          "שחקן ספסל שעולה להרכב:", list(bench_options.keys())
+      )
+    with col_sub3:
+      st.write("")
+      st.write("")
+      btn_swap = st.button("בצע חילוף 🔁", use_container_width=True)
+
+    if btn_swap:
+      p_out_id = starter_options[sub_out_name]
+      p_in_id = bench_options[sub_in_name]
+
+      # בדיקת חוקיות מערך לאחר החילוף
+      sim_starters_pos = [p["pos_code"] for p in starters if p["id"] != p_out_id]
+      sim_starters_pos.append(all_players[p_in_id]["pos_code"])
+      sim_counts = {
+          1: sim_starters_pos.count(1),
+          2: sim_starters_pos.count(2),
+          3: sim_starters_pos.count(3),
+          4: sim_starters_pos.count(4),
+      }
+
+      if sim_counts[1] != 1:
+        st.error("לא חוקי: חייב להיות שוער אחד בדיוק בהרכב הפותח.")
+      elif not (3 <= sim_counts[2] <= 5):
+        st.error(
+            "חוק מערך FPL: ההרכב הפותח חייב לכלול בין 3 ל-5 שחקני הגנה."
+            f" (המערך הנסיוני יצר {sim_counts[2]} מגנים)."
+        )
+      elif not (2 <= sim_counts[3] <= 5):
+        st.error("חוק מערך FPL: ההרכב הפותח חייב לכלול בין 2 ל-5 קשרים.")
+      elif not (1 <= sim_counts[4] <= 3):
+        st.error("חוק מערך FPL: ההרכב הפותח חייב לכלול בין 1 ל-3 חלוצים.")
+      else:
+        st.session_state.bench_swaps.append((p_out_id, p_in_id))
+        st.success(
+            f"החילוף בוצע בהצלחה! {all_players[p_in_id]['name']} עלה להרכב במקום"
+            f" {all_players[p_out_id]['name']}."
+        )
+        st.rerun()
+
+    if st.session_state.bench_swaps:
+      if st.button("אפס חילופי ספסל להרכב המקורי ↩️"):
+        st.session_state.bench_swaps = []
+        st.rerun()
 
 # --- טאב 2: עדכון חילופים מהיר + המלצות חכמות בצד ---
 with tab_manual:
