@@ -289,34 +289,34 @@ def fetch_league_data():
 
 all_players, next_gw = fetch_league_data()
 
-team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")[span_6](start_span)[span_6](end_span)
+team_id = st.sidebar.text_input("מספר קבוצה (Team ID):", value="139103")
 
-# 2. משיכת נתוני הקבוצה מה-API עם הזחה תקנית
+# 2. משיכת נתוני הקבוצה מה-API
 @st.cache_data(ttl=300)
 def fetch_user_team(t_id, gw):
     try:
-        last_gw = max(1, gw - 1)[span_7](start_span)[span_7](end_span)
-        base_url = "https://fantasy.premierleague.com/api/[span_8](start_span)"[span_8](end_span)
-        picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw}/picks/").json()[span_9](start_span)[span_9](end_span)
-        entry_res = requests.get(f"{base_url}entry/{t_id}/").json()[span_10](start_span)[span_10](end_span)
+        last_gw = max(1, gw - 1)
+        base_url = "https://fantasy.premierleague.com/api/"
+        picks_res = requests.get(f"{base_url}entry/{t_id}/event/{last_gw}/picks/").json()
+        entry_res = requests.get(f"{base_url}entry/{t_id}/").json()
 
-        is_fh = picks_res.get("active_chip") == "free_hit[span_11](start_span)"[span_11](end_span)
-        if is_fh and last_gw > 1:[span_12](start_span)[span_12](end_span)
-            base_gw = last_gw - 1[span_13](start_span)[span_13](end_span)
-            picks_res = requests.get(f"{base_url}entry/{t_id}/event/{base_gw}/picks/").json()[span_14](start_span)[span_14](end_span)
+        is_fh = picks_res.get("active_chip") == "free_hit"
+        if is_fh and last_gw > 1:
+            base_gw = last_gw - 1
+            picks_res = requests.get(f"{base_url}entry/{t_id}/event/{base_gw}/picks/").json()
 
-        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10[span_15](start_span)[span_15](end_span)
-        picks = picks_res.get("picks", [])[span_16](start_span)[span_16](end_span)
-        team_name = entry_res.get("name", "Itay7900")[span_17](start_span)[span_17](end_span)
-        rank = entry_res.get("summary_overall_rank", "—")[span_18](start_span)[span_18](end_span)
-        return picks, bank, team_name, rank[span_19](start_span)[span_19](end_span)
+        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10
+        picks = picks_res.get("picks", [])
+        team_name = entry_res.get("name", "Itay7900")
+        rank = entry_res.get("summary_overall_rank", "—")
+        return picks, bank, team_name, rank
     except Exception:
-        return None, 0.0, None, None[span_20](start_span)[span_20](end_span)
+        return None, 0.0, None, None
 
-raw_picks, initial_bank, my_team_name, my_rank = fetch_user_team(team_id, next_gw)[span_21](start_span)[span_21](end_span)
+raw_picks, initial_bank, my_team_name, my_rank = fetch_user_team(team_id, next_gw)
 if not raw_picks:
-    st.warning("לא ניתן למשוך את נתוני הקבוצה. אנא ודא שמספר הקבוצה תקין.")[span_22](start_span)[span_22](end_span)
-    st.stop()[span_23](start_span)[span_23](end_span)
+    st.warning("לא ניתן למשוך את נתוני הקבוצה. אנא ודא שמספר הקבוצה תקין.")
+    st.stop()
 
 # 3. ניהול סגל גלובלי ב-Session State
 if "user_squad" not in st.session_state or st.session_state.get("synced_team_id") != team_id:
@@ -325,33 +325,33 @@ if "user_squad" not in st.session_state or st.session_state.get("synced_team_id"
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
 
-starters = [][span_24](start_span)[span_24](end_span)
-bench = [][span_25](start_span)[span_25](end_span)
+starters = []
+bench = []
 for p in st.session_state.user_squad:
-    pid = p["element"][span_26](start_span)[span_26](end_span)
-    p_info = all_players.get(pid)[span_27](start_span)[span_27](end_span)
+    pid = p["element"]
+    p_info = all_players.get(pid)
     if p_info:
         item = {
             **p_info,
-            "is_cap": p.get("is_captain", False),[span_28](start_span)[span_28](end_span)
-            "is_vc": p.get("is_vice_captain", False),[span_29](start_span)[span_29](end_span)
-            "position": p["position"],[span_30](start_span)[span_30](end_span)
+            "is_cap": p.get("is_captain", False),
+            "is_vc": p.get("is_vice_captain", False),
+            "position": p["position"],
         }
-        if p["position"] <= 11:[span_31](start_span)[span_31](end_span)
-            starters.append(item)[span_32](start_span)[span_32](end_span)
+        if p["position"] <= 11:
+            starters.append(item)
         else:
-            bench.append(item)[span_33](start_span)[span_33](end_span)
+            bench.append(item)
 
-pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}[span_34](start_span)[span_34](end_span)
-for p in starters:[span_35](start_span)[span_35](end_span)
-    pos_counts[p["pos_code"]] += 1[span_36](start_span)[span_36](end_span)
+pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}
+for p in starters:
+    pos_counts[p["pos_code"]] += 1
 
-formation_is_valid = ([span_37](start_span)[span_37](end_span)
-    pos_counts[1] == 1[span_38](start_span)[span_38](end_span)
-    and (3 <= pos_counts[2] <= 5)[span_39](start_span)[span_39](end_span)
-    and (2 <= pos_counts[3] <= 5)[span_40](start_span)[span_40](end_span)
-    and (1 <= pos_counts[4] <= 3)[span_41](start_span)[span_41](end_span)
-    and len(starters) == 11[span_42](start_span)[span_42](end_span)
+formation_is_valid = (
+    pos_counts[1] == 1
+    and (3 <= pos_counts[2] <= 5)
+    and (2 <= pos_counts[3] <= 5)
+    and (1 <= pos_counts[4] <= 3)
+    and len(starters) == 11
 )
 
 starting_xp_total = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
@@ -449,7 +449,7 @@ else:
 
 # 5. מדדים עליונים
 st.title(f"⚽ FPL Command Center | {my_team_name}")
-st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)[span_43](start_span)[span_43](end_span)
+st.caption(f'מנוע אנליטי מבוסס xGI לקראת מחזור {next_gw} | סנכרון חי לסגל: <span class="ltr-box"><b>{team_id}</b></span>', unsafe_allow_html=True)
 
 rank_disp = f"{my_rank:,}" if isinstance(my_rank, int) else (str(my_rank) if my_rank else "—")
 m1, m2, m3, m4 = st.columns(4)
@@ -470,8 +470,8 @@ tab_squad, tab_manual, tab_projection, tab_targets, tab_transfer, tab_health = s
 ])
 
 def build_card(p, is_bench=False):
-    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")[span_44](start_span)[span_44](end_span)
-    bench_class = "bench-card" if is_bench else "[span_45](start_span)"[span_45](end_span)
+    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
+    bench_class = "bench-card" if is_bench else ""
 
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-injured"
@@ -483,7 +483,7 @@ def build_card(p, is_bench=False):
         status_class = "cap-border" if p.get("is_cap") else ""
         status_pill = f'<div class="prob-pill pill-green">🟢 {p["start_prob"]}% פותח</div>'
 
-    if p.get("is_cap") and p["chance"] > 75:[span_46](start_span)[span_46](end_span)
+    if p.get("is_cap") and p["chance"] > 75:
         status_class = "cap-border"
 
     return (
@@ -681,24 +681,24 @@ with tab_projection:
     st.markdown("#### 📋 פירוט שחקני ההרכב הפותח")
     xp_rows = []
     for p in starters:
-        is_c = " 👑 (קפטן)" if p.get("is_cap") else "[span_47](start_span)"[span_47](end_span)
-        mult = 2 if p.get("is_cap") else 1[span_48](start_span)[span_48](end_span)
+        is_c = " 👑 (קפטן)" if p.get("is_cap") else ""
+        mult = 2 if p.get("is_cap") else 1
         xp_rows.append({
-            "שחקן": f"{p['name']}{is_c}",[span_49](start_span)[span_49](end_span)
-            "עמדה": p["pos"],[span_50](start_span)[span_50](end_span)
-            "קבוצה": p["team"],[span_51](start_span)[span_51](end_span)
+            "שחקן": f"{p['name']}{is_c}",
+            "עמדה": p["pos"],
+            "קבוצה": p["team"],
             "סך נקודות העונה": p["total_points"],
             "סבירות פתיחה": f"{p['start_prob']}%",
-            "משחק קרוב": p["next_match"],[span_52](start_span)[span_52](end_span)
-            "דרגת קושי": f"FDR {p['next_fdr']}",[span_53](start_span)[span_53](end_span)
+            "משחק קרוב": p["next_match"],
+            "דרגת קושי": f"FDR {p['next_fdr']}",
             "xGI ל-90 דק׳": p["xgi_p90"],
-            "נקודות צפויות": round(p["xp"] * mult, 1),[span_54](start_span)[span_54](end_span)
+            "נקודות צפויות": round(p["xp"] * mult, 1),
         })
     st.dataframe(pd.DataFrame(xp_rows).sort_values(by="סך נקודות העונה", ascending=False), use_container_width=True, hide_index=True)
 
 # טאב 4: רדאר רכש עילית
 with tab_targets:
-    st.subheader(f"🌟 יעדי רכש מובילים למחזור {next_gw} (Top 50K Algorithm)")[span_55](start_span)[span_55](end_span)
+    st.subheader(f"🌟 יעדי רכש מובילים למחזור {next_gw} (Top 50K Algorithm)")
     sub_fwd, sub_mid, sub_def, sub_gk, sub_cap = st.tabs([
         "⚡ חלוצים (FWD)",
         "🎯 קשרים (MID)",
@@ -763,7 +763,7 @@ with tab_targets:
 
 # טאב 5: הצעות חילוף מותאמות לתקציב
 with tab_transfer:
-    st.subheader("🎯 3 הצעות חילוף אופציונליות המותאמות לתקציב שלך")[span_56](start_span)[span_56](end_span)
+    st.subheader("🎯 3 הצעות חילוף אופציונליות המותאמות לתקציב שלך")
     all_my = starters + bench
     my_ids = [x["id"] for x in all_my]
 
@@ -812,17 +812,17 @@ with tab_transfer:
 
 # טאב 6: רמזור בריאות הסגל
 with tab_health:
-    st.subheader("🚦 רמזור בריאות ומוקשי הרכב")[span_57](start_span)[span_57](end_span)
-    reds = [p for p in all_my if p["status"] != "a" or p["chance"] < 100][span_58](start_span)[span_58](end_span)
+    st.subheader("🚦 רמזור בריאות ומוקשי הרכב")
+    reds = [p for p in all_my if p["status"] != "a" or p["chance"] < 100]
     yellows = [p for p in all_my if p["status"] == "a" and p["chance"] == 100 and (p["avg_fdr"] > 2.8 or p["form"] < 2.5)]
 
-    st.markdown(f"#### 🔴 מוקדי חירום בסגל ({len(reds)})")[span_59](start_span)[span_59](end_span)
+    st.markdown(f"#### 🔴 מוקדי חירום בסגל ({len(reds)})")
     if reds:
         for p in reds:
             st.markdown(f'<div class="health-box health-red"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — כשירות רפואית: {p["chance"]}% | סבירות לפתוח: <b>{p["start_prob"]}%</b> | לוח: <span class="ltr-box">{p["fixtures"]}</span></div>', unsafe_allow_html=True)
     else:
-        st.success("אין פציעות או השעיות ידועות בסגל!")[span_60](start_span)[span_60](end_span)
+        st.success("אין פציעות או השעיות ידועות בסגל!")
 
-    st.markdown(f"#### 🟡 תחת מעקב / לוח קשה ({len(yellows)})")[span_61](start_span)[span_61](end_span)
+    st.markdown(f"#### 🟡 תחת מעקב / לוח קשה ({len(yellows)})")
     for p in yellows:
         st.markdown(f'<div class="health-box health-yellow"><b>[{p["total_points"]} נק׳] {p["name"]} <span class="ltr-box">({p["team"]})</span></b> — סבירות פתיחה: <b>{p["start_prob"]}%</b> | כושר: {p["form"]} | לוח: <span class="ltr-box">{p["fixtures"]}</span> (FDR ממוצע: {p["avg_fdr"]})</div>', unsafe_allow_html=True)
