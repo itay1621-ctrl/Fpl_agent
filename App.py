@@ -58,6 +58,14 @@ st.markdown(
 .tier-2 { border-right: 4px solid #38bdf8; }
 .tier-3 { border-right: 4px solid #f59e0b; }
 
+.transfer-scenario-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
 .badge { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-left: 4px; }
 .badge-buylow { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
 .badge-trap { background: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
@@ -366,10 +374,11 @@ m4.markdown(
 
 st.write("")
 
+# טאבים מרכזיים
 tab_squad, tab_targets, tab_transfer, tab_health, tab_chat = st.tabs([
     "🟢 הסגל על המגרש",
     "🌟 רדאר רכש עילית",
-    "🎯 מחשבון ערך חילוף (Δ Score)",
+    "🎯 הצעות חילוף לתקציב שלי (3 אופציות)",
     "🚦 רמזור בריאות הסגל",
     "💬 צ'אט AI אישי",
 ])
@@ -522,79 +531,136 @@ with tab_targets:
           unsafe_allow_html=True,
       )
 
-# --- טאב 3: מחשבון ערך חילוף נטו (Delta Score Optimizer) ---
+# --- טאב 3: הצעות חילוף מותאמות לתקציב הסגל שלך (3 אופציות ממוקדות) ---
 with tab_transfer:
-  st.subheader("🎯 מחשבון ערך חילוף נטו (Δ Score)")
+  st.subheader("🎯 3 הצעות חילוף אופציונליות המותאמות לתקציב שלך")
   st.caption(
-      "המערכת משווה בין החוליה החלשה בסגל ליעד הרכש הטוב ביותר בתקציב,"
-      " ובודקת האם שווה לבצע חילוף או לשמור (Roll Transfer):"
+      f"מחושב בדיוק לפי 15 השחקנים שלך ויתרת הבנק הנוכחית (£{bank_balance:.1f}m)."
+      " כל אפשרות משווה שחקן יוצא מול יעד הרכש הכי איכותי בליגה בעמדתו:"
   )
 
   all_my_players = starters + bench
-  weak_link = min(
-      all_my_players,
+  my_ids = [x["id"] for x in all_my_players]
+
+  # פונקציית עזר למציאת שחקן הרכש האופטימלי בעמדה ובתקציב
+  def find_best_in(pos_code, max_budget):
+    candidates = [
+        p
+        for p in all_players.values()
+        if p["id"] not in my_ids
+        and p["pos_code"] == pos_code
+        and p["cost"] <= max_budget
+        and p["status"] == "a"
+    ]
+    if not candidates:
+      return None
+    return max(candidates, key=lambda x: x["score"])
+
+  # זיהוי שחקני יציאה (OUT) מובילים בסגל שלך לפי עמדות
+  # 1. הגנה: עדיפות לשחקן פצוע/לא כשיר, או השחקן בעל הציון הנמוך ביותר
+  def_pool = [p for p in all_my_players if p["pos_code"] == 2]
+  out_def = min(
+      def_pool,
       key=lambda x: (
           x["score"] if x["status"] == "a" and x["chance"] == 100 else -20
       ),
   )
-  max_budget = weak_link["cost"] + bank_balance
 
-  best_replacement = None
-  highest_score = -1
-  for p in all_players.values():
-    if (
-        p["id"] not in [x["id"] for x in all_my_players]
-        and p["pos_code"] == weak_link["pos_code"]
-        and p["cost"] <= max_budget
-        and p["status"] == "a"
-    ):
-      if p["score"] > highest_score:
-        highest_score = p["score"]
-        best_replacement = p
-
-  delta_score = (
-      (best_replacement["score"] - weak_link["score"])
-      if best_replacement
-      else 0
+  # 2. קישור: הקשר בעל הציון הנמוך ביותר בסגל
+  mid_pool = [p for p in all_my_players if p["pos_code"] == 3]
+  out_mid = min(
+      mid_pool,
+      key=lambda x: (
+          x["score"] if x["status"] == "a" and x["chance"] == 100 else -15
+      ),
   )
 
-  if delta_score < 2.5:
-    st.info(
-        f"💡 **המלצת אסטרטגיה ל-Top 50K:** תוספת הניקוד הצפויה נמוכה"
-        f" (Δ={delta_score:.1f}). **מומלץ לשמור את החילוף (Roll Transfer)**"
-        " כדי להגיע עם 2 חילופים חופשיים למחזור הבא!"
-    )
-  else:
-    st.success(
-        f"🚀 **חילוף כדאי במיוחד:** תוספת פוטנציאל משמעותית של"
-        f" +{delta_score:.1f} נקודות מדד ל-3 המחזורים הבאים."
+  # 3. התקפה: החלוץ בעל הציון הנמוך ביותר (שאינו הולאנד)
+  fwd_pool = [
+      p for p in all_my_players if p["pos_code"] == 4 and "Haaland" not in p["name"]
+  ]
+  out_fwd = (
+      min(fwd_pool, key=lambda x: x["score"])
+      if fwd_pool
+      else [p for p in all_my_players if p["pos_code"] == 4][0]
+  )
+
+  scenarios = [
+      {
+          "title": "אופציה 1: טיפול במוקד החירום / שיפוץ הגנתי",
+          "tag": "🛡️ עדיפות הגנתית",
+          "out_player": out_def,
+          "in_player": find_best_in(2, out_def["cost"] + bank_balance),
+      },
+      {
+          "title": "אופציה 2: שדרוג מנוע הקישור וייצור שערים",
+          "tag": "🎯 תוספת איום התקפי",
+          "out_player": out_mid,
+          "in_player": find_best_in(3, out_mid["cost"] + bank_balance),
+      },
+      {
+          "title": "אופציה 3: רענון חוד ההתקפה / פונט התקפי",
+          "tag": "⚡ חוד ההתקפה",
+          "out_player": out_fwd,
+          "in_player": find_best_in(4, out_fwd["cost"] + bank_balance),
+      },
+  ]
+
+  for i, sc in enumerate(scenarios, 1):
+    p_out = sc["out_player"]
+    p_in = sc["in_player"]
+
+    if not p_in:
+      continue
+
+    max_b = p_out["cost"] + bank_balance
+    rem_b = max_b - p_in["cost"]
+    delta = p_in["score"] - p_out["score"]
+
+    delta_color = "#10b981" if delta >= 2.5 else "#38bdf8"
+    recommendation_badge = (
+        "🔥 מומלץ מאוד לביצוע"
+        if delta >= 3.0
+        else (
+            "⚖️ שדרוג נקודתי"
+            if delta >= 1.5
+            else "💡 עדיף לשמור חילוף (Roll)"
+        )
     )
 
-  c_out, c_in = st.columns(2)
-  with c_out:
     st.markdown(
-        f'<div class="health-box health-red"><strong style="color:#fca5a5;'
-        f' font-size:14px;">🔴 שחקן מועמד למכירה (OUT)</strong><br><h4'
-        f' style="margin:4px 0; color:#fff;">{weak_link["name"]}'
-        f' ({weak_link["team"]})</h4><span style="font-size:12px;'
-        f' color:#cbd5e1;">עמדה: {weak_link["pos"]} | מחיר:'
-        f' £{weak_link["cost"]}m<br>ציון מנוע: <b>{weak_link["score"]}</b> |'
-        f' FDR קרוב: {weak_link["next_match"]}</span></div>',
+        f"""
+        <div class="transfer-scenario-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:8px; margin-bottom:12px;">
+                <div>
+                    <span style="font-weight:bold; font-size:16px; color:#f8fafc;">{sc['title']}</span>
+                    <span class="badge" style="background:#1e293b; color:#94a3b8;">{sc['tag']}</span>
+                </div>
+                <div style="font-size:13px; font-weight:bold; color:{delta_color};">
+                    תוספת פוטנציאל: Δ+{delta:.1f} נקודות ({recommendation_badge})
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:240px; background:#231114; border-right:4px solid #ef4444; border-radius:8px; padding:10px;">
+                    <div style="font-size:11px; color:#fca5a5; font-weight:bold;">🔴 שחקן שיצא (OUT)</div>
+                    <div style="font-size:15px; font-weight:bold; color:#fff; margin:2px 0;">{p_out['name']} ({p_out['team']})</div>
+                    <div style="font-size:12px; color:#cbd5e1;">עמדה: {p_out['pos']} | מחיר מכירה: £{p_out['cost']}m | ציון: {p_out['score']}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">משחק קרוב: {p_out['next_match']} (FDR {p_out['avg_fdr']})</div>
+                </div>
+                <div style="flex:1; min-width:240px; background:#0c2417; border-right:4px solid #10b981; border-radius:8px; padding:10px;">
+                    <div style="font-size:11px; color:#6ee7b7; font-weight:bold;">🟢 שחקן שיכנס (IN)</div>
+                    <div style="font-size:15px; font-weight:bold; color:#fff; margin:2px 0;">{p_in['name']} ({p_in['team']})</div>
+                    <div style="font-size:12px; color:#cbd5e1;">מחיר קנייה: £{p_in['cost']}m (נשאר בבנק: <b>£{rem_b:.1f}m</b>) | ציון: {p_in['score']}</div>
+                    <div style="font-size:11px; color:#94a3b8; margin-top:4px;">משחק קרוב: <b>{p_in['next_match']}</b> | xGI/90: <b>{p_in['xgi_p90']}</b></div>
+                </div>
+            </div>
+            <div style="font-size:12px; color:#94a3b8; margin-top:8px; background:#0b1120; padding:8px 10px; border-radius:6px;">
+                💡 <b>נימוק טקטי:</b> {p_in['reason']}
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-  with c_in:
-    if best_replacement:
-      rem_bank = max_budget - best_replacement["cost"]
-      st.markdown(
-          f'<div class="health-box health-green"><strong style="color:#6ee7b7;'
-          f' font-size:14px;">🟢 שחקן מומלץ לרכש (IN)</strong><br><h4'
-          f' style="margin:4px 0; color:#fff;">{best_replacement["name"]}'
-          f' ({best_replacement["team"]})</h4><span style="font-size:12px;'
-          f' color:#cbd5e1;">מחיר: £{best_replacement["cost"]}m (בנק:'
-          f' £{rem_bank:.1f}m)<br>ציון מנוע: <b>{best_replacement["score"]}</b>'
-          f' | הבא: {best_replacement["next_match"]}</span></div>',
-          unsafe_allow_html=True,
-      )
 
 # --- טאב 4: רמזור בריאות הסגל ---
 with tab_health:
@@ -649,7 +715,7 @@ with tab_chat:
     with st.chat_message(msg["role"]):
       st.write(msg["content"])
 
-  if prompt := st.chat_input("שאל את המאמן (למשל: מי להכניס במקום מגווייר?)..."):
+  if prompt := st.chat_input("שאל את המאמן (למשל: איזה מבין 3 החילופים הכי עדיף?)..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.write(prompt)
@@ -684,21 +750,19 @@ with tab_chat:
 
 הנחיות לתשובה:
 1. היה חד, טקטי ומבוסס מדע (xGI per 90, FDR דועך, תוחלת שערים EV).
-2. אל תמליץ על שחקנים רק כי הבקיעו במחזור שעבר אם ה-xGI שלהם נמוך.
+2. התייחס לתקציב הפנוי של המשתמש (£{bank_balance:.1f}m).
 3. קח בחשבון שימור חילופים (Roll Transfer) מול קנסות מינוס 4.
 4. ענה בעברית רהוטה וקולעת.
 """
 
       combined_prompt = f"{system_instruction}\n\n---\nשאלת המשתמש:\n{prompt}"
 
-      # רשימת מודלים מעודכנת לפי הנחיות גוגל העדכניות
       models_to_try = [
           "gemini-2.5-flash",
           "gemini-2.5-flash-lite",
           "gemini-2.5-pro",
       ]
 
-      # זיהוי דינמי של המודלים הפתוחים עבור המפתח
       try:
         list_url = f"https://generativelanguage.googleapis.com/v1beta/models?key={clean_key}"
         list_res = requests.get(list_url, timeout=3)
