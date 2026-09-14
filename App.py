@@ -128,7 +128,7 @@ TRANSLATIONS = {
         "vc_select_label": "בחר סגן קפטן (VC):",
         "swap_active_hint_prefix": "לחץ בכפתור אחד על שחקן",
         "swap_active_hint_suffix": "להשלמת החילוף מיד",
-        "transfer_market_expander": "ביצוע העברה מהשוק (Market Transfer)",
+        "transfer_market_expander": "ביצוע העברה מהשוק",
         "planner_tr_expander": "תכנון העברה מהשוק למחזור זה",
         "btn_transfer": "העברה מהשוק 🔄",
         "btn_cancel": "ביטול",
@@ -143,11 +143,12 @@ TRANSLATIONS = {
         "max_budget": "תקציב מקסימלי לרכש:",
         "close_drawer": "✕ סגור חלון",
         "search_placeholder": "חיפוש שחקן (שם או קבוצה באנגלית)...",
-        "rec_header": "⭐ שחקנים מומלצים לרכש (Recommended):",
+        "rec_header": "⭐ שחקנים מומלצים לרכש:",
         "buy_player_btn": "➕ קנה שחקן זה",
         "all_cands_label": "או בחר שחקן לרכש מהרשימה המלאה:",
         "confirm_transfer_btn": "➕ אשר העברה",
-        "bench_title": "🪑 שחקני ספסל:",
+        "bench_title": "שחקני ספסל",
+        "bench_sub_order": "סדר עדיפות 1-4",
         "rebuild_btn": "🃏 בנה סגל מאפס (WC / FH)",
         "close_rebuild_btn": "✕ סגור מצב בנייה מחדש",
         "rebuild_title": "🛠️ לוח בניית סגל מאפס",
@@ -354,7 +355,8 @@ TRANSLATIONS = {
         "buy_player_btn": "➕ Buy This Player",
         "all_cands_label": "Or choose from all available players in budget:",
         "confirm_transfer_btn": "➕ Confirm Transfer",
-        "bench_title": "🪑 Bench Players:",
+        "bench_title": "Bench Players",
+        "bench_sub_order": "Sub Priority 1-4",
         "rebuild_btn": "🃏 Rebuild from Scratch (WC / FH)",
         "close_rebuild_btn": "✕ Close Rebuild Mode",
         "rebuild_title": "🛠️ Rebuild Squad from Scratch",
@@ -537,14 +539,38 @@ div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none 
 }
 
 /* --- תמיכה מושלמת ועקבית ב-RTL / LTR וערכת נושא רשמית Premier League --- */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container, div[data-testid="stVerticalBlock"] {
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background-color: var(--bg-main);
+    background-color: var(--bg-main) !important;
     background-image: radial-gradient(circle at 50% -10%, rgba(55, 0, 60, 0.45) 0%, transparent 60%) !important;
+    background-attachment: fixed !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
+}
+
+/* ביטול מוחלט של כל רקעים ומרובעים כהים בעמודות ובלוקים פנימיים */
+div[data-testid="stVerticalBlock"] {
+    direction: __DIR__ !important;
+    text-align: __ALIGN__ !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+div[data-testid="column"],
+div[data-testid="column"] > div,
+div[data-testid="column"] div[data-testid="stVerticalBlock"],
+div[data-testid="stHorizontalBlock"],
+div[data-testid="stHorizontalBlock"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 [data-testid="stMarkdownContainer"], 
@@ -841,12 +867,19 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) * {
     text-align: center !important;
 }
 
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"],
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] > div,
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] div[data-testid="stVerticalBlock"],
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] div[data-testid="stVerticalBlock"] {
     gap: 0 !important;
     row-gap: 0 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] div[data-testid="stMarkdownContainer"],
@@ -1848,12 +1881,10 @@ with h_col1:
         """
     )
 with h_col2:
-    st.write("")
     if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="hdr_lang_toggle", use_container_width=True):
         st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
         st.rerun()
 with h_col3:
-    st.write("")
     if st.button(t("change_team"), use_container_width=True):
         st.session_state.user_team_id = None
         st.query_params.clear()
@@ -2223,9 +2254,9 @@ with t_squad:
             <div class="bench-dugout-badge">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:16px;">🪑</span>
-                    <span style="font-weight:800; font-size:13.5px; color:#38bdf8;">{t('bench_title')}</span>
+                    <span style="font-weight:800; font-size:14px; color:#00ff87;">{t('bench_title')}</span>
                 </div>
-                <span class="ltr-tag" style="font-size:10px; color:#cbd5e1; background:rgba(2, 132, 199, 0.4); padding:2px 8px; border-radius:5px; font-weight:700; border:1px solid #38bdf8;">DUGOUT</span>
+                <span style="font-size:11px; color:#00ff87; background:rgba(0, 255, 135, 0.15); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(0, 255, 135, 0.35);">{t('bench_sub_order')}</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -3448,9 +3479,9 @@ with t_planner:
                 <div class="bench-dugout-badge">
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span style="font-size:16px;">🪑</span>
-                        <span style="font-weight:800; font-size:13.5px; color:#38bdf8;">{t('bench_title')}</span>
+                        <span style="font-weight:800; font-size:14px; color:#00ff87;">{t('bench_title')}</span>
                     </div>
-                    <span class="ltr-tag" style="font-size:10px; color:#cbd5e1; background:rgba(2, 132, 199, 0.4); padding:2px 8px; border-radius:5px; font-weight:700; border:1px solid #38bdf8;">DUGOUT</span>
+                    <span style="font-size:11px; color:#00ff87; background:rgba(0, 255, 135, 0.15); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(0, 255, 135, 0.35);">{t('bench_sub_order')}</span>
                 </div>
                 """,
                 unsafe_allow_html=True,
