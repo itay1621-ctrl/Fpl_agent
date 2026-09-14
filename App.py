@@ -76,10 +76,196 @@ def get_jersey_svg(team_code, is_gk=False):
     return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="34" height="30" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
 
 # =====================================================================
-# 3. עיצוב CSS מלא: נגישות, RTL, רספונסיביות מובייל וכפתורי מיקרו
+# 3. תמיכה דו-לשונית מלאה (i18n): עברית / אנגלית
 # =====================================================================
-st.markdown(
-    """
+if "app_lang" not in st.session_state:
+    st.session_state.app_lang = "he"
+
+TRANSLATIONS = {
+    "he": {
+        "page_title": "FPL Elite Scout | מנוע החלטות ומרגל סגלים",
+        "app_title": "⚽ FPL Elite Scout",
+        "app_subtitle": "סוכן בינה, אסטרטגיית הרכב ומרגל מיני-ליגות המכוון ל-Top 50K",
+        "gate_desc": "הזן את מספר הקבוצה שלך כדי לטעון ניתוח כשירות, ציון סגל מכויל, חסרונות הרכב, מתכנן מחזורים ומרגל ליגות.",
+        "team_id_label": "מספר קבוצה (Team ID):",
+        "team_id_placeholder": "למשל: 139103",
+        "team_id_help": "המספר שמופיע בכתובת הדפדפן בלשונית Points",
+        "login_btn": "🚀 כניסה לסגל שלי",
+        "demo_btn": "👀 סגל דמו לדוגמה",
+        "where_find_id": "❓ איפה מוצאים את ה-Team ID?",
+        "digits_only": "נא להזין ספרות בלבד.",
+        "change_team": "🔄 החלף קבוצה",
+        "engine_for_gw": "מנוע החלטות למחזור",
+        "team_label": "קבוצה:",
+        "squad_score": "ציון סגל מכויל",
+        "xp_forecast": "תחזית נקודות (xP)",
+        "in_bank": "יתרה בבנק",
+        "overall_rank": "דירוג כללי",
+        "formation": "מערך",
+        "total_xp": "תוחלת נקודות להרכב",
+        "tab_squad": "🟢 הסגל על המגרש",
+        "tab_transfers": "🔄 מעבדת חילופים",
+        "tab_analysis": "📊 ניתוח וחסרונות",
+        "tab_scout": "🌟 רדאר רכש עילית",
+        "tab_scenarios": "🎯 3 תרחישי תקציב",
+        "tab_planner": "🗓️ מתכנן מחזורים משורשר",
+        "tab_leagues": "🏆 מרגל מיני-ליגות",
+        "pos_1": "שוער",
+        "pos_2": "הגנה",
+        "pos_3": "קישור",
+        "pos_4": "חלוץ",
+        "pos_1_pl": "שוערים",
+        "pos_2_pl": "מגנים",
+        "pos_3_pl": "קשרים",
+        "pos_4_pl": "חלוצים",
+        "btn_select": "בחר",
+        "btn_selected": "✓ נבחר",
+        "btn_captain": "קפטן (C)",
+        "btn_vc": "סגן (VC)",
+        "btn_sub": "חילוף ספסל ⇄",
+        "btn_transfer": "העברה מהשוק 🔄",
+        "btn_cancel": "ביטול",
+        "btn_swap_here": "⇄ החלף לכאן",
+        "swap_banner_title": "מצב חילוף פעיל:",
+        "swap_banner_desc": "בחר שחקן יעד חוקי להחלפה עם",
+        "cancel_swap": "✕ ביטול חילוף",
+        "action_bar_title": "⚙️ פעולות עבור שחקן:",
+        "action_bar_hint": "בחר פעולה:",
+        "transfer_drawer_title": "🛒 חלון העברות שוק",
+        "selling_player": "מכירת שחקן:",
+        "max_budget": "תקציב מקסימלי לרכש:",
+        "close_drawer": "✕ סגור חלון",
+        "search_placeholder": "חיפוש שחקן (שם או קבוצה באנגלית)...",
+        "rec_header": "⭐ שחקנים מומלצים לרכש (Recommended):",
+        "buy_player_btn": "➕ קנה שחקן זה",
+        "all_cands_label": "או בחר שחקן לרכש מהרשימה המלאה:",
+        "confirm_transfer_btn": "➕ אשר העברה",
+        "bench_title": "🪑 שחקני ספסל:",
+        "rebuild_btn": "🃏 בנה סגל מאפס (WC / FH)",
+        "close_rebuild_btn": "✕ סגור מצב בנייה מחדש",
+        "rebuild_title": "🛠️ לוח בניית סגל מאפס",
+        "rebuild_subtitle": "בחר 15 שחקנים (2 שוערים, 5 מגנים, 5 קשרים, 3 חלוצים) במסגרת התקציב",
+        "total_squad_val": "שווי סגל כולל",
+        "rem_budget": "תקציב פנוי נותר",
+        "players_picked": "שחקנים שנבחרו",
+        "avg_per_player": "ממוצע לשחקן",
+        "clear_15_btn": "🗑️ רוקן את כל 15 השחקנים",
+        "load_existing_btn": "📋 טען שחקנים מסגל קיים",
+        "save_rebuild_btn": "💾 אשר ושמור סגל חדש!",
+        "empty_slot": "משבצת פנויה",
+        "add_slot": "➕ הוסף",
+        "remove_btn": "✕ הסר",
+        "ft_available": "חילופים זמינים",
+        "ft_planned": "חילופים שתוכננו",
+        "hit_penalty": "קנס מינוס (Hits)",
+        "bank_bal": "יתרה בבנק",
+        "xp_pred": "תחזית נקודות (xP)",
+        "chip_for_gw": "צ'יפ למחזור",
+        "no_chip": "ללא צ'יפ",
+        "clear_all_transfers": "🗑️ נקה הכל",
+        "planned_transfers_gw": "העברות שתוכננו למחזור",
+        "cancel_single_transfer": "✕ בטל",
+        "pts": "נק׳",
+        "against": "מול:",
+        "starters_only_cap": "קפטן להרכב בלבד",
+    },
+    "en": {
+        "page_title": "FPL Elite Scout | Decision Engine & Squad Spy",
+        "app_title": "⚽ FPL Elite Scout",
+        "app_subtitle": "AI Agent, Lineup Optimizer & Mini-League Spy aimed at Top 50K",
+        "gate_desc": "Enter your Team ID to load injury analysis, calibrated squad rating, lineup flaws, gameweek planner, and league spy.",
+        "team_id_label": "Team ID:",
+        "team_id_placeholder": "e.g., 139103",
+        "team_id_help": "The number from your browser URL under the Points tab",
+        "login_btn": "🚀 Load My Squad",
+        "demo_btn": "👀 Demo Squad",
+        "where_find_id": "❓ Where to find your Team ID?",
+        "digits_only": "Please enter digits only.",
+        "change_team": "🔄 Change Team",
+        "engine_for_gw": "Decision Engine for Gameweek",
+        "team_label": "Team:",
+        "squad_score": "Squad Rating",
+        "xp_forecast": "Expected Points (xP)",
+        "in_bank": "In the Bank",
+        "overall_rank": "Overall Rank",
+        "formation": "Formation",
+        "total_xp": "Lineup Expected Points",
+        "tab_squad": "🟢 Squad on Pitch",
+        "tab_transfers": "🔄 Transfers Lab",
+        "tab_analysis": "📊 Analysis & Flaws",
+        "tab_scout": "🌟 Elite Scout Radar",
+        "tab_scenarios": "🎯 3 Budget Scenarios",
+        "tab_planner": "🗓️ Gameweek Planner",
+        "tab_leagues": "🏆 Mini-League Spy",
+        "pos_1": "Goalkeeper",
+        "pos_2": "Defender",
+        "pos_3": "Midfielder",
+        "pos_4": "Forward",
+        "pos_1_pl": "Goalkeepers",
+        "pos_2_pl": "Defenders",
+        "pos_3_pl": "Midfielders",
+        "pos_4_pl": "Forwards",
+        "btn_select": "Select",
+        "btn_selected": "✓ Selected",
+        "btn_captain": "Captain (C)",
+        "btn_vc": "Vice (VC)",
+        "btn_sub": "Substitute ⇄",
+        "btn_transfer": "Transfer Out 🔄",
+        "btn_cancel": "Cancel",
+        "btn_swap_here": "⇄ Swap Here",
+        "swap_banner_title": "Substitution Mode Active:",
+        "swap_banner_desc": "Select an eligible player to swap with",
+        "cancel_swap": "✕ Cancel Swap",
+        "action_bar_title": "⚙️ Player Actions:",
+        "action_bar_hint": "Select action:",
+        "transfer_drawer_title": "🛒 Transfer Market Drawer",
+        "selling_player": "Selling Player:",
+        "max_budget": "Max Budget Available:",
+        "close_drawer": "✕ Close Drawer",
+        "search_placeholder": "Search player (name or team)...",
+        "rec_header": "⭐ Recommended Replacements:",
+        "buy_player_btn": "➕ Buy This Player",
+        "all_cands_label": "Or choose from all available players in budget:",
+        "confirm_transfer_btn": "➕ Confirm Transfer",
+        "bench_title": "🪑 Bench Players:",
+        "rebuild_btn": "🃏 Rebuild from Scratch (WC / FH)",
+        "close_rebuild_btn": "✕ Close Rebuild Mode",
+        "rebuild_title": "🛠️ Rebuild Squad from Scratch",
+        "rebuild_subtitle": "Select 15 players (2 GKs, 5 DEFs, 5 MIDs, 3 FWDs) within your budget",
+        "total_squad_val": "Total Squad Value",
+        "rem_budget": "Remaining Budget",
+        "players_picked": "Players Picked",
+        "avg_per_player": "Avg per Player",
+        "clear_15_btn": "🗑️ Clear All 15 Players",
+        "load_existing_btn": "📋 Load Existing Squad",
+        "save_rebuild_btn": "💾 Save & Apply New Squad!",
+        "empty_slot": "Empty Slot",
+        "add_slot": "➕ Add",
+        "remove_btn": "✕ Remove",
+        "ft_available": "Available FTs",
+        "ft_planned": "Planned Transfers",
+        "hit_penalty": "Hit Penalty",
+        "bank_bal": "Bank Balance",
+        "xp_pred": "Points Forecast (xP)",
+        "chip_for_gw": "Chip for GW",
+        "no_chip": "No Chip",
+        "clear_all_transfers": "🗑️ Clear All",
+        "planned_transfers_gw": "Planned Transfers for GW",
+        "cancel_single_transfer": "✕ Cancel",
+        "pts": "pts",
+        "against": "vs:",
+        "starters_only_cap": "Starters only for Captain",
+    }
+}
+
+def t(key):
+    lang = st.session_state.get("app_lang", "he")
+    return TRANSLATIONS.get(lang, {}).get(key, TRANSLATIONS["he"].get(key, key))
+
+# =====================================================================
+# 4. עיצוב CSS מלא: נגישות, RTL / LTR דינמי, רספונסיביות מובייל
+# =====================================================================
+css_template = """
 <style>
 :root {
     --bg-main: #090e17;
@@ -95,16 +281,16 @@ st.markdown(
 }
 
 .main {
-    direction: rtl;
-    text-align: right;
+    direction: __DIR__;
+    text-align: __ALIGN__;
     background-color: var(--bg-main);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     color: var(--text-primary);
 }
 
 div[data-testid="stMarkdownContainer"] p {
-    direction: rtl;
-    text-align: right;
+    direction: __DIR__;
+    text-align: __ALIGN__;
     line-height: 1.5;
 }
 
@@ -179,7 +365,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
     margin: 10px auto 14px auto;
     max-width: 820px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.55);
-    direction: rtl;
+    direction: __DIR__;
 }
 
 /* כפתורי פעולה בודדים ונוחים במגרש ובספסל */
@@ -389,6 +575,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     margin: 10px auto 16px auto;
     max-width: 820px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    direction: __DIR__;
 }
 
 .rebuild-banner {
@@ -399,7 +586,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     margin: 10px auto 14px auto;
     max-width: 820px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    direction: rtl;
+    direction: __DIR__;
 }
 
 /* התאמות מובייל קפדניות (Mobile Media Queries) */
@@ -449,9 +636,13 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     }
 }
 </style>
-""",
-    unsafe_allow_html=True,
-)
+"""
+
+is_rtl = (st.session_state.get("app_lang", "he") == "he")
+dir_val = "rtl" if is_rtl else "ltr"
+align_val = "right" if is_rtl else "left"
+rendered_css = css_template.replace("__DIR__", dir_val).replace("__ALIGN__", align_val)
+st.markdown(rendered_css, unsafe_allow_html=True)
 
 # =====================================================================
 # 4. משיכת נתוני הליגה והגנת API מבוססת כותרות
@@ -650,6 +841,58 @@ def fetch_league_data():
 
 all_players, next_gw, next_deadline = fetch_league_data()
 
+def is_swap_legal(player1_id, player2_id, current_squad_list):
+    """
+    בדיקה קפדנית לפי חוקי ה-FPL הרשמיים האם חילוף בין שני שחקנים חוקי:
+    1. שוער (GK) יכול להתחלף רק עם שוער.
+    2. חילוף בין שחקן הרכב לשחקן ספסל חייב להשאיר מערך חוקי:
+       - בדיוק 1 שוער
+       - בין 3 ל-5 מגנים
+       - בין 2 ל-5 קשרים
+       - בין 1 ל-3 חלוצים
+       - סך הכל בדיוק 11 שחקני הרכב
+    """
+    p1_entry = next((p for p in current_squad_list if p["element"] == player1_id), None)
+    p2_entry = next((p for p in current_squad_list if p["element"] == player2_id), None)
+    if not p1_entry or not p2_entry:
+        return False, ("שחקן לא נמצא" if st.session_state.app_lang == "he" else "Player not found")
+    
+    p1_data = all_players.get(player1_id)
+    p2_data = all_players.get(player2_id)
+    if not p1_data or not p2_data:
+        return False, ("חסרים נתוני שחקן" if st.session_state.app_lang == "he" else "Missing player data")
+    
+    is_p1_starter = (p1_entry["position"] <= 11)
+    is_p2_starter = (p2_entry["position"] <= 11)
+    
+    if is_p1_starter == is_p2_starter:
+        return True, ""
+    
+    if (p1_data["pos_code"] == 1 or p2_data["pos_code"] == 1) and (p1_data["pos_code"] != p2_data["pos_code"]):
+        err = "שוער מתחלף רק בשוער" if st.session_state.app_lang == "he" else "GK can only swap with GK"
+        return False, err
+    
+    starter_id = player1_id if is_p1_starter else player2_id
+    bench_id = player2_id if is_p1_starter else player1_id
+    bench_pos = all_players[bench_id]["pos_code"]
+    
+    new_pos_codes = [all_players[p["element"]]["pos_code"] for p in current_squad_list if p["position"] <= 11 and p["element"] != starter_id] + [bench_pos]
+    gk_cnt = new_pos_codes.count(1)
+    def_cnt = new_pos_codes.count(2)
+    mid_cnt = new_pos_codes.count(3)
+    fwd_cnt = new_pos_codes.count(4)
+    
+    if gk_cnt != 1:
+        return False, ("חובה שוער 1" if st.session_state.app_lang == "he" else "Must have 1 GK")
+    if not (3 <= def_cnt <= 5):
+        return False, ("דרוש 3-5 מגנים" if st.session_state.app_lang == "he" else "Needs 3-5 DEFs")
+    if not (2 <= mid_cnt <= 5):
+        return False, ("דרוש 2-5 קשרים" if st.session_state.app_lang == "he" else "Needs 2-5 MIDs")
+    if not (1 <= fwd_cnt <= 3):
+        return False, ("דרוש לפחות חלוץ 1" if st.session_state.app_lang == "he" else "Needs 1-3 FWDs")
+    
+    return True, ""
+
 # =====================================================================
 # 5. שער כניסה ומסך נחיתה
 # =====================================================================
@@ -662,16 +905,21 @@ if "user_team_id" not in st.session_state:
     )
 
 if not st.session_state.user_team_id:
-    st.write("")
+    c_gate_top1, c_gate_top2 = st.columns([5, 1])
+    with c_gate_top2:
+        if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="gate_lang_btn", use_container_width=True):
+            st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
+            st.rerun()
+
     st.markdown(
-        """
+        f"""
     <div class="gate-card">
-        <h1 style="color:#38bdf8; margin-bottom:6px;">⚽ FPL Elite Scout</h1>
+        <h1 style="color:#38bdf8; margin-bottom:6px;">{t('app_title')}</h1>
         <div style="font-size:15px; color:#94a3b8; margin-bottom:18px;">
-            סוכן בינה, אסטרטגיית הרכב ומרגל מיני-ליגות המכוון ל-<b class="ltr-tag">Top 50K</b>
+            {t('app_subtitle')}
         </div>
         <p style="font-size:13px; color:#cbd5e1; line-height:1.6; margin-bottom:20px;">
-            הזן את מספר הקבוצה שלך כדי לטעון ניתוח כשירות, ציון סגל מכויל, חסרונות הרכב, מתכנן מחזורים ומרגל ליגות.
+            {t('gate_desc')}
         </p>
     </div>
     """,
@@ -681,32 +929,31 @@ if not st.session_state.user_team_id:
     c_form = st.columns([1, 2, 1])[1]
     with c_form:
         input_val = st.text_input(
-            "מספר קבוצה (Team ID):",
-            placeholder="למשל: 139103",
-            help="המספר שמופיע בכתובת הדפדפן בלשונית Points",
+            t("team_id_label"),
+            placeholder=t("team_id_placeholder"),
+            help=t("team_id_help"),
         )
         b1, b2 = st.columns(2)
         with b1:
-            if st.button("🚀 כניסה לסגל שלי", use_container_width=True):
+            if st.button(t("login_btn"), use_container_width=True):
                 if input_val.strip().isdigit():
                     st.session_state.user_team_id = input_val.strip()
                     st.query_params["team"] = input_val.strip()
                     st.rerun()
                 else:
-                    st.error("נא להזין ספרות בלבד.")
+                    st.error(t("digits_only"))
         with b2:
-            if st.button("👀 סגל דמו לדוגמה", use_container_width=True):
+            if st.button(t("demo_btn"), use_container_width=True):
                 st.session_state.user_team_id = "1"
                 st.query_params["team"] = "1"
                 st.rerun()
 
-        with st.expander("❓ איפה מוצאים את ה-Team ID?"):
+        with st.expander(t("where_find_id")):
             st.markdown(
                 """
-            1. היכנס ל-<span class="ltr-tag">fantasy.premierleague.com</span> והתחבר.
-            2. לחץ על לשונית **Points** (נקודות).
-            3. העתק את רצף הספרות מתוך שורת הכתובת:  
-               `.../entry/XXXXXX/event/...`  
+            1. fantasy.premierleague.com  
+            2. Points Tab  
+            3. entry/XXXXXX/event  
             """,
                 unsafe_allow_html=True,
             )
@@ -760,9 +1007,13 @@ if (
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
 
-# ניהול מצבי בחירה וקפטנים
-if "squad_swap_id" not in st.session_state:
-    st.session_state.squad_swap_id = None
+# ניהול מצבי בחירה, חילוף והעברות
+if "squad_selected_id" not in st.session_state:
+    st.session_state.squad_selected_id = None
+if "squad_swap_active" not in st.session_state:
+    st.session_state.squad_swap_active = False
+if "squad_transfer_active" not in st.session_state:
+    st.session_state.squad_transfer_active = False
 
 if "planner_plan" not in st.session_state:
     st.session_state.planner_plan = {
@@ -774,9 +1025,10 @@ if "planner_captains" not in st.session_state:
 if "planner_starting_fts" not in st.session_state:
     st.session_state.planner_starting_fts = 1
 
-if "planner_swap_out" not in st.session_state:
-    st.session_state.planner_swap_out = None
-
+if "planner_selected_id" not in st.session_state:
+    st.session_state.planner_selected_id = None
+if "planner_swap_active" not in st.session_state:
+    st.session_state.planner_swap_active = False
 if "planner_transfer_out" not in st.session_state:
     st.session_state.planner_transfer_out = None
 
@@ -915,17 +1167,21 @@ rating_color = (
 # =====================================================================
 # 7. סרגל עליון ומדדים ראשיים
 # =====================================================================
-h_col1, h_col2 = st.columns([3, 1])
+h_col1, h_col2, h_col3 = st.columns([3, 1, 1])
 with h_col1:
     st.title(f"⚽ {my_team_name}")
     st.caption(
-        f'מנוע החלטות למחזור {next_gw} | קבוצה: <span'
-        f' class="ltr-tag"><b>{team_id}</b></span>',
+        f'{t("engine_for_gw")} {next_gw} | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>',
         unsafe_allow_html=True,
     )
 with h_col2:
     st.write("")
-    if st.button("🔄 החלף קבוצה", use_container_width=True):
+    if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="hdr_lang_toggle", use_container_width=True):
+        st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
+        st.rerun()
+with h_col3:
+    st.write("")
+    if st.button(t("change_team"), use_container_width=True):
         st.session_state.user_team_id = None
         st.query_params.clear()
         st.rerun()
@@ -940,19 +1196,19 @@ st.markdown(
     f"""
 <div class="kpi-container">
     <div class="kpi-card">
-        <div class="kpi-title">ציון סגל מכויל</div>
+        <div class="kpi-title">{t('squad_score')}</div>
         <div class="kpi-value" style="color:{rating_color};">{squad_rating} <span style="font-size:12px; color:#64748b;">/ 100</span></div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-title">תחזית נקודות (xP)</div>
+        <div class="kpi-title">{t('xp_forecast')}</div>
         <div class="kpi-value" style="color:#10b981;">{starting_xp_total:.1f}</div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-title">יתרה בבנק</div>
+        <div class="kpi-title">{t('in_bank')}</div>
         <div class="kpi-value"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-title">דירוג עולמי</div>
+        <div class="kpi-title">{t('overall_rank')}</div>
         <div class="kpi-value"><span class="ltr-tag">{rank_txt}</span></div>
     </div>
 </div>
@@ -1001,15 +1257,20 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     bench_class = "card-bench" if is_bench else ""
     sel_class = "p-card-selected" if is_selected else ("p-card-transfer-selected" if is_transfer_selected else "")
 
+    lang = st.session_state.get("app_lang", "he")
+    lbl_inj = "🔴 פצוע" if lang == "he" else "🔴 Injured"
+    lbl_dbt = "🟡 בספק" if lang == "he" else "🟡 Doubt"
+    lbl_str = "🟢 פותח" if lang == "he" else "🟢 Starts"
+
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
-        status_pill = f'<div class="prob-badge prob-red">🔴 פצוע {p["start_prob"]}%</div>'
+        status_pill = f'<div class="prob-badge prob-red">{lbl_inj} {p["start_prob"]}%</div>'
     elif p["chance"] <= 75 or p["status"] == "d":
         status_class = "card-warning"
-        status_pill = f'<div class="prob-badge prob-yellow">🟡 בספק {p["start_prob"]}%</div>'
+        status_pill = f'<div class="prob-badge prob-yellow">{lbl_dbt} {p["start_prob"]}%</div>'
     else:
         status_class = "cap-gold" if is_c else ("vc-silver" if is_v else "")
-        status_pill = f'<div class="prob-badge prob-green">🟢 {p["start_prob"]}% פותח</div>'
+        status_pill = f'<div class="prob-badge prob-green">{lbl_str} {p["start_prob"]}%</div>'
 
     jersey_svg = get_jersey_svg(p["team"], is_gk=(p["pos_code"] == 1))
     club_cfg = TEAM_KIT_COLORS.get(p["team"], {"primary": "#38bdf8"})
@@ -1055,63 +1316,44 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
 # 9. שבעת הטאבים המרכזיים
 # =====================================================================
 t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner, t_leagues = st.tabs([
-    "🟢 הסגל על המגרש",
-    "🔄 מעבדת חילופים",
-    "📊 ניתוח וחסרונות",
-    "🌟 רדאר רכש עילית",
-    "🎯 3 תרחישי תקציב",
-    "🗓️ מתכנן מחזורים משורשר",
-    "🏆 מרגל מיני-ליגות",
+    t("tab_squad"),
+    t("tab_transfers"),
+    t("tab_analysis"),
+    t("tab_scout"),
+    t("tab_scenarios"),
+    t("tab_planner"),
+    t("tab_leagues"),
 ])
 
 # ---------------------------------------------------------------------
-# טאב 1: מגרש חי עם סימוני C ו-VC רשמיים, ושורת חילוף מתחת למגרש
+# טאב 1: מגרש חי עם חילופים מודרכים, סימוני C ו-VC, והעברות שוק
 # ---------------------------------------------------------------------
 with t_squad:
     st.caption(
-        f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | סך תוחלת נקודות: **{starting_xp_total:.1f}** | "
-        "לחץ על שחקן כדי לפתוח את **שורת החילוף והניהול מתחת למגרש** לבחירת קפטן (C), סגן (VC) או ביצוע חילוף."
+        f"{t('formation')}: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | {t('total_xp')}: **{starting_xp_total:.1f}**"
     )
 
     def execute_squad_swap(p_out_id, p_in_id):
-        p_o = next(x for x in st.session_state.user_squad if x["element"] == p_out_id)
-        p_i = next(x for x in st.session_state.user_squad if x["element"] == p_in_id)
-
-        is_o_starter = p_o["position"] <= 11
-        is_i_starter = p_i["position"] <= 11
-        valid = True
-        if is_o_starter != is_i_starter:
-            starter_obj = all_players[p_out_id if is_o_starter else p_in_id]
-            bench_obj = all_players[p_in_id if is_i_starter else p_out_id]
-            curr_pos_codes = [all_players[x["element"]]["pos_code"] for x in st.session_state.user_squad if x["position"] <= 11 and x["element"] != starter_obj["id"]] + [bench_obj["pos_code"]]
-            if curr_pos_codes.count(1) != 1 or not (3 <= curr_pos_codes.count(2) <= 5) or not (2 <= curr_pos_codes.count(3) <= 5) or not (1 <= curr_pos_codes.count(4) <= 3):
-                valid = False
-
-        if not valid:
-            st.error("חילוף לא חוקי! הרכב חייב לכלול שוער 1, 3-5 מגנים, 2-5 קשרים ולפחות חלוץ 1.")
-        else:
+        legal, err_msg = is_swap_legal(p_out_id, p_in_id, st.session_state.user_squad)
+        if not legal:
+            st.error(f"⚠️ {err_msg}")
+            return
+        p_o = next((x for x in st.session_state.user_squad if x["element"] == p_out_id), None)
+        p_i = next((x for x in st.session_state.user_squad if x["element"] == p_in_id), None)
+        if p_o and p_i:
             p_o["position"], p_i["position"] = p_i["position"], p_o["position"]
-            st.session_state.squad_swap_id = None
-            st.toast(f"✅ חילוף בוצע: {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
+            st.session_state.squad_selected_id = None
+            st.session_state.squad_swap_active = False
+            st.toast(f"✅ {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
             st.rerun()
-
-    def handle_squad_card_click(target_id):
-        if st.session_state.squad_swap_id is None:
-            st.session_state.squad_swap_id = target_id
-            st.rerun()
-        elif st.session_state.squad_swap_id == target_id:
-            st.session_state.squad_swap_id = None
-            st.rerun()
-        else:
-            execute_squad_swap(st.session_state.squad_swap_id, target_id)
 
     def set_squad_captain(target_id):
         for sp in st.session_state.user_squad:
             sp["is_captain"] = (sp["element"] == target_id)
             if sp["is_captain"]:
                 sp["is_vice_captain"] = False
-        st.session_state.squad_swap_id = None
-        st.toast(f"👑 {all_players[target_id]['name']} נבחר לקפטן (C)!")
+        st.session_state.squad_selected_id = None
+        st.toast(f"👑 {all_players[target_id]['name']} (C)")
         st.rerun()
 
     def set_squad_vice_captain(target_id):
@@ -1119,111 +1361,223 @@ with t_squad:
             sp["is_vice_captain"] = (sp["element"] == target_id)
             if sp["is_vice_captain"]:
                 sp["is_captain"] = False
-        st.session_state.squad_swap_id = None
-        st.toast(f"🥈 {all_players[target_id]['name']} נבחר לסגן קפטן (VC)!")
+        st.session_state.squad_selected_id = None
+        st.toast(f"🥈 {all_players[target_id]['name']} (VC)")
         st.rerun()
 
-    # רינדור שורת מגרש נקייה
-    def render_clean_squad_row(player_list):
+    # באנר מצב חילוף פעיל
+    if st.session_state.squad_swap_active and st.session_state.squad_selected_id:
+        p_sw_from = all_players.get(st.session_state.squad_selected_id)
+        if p_sw_from:
+            c_sw_info, c_sw_canc = st.columns([4, 1])
+            with c_sw_info:
+                st.info(f"🔁 **{t('swap_banner_title')}** {t('swap_banner_desc')} **{p_sw_from['name']}** ({p_sw_from['team']} | {p_sw_from['pos']})")
+            with c_sw_canc:
+                if st.button(t("cancel_swap"), key="sq_cancel_swap_top", use_container_width=True, type="primary"):
+                    st.session_state.squad_swap_active = False
+                    st.session_state.squad_selected_id = None
+                    st.rerun()
+
+    def render_clean_squad_row(player_list, is_bench=False):
         if not player_list:
             return
-        cols = st.columns(len(player_list))
+        if len(player_list) == 1:
+            cols = [st.columns([2, 1, 2])[1]]
+        else:
+            cols = st.columns(len(player_list))
         for i, p in enumerate(player_list):
             with cols[i]:
-                is_active = (st.session_state.squad_swap_id == p["id"])
-                st.markdown(render_player_card_html(p, is_selected=is_active), unsafe_allow_html=True)
+                is_this_selected = (st.session_state.squad_selected_id == p["id"])
+                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected), unsafe_allow_html=True)
                 
-                # כפתור בחירה יחיד וקומפקטי
-                btn_lbl = "✓ נבחר" if is_active else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else "בחר"))
-                btn_type = "primary" if is_active else "secondary"
-                if st.button(btn_lbl, key=f"sq_pick_{p['id']}", use_container_width=True, type=btn_type):
-                    handle_squad_card_click(p["id"])
+                if st.session_state.squad_swap_active:
+                    if is_this_selected:
+                        if st.button(t("btn_selected"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
+                            st.session_state.squad_swap_active = False
+                            st.session_state.squad_selected_id = None
+                            st.rerun()
+                    else:
+                        legal, reason = is_swap_legal(st.session_state.squad_selected_id, p["id"], st.session_state.user_squad)
+                        if legal:
+                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
+                                execute_squad_swap(st.session_state.squad_selected_id, p["id"])
+                        else:
+                            st.button(f"✕ {reason}", key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
+                else:
+                    btn_lbl = t("btn_selected") if is_this_selected else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else t("btn_select")))
+                    btn_type = "primary" if is_this_selected else "secondary"
+                    if st.button(btn_lbl, key=f"sq_b_{p['id']}", use_container_width=True, type=btn_type):
+                        if is_this_selected:
+                            st.session_state.squad_selected_id = None
+                            st.session_state.squad_transfer_active = False
+                        else:
+                            st.session_state.squad_selected_id = p["id"]
+                            st.session_state.squad_transfer_active = False
+                        st.rerun()
 
-    # המגרש הראשי
+    # מגרש ראשי
     with st.container():
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-        # חלוצים
         render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
         st.write("")
-        # קשרים
         render_clean_squad_row([p for p in starters if p["pos_code"] == 3])
         st.write("")
-        # מגנים
         render_clean_squad_row([p for p in starters if p["pos_code"] == 2])
         st.write("")
-        # שוער
         gks = [p for p in starters if p["pos_code"] == 1]
         if gks:
-            gk_col = st.columns([2, 1, 2])[1]
-            with gk_col:
-                p = gks[0]
-                is_active = (st.session_state.squad_swap_id == p["id"])
-                st.markdown(render_player_card_html(p, is_selected=is_active), unsafe_allow_html=True)
-                btn_lbl = "✓ נבחר" if is_active else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else "בחר"))
-                btn_type = "primary" if is_active else "secondary"
-                if st.button(btn_lbl, key=f"sq_pick_{p['id']}", use_container_width=True, type=btn_type):
-                    handle_squad_card_click(p["id"])
+            render_clean_squad_row(gks)
 
-    # -----------------------------------------------------------------
-    # שורת החילוף והניהול - ממוקמת בלעדית מתחת למגרש!
-    if st.session_state.squad_swap_id is not None:
-        p_sel = all_players.get(st.session_state.squad_swap_id)
+    # שורת פעולות מתחת למגרש (בבחירת שחקן)
+    if st.session_state.squad_selected_id is not None and not st.session_state.squad_swap_active and not st.session_state.squad_transfer_active:
+        p_sel = all_players.get(st.session_state.squad_selected_id)
         if p_sel:
             is_starter = any(p["id"] == p_sel["id"] for p in starters)
+            j_svg = get_jersey_svg(p_sel["team"], is_gk=(p_sel["pos_code"] == 1))
             render_html(
                 f"""
                 <div class="action-bar-under-pitch">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-                        <div>
-                            <span style="font-size:14px; font-weight:700; color:#38bdf8;">⚙️ שורת חילוף וניהול:</span>
-                            <b style="color:#ffffff; margin-right:6px; font-size:14px;">{p_sel['name']}</b>
-                            <span class="ltr-tag" style="color:#94a3b8; font-size:12px;">({p_sel['team']} | {p_sel['pos']} | £{p_sel['cost']}m | xP: {p_sel['xp']})</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            {j_svg}
+                            <div>
+                                <span style="font-size:13px; font-weight:700; color:#38bdf8;">{t('action_bar_title')}</span>
+                                <b style="color:#ffffff; font-size:14px; margin:0 4px;">{p_sel['name']}</b>
+                                <span class="ltr-tag" style="color:#94a3b8; font-size:12px;">({p_sel['team']} | {p_sel['pos']} | £{p_sel['cost']}m | xP: {p_sel['xp']})</span>
+                            </div>
                         </div>
                         <div style="font-size:11px; color:#cbd5e1;">
-                            {'לחץ על שחקן נוסף להחלפה, או בחר פעולה:' if is_starter else 'לחץ על שחקן הרכב להחלפה ביניהם:'}
+                            {t('action_bar_hint')}
                         </div>
                     </div>
                 </div>
                 """
             )
-
-            col_a1, col_a2, col_a3, col_a4 = st.columns([1.2, 1.2, 2.5, 1])
+            col_a1, col_a2, col_a3, col_a4, col_a5 = st.columns([1, 1, 1.2, 1.2, 0.8])
             with col_a1:
                 if is_starter:
-                    if st.button("🅲 קפטן (C)", key="bar_cap_btn", use_container_width=True, type="primary"):
+                    if st.button(f"👑 {t('btn_captain')}", key="bar_cap_btn", use_container_width=True, type="primary"):
                         set_squad_captain(p_sel["id"])
                 else:
-                    st.button("🅲 רק להרכב", disabled=True, use_container_width=True)
+                    st.button(f"👑 {t('btn_captain')}", disabled=True, help=t("starters_only_cap"), use_container_width=True)
             with col_a2:
                 if is_starter:
-                    if st.button("🆅 סגן (VC)", key="bar_vc_btn", use_container_width=True):
+                    if st.button(f"🥈 {t('btn_vc')}", key="bar_vc_btn", use_container_width=True):
                         set_squad_vice_captain(p_sel["id"])
                 else:
-                    st.button("🆅 רק להרכב", disabled=True, use_container_width=True)
+                    st.button(f"🥈 {t('btn_vc')}", disabled=True, help=t("starters_only_cap"), use_container_width=True)
             with col_a3:
-                eligible_targets = bench if is_starter else starters
-                swap_dict = {p["id"]: f"{p['name']} ({p['pos']} - {p['team']}) | xP: {p['xp']}" for p in eligible_targets}
-                chosen_target_id = st.selectbox("בחר יעד לחילוף:", list(swap_dict.keys()), format_func=lambda x: swap_dict[x], key="action_bar_swap_sel", label_visibility="collapsed")
-                if st.button("בצע חילוף ⇄", key="exec_bar_swap", use_container_width=True):
-                    execute_squad_swap(p_sel["id"], chosen_target_id)
+                if st.button(t("btn_sub"), key="bar_sub_btn", use_container_width=True, type="primary"):
+                    st.session_state.squad_swap_active = True
+                    st.rerun()
             with col_a4:
-                if st.button("✕ ביטול", key="bar_cancel_btn", use_container_width=True):
-                    st.session_state.squad_swap_id = None
+                if st.button(t("btn_transfer"), key="bar_tr_btn", use_container_width=True):
+                    st.session_state.squad_transfer_active = True
+                    st.rerun()
+            with col_a5:
+                if st.button(f"✕ {t('btn_cancel')}", key="bar_cancel_btn", use_container_width=True):
+                    st.session_state.squad_selected_id = None
+                    st.session_state.squad_swap_active = False
+                    st.session_state.squad_transfer_active = False
                     st.rerun()
 
+    # מגירת שוק העברות בטאב 1
+    if st.session_state.squad_transfer_active and st.session_state.squad_selected_id:
+        p_tr_out = all_players.get(st.session_state.squad_selected_id)
+        if p_tr_out:
+            max_budget = round(p_tr_out["cost"] + st.session_state.user_bank, 1)
+            cur_pids = [x["element"] for x in st.session_state.user_squad]
+            
+            render_html(
+                f"""
+                <div class="transfer-drawer">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                        <div>
+                            <span style="font-size:15px; font-weight:700; color:#38bdf8;">{t('transfer_drawer_title')}</span>
+                            <div style="font-size:12px; color:#cbd5e1;">
+                                {t('selling_player')} <b style="color:#ef4444;">{p_tr_out['name']}</b> ({p_tr_out['pos']} | £{p_tr_out['cost']}m) | 
+                                {t('max_budget')} <b style="color:#10b981;">£{max_budget:.1f}m</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                """
+            )
+            c_cls, c_sch = st.columns([1, 3])
+            with c_cls:
+                if st.button(t("close_drawer"), key="sq_close_tr_btn", type="primary", use_container_width=True):
+                    st.session_state.squad_transfer_active = False
+                    st.rerun()
+            with c_sch:
+                tr_search_q = st.text_input(t("search_placeholder"), key="sq_tr_search_inp").strip().lower()
+            
+            cands = [
+                p for p in all_players.values()
+                if p["pos_code"] == p_tr_out["pos_code"]
+                and p["id"] not in cur_pids
+                and p["cost"] <= max_budget
+                and p["status"] == "a"
+            ]
+            if tr_search_q:
+                cands = [p for p in cands if tr_search_q in p["name"].lower() or tr_search_q in p["team"].lower()]
+            
+            recs = sorted(cands, key=lambda x: x["score"], reverse=True)[:3]
+            if recs:
+                st.markdown(f"##### {t('rec_header')}")
+                r_cols = st.columns(len(recs))
+                for r_i, r_p in enumerate(recs):
+                    with r_cols[r_i]:
+                        r_j = get_jersey_svg(r_p["team"], is_gk=(r_p["pos_code"] == 1))
+                        render_html(
+                            f"""
+                            <div class="accessible-card" style="text-align:center; padding:10px;">
+                                {r_j}
+                                <b>{r_p['name']}</b> ({r_p['team']})<br>
+                                <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
+                                <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{r_p['reason']}</div>
+                                <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
+                            </div>
+                            """
+                        )
+                        if st.button(t("buy_player_btn"), key=f"sq_buy_rec_{r_p['id']}", use_container_width=True):
+                            for sp in st.session_state.user_squad:
+                                if sp["element"] == p_tr_out["id"]:
+                                    sp["element"] = r_p["id"]
+                                    break
+                            st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - r_p["cost"], 1)
+                            st.session_state.transfers_log.append(f"{p_tr_out['name']} ⬅️ {r_p['name']}")
+                            st.session_state.squad_transfer_active = False
+                            st.session_state.squad_selected_id = None
+                            st.toast(f"✅ {p_tr_out['name']} ⬅️ {r_p['name']}")
+                            st.rerun()
+            
+            st.write("")
+            all_sorted = sorted(cands, key=lambda x: x["total_points"], reverse=True)
+            if all_sorted:
+                cand_map = {p["id"]: f"{p['name']} ({p['team']}) | £{p['cost']:.1f}m | {p['total_points']} {t('pts')} | xP: {p['xp']} | {t('against')} {p['next_match']}" for p in all_sorted}
+                c_c1, c_c2 = st.columns([3, 1])
+                with c_c1:
+                    chosen_p_id = st.selectbox(t("all_cands_label"), list(cand_map.keys()), format_func=lambda x: cand_map[x], key="sq_tr_pool_sel")
+                with c_c2:
+                    st.write("")
+                    if st.button(t("confirm_transfer_btn"), key="sq_confirm_pool_tr", use_container_width=True):
+                        chosen_p = all_players[chosen_p_id]
+                        for sp in st.session_state.user_squad:
+                            if sp["element"] == p_tr_out["id"]:
+                                sp["element"] = chosen_p_id
+                                break
+                        st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - chosen_p["cost"], 1)
+                        st.session_state.transfers_log.append(f"{p_tr_out['name']} ⬅️ {chosen_p['name']}")
+                        st.session_state.squad_transfer_active = False
+                        st.session_state.squad_selected_id = None
+                        st.toast(f"✅ {p_tr_out['name']} ⬅️ {chosen_p['name']}")
+                        st.rerun()
+
     # ספסל נקי ומרווח מתחת למגרש
-    st.markdown("**🪑 שחקני הספסל:**")
+    st.markdown(f"**{t('bench_title')}**")
     with st.container():
         st.markdown('<div class="bench-anchor"></div>', unsafe_allow_html=True)
-        bench_cols = st.columns(len(bench))
-        for i, p in enumerate(bench):
-            with bench_cols[i]:
-                is_active = (st.session_state.squad_swap_id == p["id"])
-                st.markdown(render_player_card_html(p, is_bench=True, is_selected=is_active), unsafe_allow_html=True)
-                btn_lbl = "✓ נבחר" if is_active else "בחר לחילוף"
-                btn_type = "primary" if is_active else "secondary"
-                if st.button(btn_lbl, key=f"sq_bench_{p['id']}", use_container_width=True, type=btn_type):
-                    handle_squad_card_click(p["id"])
+        render_clean_squad_row(bench, is_bench=True)
 
 # ---------------------------------------------------------------------
 # טאב 2: מעבדת חילופים (Transfers Lab)
@@ -1664,7 +2018,8 @@ with t_planner:
                     for g in range(next_gw, 39)
                 }
                 st.session_state.planner_captains = {}
-                st.session_state.planner_swap_out = None
+                st.session_state.planner_selected_id = None
+                st.session_state.planner_swap_active = False
                 st.session_state.planner_transfer_out = None
                 st.session_state.planner_rebuild_active = None
                 st.session_state.planner_rebuild_picks = []
@@ -1698,6 +2053,7 @@ with t_planner:
     current_sim_fts = int(st.session_state.planner_starting_fts)
     pre_fh_squad = None
     pre_fh_bank = current_sim_bank
+    active_lineup_positions = None
 
     for idx, g in enumerate(range(next_gw, max_sim_gw + 1)):
         gw_plan = st.session_state.planner_plan[g]
@@ -1716,6 +2072,15 @@ with t_planner:
         if gw_plan.get("rebuilt_squad"):
             current_sim_squad = [dict(p) for p in gw_plan["rebuilt_squad"]]
             current_sim_bank = float(gw_plan.get("rebuilt_bank", current_sim_bank))
+            active_lineup_positions = None
+
+        if gw_plan.get("lineup_positions"):
+            active_lineup_positions = dict(gw_plan["lineup_positions"])
+
+        if active_lineup_positions:
+            for sp in current_sim_squad:
+                if sp["element"] in active_lineup_positions:
+                    sp["position"] = active_lineup_positions[sp["element"]]
 
         if idx == 0:
             available_fts = current_sim_fts
@@ -1807,16 +2172,16 @@ with t_planner:
     # מדדי מחזור
     pk1, pk2, pk3, pk4, pk5 = st.columns(5)
     with pk1:
-        st.metric("חילופים זמינים", f"{cur_gw_sim['available_fts']} FT")
+        st.metric(t("ft_available"), f"{cur_gw_sim['available_fts']} FT")
     with pk2:
-        st.metric("חילופים שתוכננו", f"{cur_gw_sim['transfers_count']}")
+        st.metric(t("ft_planned"), f"{cur_gw_sim['transfers_count']}")
     with pk3:
-        hit_label = f"-{cur_gw_sim['hits_cost']} נק׳" if cur_gw_sim["hits_cost"] > 0 else "ללא"
-        st.metric("קנס מינוס (Hits)", hit_label)
+        hit_label = f"-{cur_gw_sim['hits_cost']} {t('pts')}" if cur_gw_sim["hits_cost"] > 0 else "0"
+        st.metric(t("hit_penalty"), hit_label)
     with pk4:
-        st.metric("יתרה בבנק", f"£{cur_gw_sim['bank']:.1f}m")
+        st.metric(t("bank_bal"), f"£{cur_gw_sim['bank']:.1f}m")
     with pk5:
-        st.metric("תחזית נקודות (xP)", f"{cur_gw_sim['xp']}")
+        st.metric(t("xp_pred"), f"{cur_gw_sim['xp']}")
 
     st.write("---")
 
@@ -1826,7 +2191,7 @@ with t_planner:
         current_chip_val = st.session_state.planner_plan[selected_gw]["chip"]
         chip_opts = ["ללא צ'יפ", "Wildcard", "Free Hit", "Bench Boost", "Triple Captain"]
         chosen_chip = st.selectbox(
-            f"🎮 צ'יפ למחזור {selected_gw}:",
+            f"🎮 {t('chip_for_gw')} {selected_gw}:",
             chip_opts,
             index=chip_opts.index(current_chip_val) if current_chip_val in chip_opts else 0,
             key=f"chip_select_{selected_gw}",
@@ -1837,18 +2202,23 @@ with t_planner:
 
     with c_cp2:
         if st.session_state.planner_plan[selected_gw]["transfers"]:
-            st.markdown(f"**העברות שתוכננו ל-GW {selected_gw}:**")
-            tr_texts = []
-            for o_id, i_id in st.session_state.planner_plan[selected_gw]["transfers"]:
-                tr_texts.append(f"{all_players[o_id]['name']} ⬅️ {all_players[i_id]['name']}")
-            st.caption(", ".join(tr_texts))
-            if st.button("🗑️ נקה העברות מחזור זה", key=f"clr_tr_{selected_gw}"):
+            st.markdown(f"**{t('planned_transfers_gw')} {selected_gw}:**")
+            for tr_idx, (o_id, i_id) in enumerate(list(st.session_state.planner_plan[selected_gw]["transfers"])):
+                c_tr_t, c_tr_b = st.columns([3.5, 1.5])
+                with c_tr_t:
+                    st.caption(f"🔴 {all_players[o_id]['name']} ⬅️ 🟢 {all_players[i_id]['name']}")
+                with c_tr_b:
+                    if st.button(f"✕ {t('cancel_single_transfer')}", key=f"del_tr_{selected_gw}_{tr_idx}", use_container_width=True):
+                        st.session_state.planner_plan[selected_gw]["transfers"].pop(tr_idx)
+                        st.session_state.planner_transfer_out = None
+                        st.rerun()
+            if st.button(t("clear_all_transfers"), key=f"clr_tr_{selected_gw}", use_container_width=True):
                 st.session_state.planner_plan[selected_gw]["transfers"] = []
                 st.session_state.planner_transfer_out = None
                 st.rerun()
         elif st.session_state.planner_plan[selected_gw].get("rebuilt_squad"):
-            st.success("✅ סגל נבנה מחדש מאפס למחזור זה")
-            if st.button("↩️ אפס וחזור לסגל המקורי", key=f"clr_rebuild_{selected_gw}"):
+            st.success("✅ סגל נבנה מחדש מאפס למחזור זה" if st.session_state.app_lang == "he" else "✅ Squad rebuilt from scratch for this GW")
+            if st.button("↩️ אפס וחזור לסגל המקורי" if st.session_state.app_lang == "he" else "↩️ Reset to original squad", key=f"clr_rebuild_{selected_gw}"):
                 del st.session_state.planner_plan[selected_gw]["rebuilt_squad"]
                 if "rebuilt_bank" in st.session_state.planner_plan[selected_gw]:
                     del st.session_state.planner_plan[selected_gw]["rebuilt_bank"]
@@ -1857,7 +2227,7 @@ with t_planner:
     with c_cp3:
         st.write("")
         is_rebuilding_this_gw = (st.session_state.get("planner_rebuild_active") == selected_gw)
-        btn_rebuild_lbl = "✕ סגור מצב בנייה מחדש" if is_rebuilding_this_gw else "🃏 בנה סגל מאפס (WC / FH)"
+        btn_rebuild_lbl = t("close_rebuild_btn") if is_rebuilding_this_gw else t("rebuild_btn")
         btn_rebuild_type = "secondary" if is_rebuilding_this_gw else "primary"
         if st.button(btn_rebuild_lbl, key=f"toggle_rebuild_{selected_gw}", type=btn_rebuild_type, use_container_width=True):
             if is_rebuilding_this_gw:
@@ -1874,62 +2244,84 @@ with t_planner:
 
     # פונקציות עזר למגרש הפלנר
     def execute_planner_bench_swap(p_out_id, p_in_id):
+        legal, err_msg = is_swap_legal(p_out_id, p_in_id, cur_gw_sim["squad_snapshot"])
+        if not legal:
+            st.error(f"⚠️ {err_msg}")
+            return
         snap = cur_gw_sim["squad_snapshot"]
         p_o = next((x for x in snap if x["element"] == p_out_id), None)
         p_i = next((x for x in snap if x["element"] == p_in_id), None)
         if p_o and p_i:
             p_o["position"], p_i["position"] = p_i["position"], p_o["position"]
+            if "lineup_positions" not in st.session_state.planner_plan[selected_gw]:
+                st.session_state.planner_plan[selected_gw]["lineup_positions"] = {}
+            for sp in snap:
+                st.session_state.planner_plan[selected_gw]["lineup_positions"][sp["element"]] = sp["position"]
+
             if selected_gw == next_gw:
                 orig_o = next((x for x in st.session_state.user_squad if x["element"] == p_out_id), None)
                 orig_i = next((x for x in st.session_state.user_squad if x["element"] == p_in_id), None)
                 if orig_o and orig_i:
                     orig_o["position"], orig_i["position"] = orig_i["position"], orig_o["position"]
-            st.session_state.planner_swap_out = None
-            st.toast(f"✅ חילוף בוצע: {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
+            st.session_state.planner_selected_id = None
+            st.session_state.planner_swap_active = False
+            st.toast(f"✅ {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
             st.rerun()
-
-    def handle_planner_card_click(target_id):
-        if st.session_state.planner_swap_out is None:
-            st.session_state.planner_swap_out = target_id
-            st.rerun()
-        elif st.session_state.planner_swap_out == target_id:
-            st.session_state.planner_swap_out = None
-            st.rerun()
-        else:
-            execute_planner_bench_swap(st.session_state.planner_swap_out, target_id)
 
     def set_planner_captain(target_id):
         if selected_gw not in st.session_state.planner_captains:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["cap"] = target_id
-        st.session_state.planner_swap_out = None
-        st.toast(f"👑 {all_players[target_id]['name']} הוגדר לקפטן (C) עבור GW {selected_gw}!")
+        st.session_state.planner_selected_id = None
+        st.toast(f"👑 {all_players[target_id]['name']} (C) GW {selected_gw}")
         st.rerun()
 
     def set_planner_vice_captain(target_id):
         if selected_gw not in st.session_state.planner_captains:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["vc"] = target_id
-        st.session_state.planner_swap_out = None
-        st.toast(f"🥈 {all_players[target_id]['name']} הוגדר לסגן קפטן (VC) עבור GW {selected_gw}!")
+        st.session_state.planner_selected_id = None
+        st.toast(f"🥈 {all_players[target_id]['name']} (VC) GW {selected_gw}")
         st.rerun()
 
     # רינדור מגרש פלנר נקי
-    def render_clean_planner_row(player_list):
+    def render_clean_planner_row(player_list, is_bench=False):
         if not player_list:
             return
-        cols = st.columns(len(player_list))
+        if len(player_list) == 1:
+            cols = [st.columns([2, 1, 2])[1]]
+        else:
+            cols = st.columns(len(player_list))
         for i, p in enumerate(player_list):
             with cols[i]:
-                is_sw_active = (st.session_state.planner_swap_out == p["id"])
-                is_tr_active = (st.session_state.planner_transfer_out == p["id"])
-
-                st.markdown(render_player_card_html(p, is_selected=is_sw_active, is_transfer_selected=is_tr_active, target_gw=selected_gw), unsafe_allow_html=True)
+                is_this_selected = (st.session_state.planner_selected_id == p["id"])
+                is_tr_selected = (st.session_state.planner_transfer_out == p["id"])
+                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected, is_transfer_selected=is_tr_selected, target_gw=selected_gw), unsafe_allow_html=True)
                 
-                btn_lbl = "✓ נבחר" if (is_sw_active or is_tr_active) else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else "בחר"))
-                btn_type = "primary" if (is_sw_active or is_tr_active) else "secondary"
-                if st.button(btn_lbl, key=f"pl_pick_{p['id']}_{selected_gw}", use_container_width=True, type=btn_type):
-                    handle_planner_card_click(p["id"])
+                if st.session_state.planner_swap_active:
+                    if is_this_selected:
+                        if st.button(t("btn_selected"), key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
+                            st.session_state.planner_swap_active = False
+                            st.session_state.planner_selected_id = None
+                            st.rerun()
+                    else:
+                        legal, reason = is_swap_legal(st.session_state.planner_selected_id, p["id"], cur_gw_sim["squad_snapshot"])
+                        if legal:
+                            if st.button(t("btn_swap_here"), key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
+                                execute_planner_bench_swap(st.session_state.planner_selected_id, p["id"])
+                        else:
+                            st.button(f"✕ {reason}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, disabled=True)
+                else:
+                    btn_lbl = t("btn_selected") if is_this_selected else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else t("btn_select")))
+                    btn_type = "primary" if is_this_selected else "secondary"
+                    if st.button(btn_lbl, key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type=btn_type):
+                        if is_this_selected:
+                            st.session_state.planner_selected_id = None
+                            st.session_state.planner_transfer_out = None
+                        else:
+                            st.session_state.planner_selected_id = p["id"]
+                            st.session_state.planner_transfer_out = None
+                        st.rerun()
 
     # בדיקה האם נמצאים במצב בנייה מחדש מאפס עבור מחזור זה
     if st.session_state.get("planner_rebuild_active") == selected_gw:
@@ -2232,7 +2624,19 @@ with t_planner:
                 st.warning(f"לא נמצאו שחקנים מתאימים בעמדת {pos_title} במסגרת התקציב של £{max_allowed_price:.1f}m.")
     else:
         # מגרש פלנר
-        st.markdown(f"#### 🏟️ הרכב הסגל על המגרש עבור Gameweek {selected_gw}")
+        if st.session_state.planner_swap_active and st.session_state.planner_selected_id:
+            p_pl_sw_from = all_players.get(st.session_state.planner_selected_id)
+            if p_pl_sw_from:
+                c_sw_info, c_sw_canc = st.columns([4, 1])
+                with c_sw_info:
+                    st.info(f"🔁 **{t('swap_banner_title')}** {t('swap_banner_desc')} **{p_pl_sw_from['name']}** ({p_pl_sw_from['team']} | {p_pl_sw_from['pos']})")
+                with c_sw_canc:
+                    if st.button(t("cancel_swap"), key=f"pl_cancel_swap_top_{selected_gw}", use_container_width=True, type="primary"):
+                        st.session_state.planner_swap_active = False
+                        st.session_state.planner_selected_id = None
+                        st.rerun()
+
+        st.markdown(f"#### 🏟️ {t('tab_squad')} — Gameweek {selected_gw}")
         with st.container():
             st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
             # חלוצים
@@ -2247,72 +2651,61 @@ with t_planner:
             # שוער
             pl_gks = [p for p in cur_gw_sim["starters"] if p["pos_code"] == 1]
             if pl_gks:
-                gk_c = st.columns([2, 1, 2])[1]
-                with gk_c:
-                    p = pl_gks[0]
-                    is_sw_active = (st.session_state.planner_swap_out == p["id"])
-                    is_tr_active = (st.session_state.planner_transfer_out == p["id"])
-                    st.markdown(render_player_card_html(p, is_selected=is_sw_active, is_transfer_selected=is_tr_active, target_gw=selected_gw), unsafe_allow_html=True)
-                    btn_lbl = "✓ נבחר" if (is_sw_active or is_tr_active) else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else "בחר"))
-                    btn_type = "primary" if (is_sw_active or is_tr_active) else "secondary"
-                    if st.button(btn_lbl, key=f"pl_pick_{p['id']}_{selected_gw}", use_container_width=True, type=btn_type):
-                        handle_planner_card_click(p["id"])
+                render_clean_planner_row(pl_gks)
 
         # -----------------------------------------------------------------
         # שורת ניהול והעברות בפלנר - ממוקמת בלעדית מתחת למגרש!
         # -----------------------------------------------------------------
-        if st.session_state.planner_swap_out is not None:
-            p_pl_sel = all_players.get(st.session_state.planner_swap_out)
+        if st.session_state.planner_selected_id is not None and not st.session_state.planner_swap_active and not st.session_state.planner_transfer_out:
+            p_pl_sel = all_players.get(st.session_state.planner_selected_id)
             if p_pl_sel:
                 is_pl_starter = any(p["id"] == p_pl_sel["id"] for p in cur_gw_sim["starters"])
+                j_svg_pl = get_jersey_svg(p_pl_sel["team"], is_gk=(p_pl_sel["pos_code"] == 1))
                 render_html(
                     f"""
                     <div class="action-bar-under-pitch">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:gap:6px;">
-                            <div>
-                                <span style="font-size:14px; font-weight:700; color:#38bdf8;">⚙️ שורת ניהול והעברות (GW {selected_gw}):</span>
-                                <b style="color:#ffffff; margin-right:6px; font-size:14px;">{p_pl_sel['name']}</b>
-                                <span class="ltr-tag" style="color:#94a3b8; font-size:12px;">({p_pl_sel['team']} | {p_pl_sel['pos']} | £{p_pl_sel['cost']}m)</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                {j_svg_pl}
+                                <div>
+                                    <span style="font-size:13px; font-weight:700; color:#38bdf8;">{t('action_bar_title')} (GW {selected_gw}):</span>
+                                    <b style="color:#ffffff; font-size:14px; margin:0 4px;">{p_pl_sel['name']}</b>
+                                    <span class="ltr-tag" style="color:#94a3b8; font-size:12px;">({p_pl_sel['team']} | {p_pl_sel['pos']} | £{p_pl_sel['cost']}m | xP: {p_pl_sel['xp']})</span>
+                                </div>
                             </div>
                             <div style="font-size:11px; color:#cbd5e1;">
-                                בחר פעולה עבור שחקן זה במחזור {selected_gw}:
+                                {t('action_bar_hint')}
                             </div>
                         </div>
                     </div>
                     """
                 )
 
-                c_pa1, c_pa2, c_pa3, c_pa4, c_pa5 = st.columns([1, 1, 1.3, 1.2, 0.8])
+                c_pa1, c_pa2, c_pa3, c_pa4, c_pa5 = st.columns([1, 1, 1.2, 1.2, 0.8])
                 with c_pa1:
                     if is_pl_starter:
-                        if st.button("🅲 קפטן (C)", key=f"pl_set_c_{selected_gw}", use_container_width=True, type="primary"):
+                        if st.button(f"👑 {t('btn_captain')}", key=f"pl_set_c_{selected_gw}", use_container_width=True, type="primary"):
                             set_planner_captain(p_pl_sel["id"])
                     else:
-                        st.button("🅲 רק להרכב", disabled=True, use_container_width=True)
+                        st.button(f"👑 {t('btn_captain')}", disabled=True, help=t("starters_only_cap"), use_container_width=True)
                 with c_pa2:
                     if is_pl_starter:
-                        if st.button("🆅 סגן (VC)", key=f"pl_set_vc_{selected_gw}", use_container_width=True):
+                        if st.button(f"🥈 {t('btn_vc')}", key=f"pl_set_vc_{selected_gw}", use_container_width=True):
                             set_planner_vice_captain(p_pl_sel["id"])
                     else:
-                        st.button("🆅 רק להרכב", disabled=True, use_container_width=True)
+                        st.button(f"🥈 {t('btn_vc')}", disabled=True, help=t("starters_only_cap"), use_container_width=True)
                 with c_pa3:
-                    is_drawer_open = (st.session_state.planner_transfer_out == p_pl_sel["id"])
-                    tr_btn_lbl = "✕ סגור שוק" if is_drawer_open else "🔄 העברה מהשוק"
-                    if st.button(tr_btn_lbl, key=f"pl_open_tr_{selected_gw}", use_container_width=True):
-                        if is_drawer_open:
-                            st.session_state.planner_transfer_out = None
-                        else:
-                            st.session_state.planner_transfer_out = p_pl_sel["id"]
+                    if st.button(t("btn_sub"), key=f"pl_open_sub_{selected_gw}", use_container_width=True, type="primary"):
+                        st.session_state.planner_swap_active = True
                         st.rerun()
                 with c_pa4:
-                    eligible_pl_swaps = cur_gw_sim["bench"] if is_pl_starter else cur_gw_sim["starters"]
-                    pl_swap_dict = {p["id"]: f"{p['name']} ({p['pos']})" for p in eligible_pl_swaps}
-                    target_pl_id = st.selectbox("החלף עם:", list(pl_swap_dict.keys()), format_func=lambda x: pl_swap_dict[x], key="pl_quick_swap_sel", label_visibility="collapsed")
-                    if st.button("בצע חילוף ⇄", key=f"pl_do_swap_{selected_gw}", use_container_width=True):
-                        execute_planner_bench_swap(p_pl_sel["id"], target_pl_id)
+                    if st.button(t("btn_transfer"), key=f"pl_open_tr_{selected_gw}", use_container_width=True):
+                        st.session_state.planner_transfer_out = p_pl_sel["id"]
+                        st.rerun()
                 with c_pa5:
-                    if st.button("✕ ביטול", key=f"pl_cancel_{selected_gw}", use_container_width=True):
-                        st.session_state.planner_swap_out = None
+                    if st.button(f"✕ {t('btn_cancel')}", key=f"pl_cancel_{selected_gw}", use_container_width=True):
+                        st.session_state.planner_selected_id = None
+                        st.session_state.planner_swap_active = False
                         st.session_state.planner_transfer_out = None
                         st.rerun()
 
@@ -2327,10 +2720,10 @@ with t_planner:
                 <div class="transfer-drawer">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <div>
-                            <span style="font-size:15px; font-weight:700; color:#38bdf8;">🛒 חלון העברות שוק למחזור {selected_gw}</span>
+                            <span style="font-size:15px; font-weight:700; color:#38bdf8;">{t('transfer_drawer_title')} (GW {selected_gw})</span>
                             <div style="font-size:12px; color:#cbd5e1;">
-                                מכירת שחקן: <b style="color:#ef4444;">{p_tr_out['name']}</b> ({p_tr_out['pos']} - £{p_tr_out['cost']}m) | 
-                                תקציב מקסימלי לרכש: <b style="color:#10b981;">£{max_tr_budget}m</b>
+                                {t('selling_player')} <b style="color:#ef4444;">{p_tr_out['name']}</b> ({p_tr_out['pos']} - £{p_tr_out['cost']}m) | 
+                                {t('max_budget')} <b style="color:#10b981;">£{max_tr_budget:.1f}m</b>
                             </div>
                         </div>
                     </div>
@@ -2340,11 +2733,11 @@ with t_planner:
 
             b_close_col, b_sch_col = st.columns([1, 3])
             with b_close_col:
-                if st.button("✕ סגור חלון העברות", key="close_tr_drawer", type="primary", use_container_width=True):
+                if st.button(t("close_drawer"), key=f"close_tr_drawer_{selected_gw}", type="primary", use_container_width=True):
                     st.session_state.planner_transfer_out = None
                     st.rerun()
             with b_sch_col:
-                tr_search = st.text_input("חיפוש שחקן לרכש (שם או קבוצה):", key=f"tr_search_{selected_gw}", placeholder="הקלד שם או קבוצה באנגלית...").strip().lower()
+                tr_search = st.text_input(t("search_placeholder"), key=f"tr_search_{selected_gw}").strip().lower()
 
             eligible_pool = [
                 p for p in all_players.values()
@@ -2360,7 +2753,7 @@ with t_planner:
             recommended_picks = sorted(eligible_pool, key=lambda x: x["score"], reverse=True)[:3]
 
             if recommended_picks:
-                st.markdown("##### ⭐ שחקנים מומלצים לרכש (Recommended):")
+                st.markdown(f"##### {t('rec_header')}")
                 rec_cols = st.columns(len(recommended_picks))
                 for r_idx, r_p in enumerate(recommended_picks):
                     with rec_cols[r_idx]:
@@ -2370,61 +2763,54 @@ with t_planner:
                             <div class="accessible-card" style="text-align:center; padding:10px;">
                                 {r_jersey}
                                 <b>{r_p['name']}</b> ({r_p['team']})<br>
-                                <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']}m | xP: {r_p['xp']}</span>
+                                <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
                                 <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{r_p['reason']}</div>
                                 <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
                             </div>
                             """
                         )
-                        if st.button("➕ קנה שחקן זה", key=f"buy_rec_{r_p['id']}_{selected_gw}", use_container_width=True):
+                        if st.button(f"{t('buy_player_btn')} {r_p['name']}", key=f"buy_rec_{r_p['id']}_{selected_gw}", use_container_width=True):
                             st.session_state.planner_plan[selected_gw]["transfers"].append(
                                 (p_tr_out["id"], r_p["id"])
                             )
                             st.session_state.planner_transfer_out = None
-                            st.session_state.planner_swap_out = None
-                            st.toast(f"✅ נרכש בהצלחה: {r_p['name']}!")
+                            st.session_state.planner_selected_id = None
+                            st.session_state.planner_swap_active = False
+                            st.toast(f"✅ {r_p['name']} ({r_p['team']})")
                             st.rerun()
 
             st.write("")
             all_sorted_by_pts = sorted(eligible_pool, key=lambda x: x["total_points"], reverse=True)
 
             if all_sorted_by_pts:
-                pick_opts = {p["id"]: f"{p['name']} ({p['team']}) | £{p['cost']}m | {p['total_points']} נק׳ | xP: {p['xp']} | מול: {p['next_match']}" for p in all_sorted_by_pts}
+                pick_opts = {p["id"]: f"{p['name']} ({p['team']}) | £{p['cost']:.1f}m | {p['total_points']} {t('pts')} | xP: {p['xp']} | {t('against')} {p['next_match']}" for p in all_sorted_by_pts}
                 c_sel_p, c_btn_p = st.columns([3, 1])
                 with c_sel_p:
                     chosen_pool_id = st.selectbox(
-                        "או בחר שחקן לרכש מהרשימה המלאה:",
+                        t("all_cands_label"),
                         list(pick_opts.keys()),
                         format_func=lambda x: pick_opts[x],
                         key=f"pool_sel_{selected_gw}",
                     )
                 with c_btn_p:
                     st.write("")
-                    if st.button("➕ אשר העברה", key=f"confirm_pool_{selected_gw}", use_container_width=True):
+                    if st.button(t("confirm_transfer_btn"), key=f"confirm_pool_{selected_gw}", use_container_width=True):
                         st.session_state.planner_plan[selected_gw]["transfers"].append(
                             (p_tr_out["id"], chosen_pool_id)
                         )
                         st.session_state.planner_transfer_out = None
-                        st.session_state.planner_swap_out = None
-                        st.toast(f"✅ בוצעה העברה: {p_tr_out['name']} ⬅️ {all_players[chosen_pool_id]['name']}!")
+                        st.session_state.planner_selected_id = None
+                        st.session_state.planner_swap_active = False
+                        st.toast(f"✅ {p_tr_out['name']} ⬅️ {all_players[chosen_pool_id]['name']}")
                         st.rerun()
             else:
-                st.warning("לא נמצאו שחקנים מתאימים במסגרת התקציב.")
+                st.warning("לא נמצאו שחקנים מתאימים במסגרת התקציב." if st.session_state.app_lang == "he" else "No eligible players found within budget.")
 
         # ספסל ב-Planner
-        st.markdown("**🪑 שחקני ספסל:**")
+        st.markdown(f"**{t('bench_title')}**")
         with st.container():
             st.markdown('<div class="bench-anchor"></div>', unsafe_allow_html=True)
-            pl_bench_cols = st.columns(len(cur_gw_sim["bench"]))
-            for i, p in enumerate(cur_gw_sim["bench"]):
-                with pl_bench_cols[i]:
-                    is_sw_active = (st.session_state.planner_swap_out == p["id"])
-                    is_tr_active = (st.session_state.planner_transfer_out == p["id"])
-                    st.markdown(render_player_card_html(p, is_bench=True, is_selected=is_sw_active, is_transfer_selected=is_tr_active, target_gw=selected_gw), unsafe_allow_html=True)
-                    btn_lbl = "✓ נבחר" if (is_sw_active or is_tr_active) else "בחר לחילוף"
-                    btn_type = "primary" if (is_sw_active or is_tr_active) else "secondary"
-                    if st.button(btn_lbl, key=f"pl_bench_{p['id']}_{selected_gw}", use_container_width=True, type=btn_type):
-                        handle_planner_card_click(p["id"])
+            render_clean_planner_row(cur_gw_sim["bench"], is_bench=True)
 
 # ---------------------------------------------------------------------
 # טאב 7: 🏆 מרגל מיני-ליגות (Mini-League Spy)
