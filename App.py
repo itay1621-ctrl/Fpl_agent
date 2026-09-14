@@ -73,13 +73,15 @@ def get_jersey_svg(team_code, is_gk=False):
             stripe_defs = ""
             fill_attr = f'fill="{c1}"'
 
-    return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="34" height="30" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
+    return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="36" height="32" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
 
 # =====================================================================
 # 3. תמיכה דו-לשונית מלאה (i18n): עברית / אנגלית
 # =====================================================================
 if "app_lang" not in st.session_state:
     st.session_state.app_lang = "he"
+if "app_theme" not in st.session_state:
+    st.session_state.app_theme = "light"
 
 TRANSLATIONS = {
     "he": {
@@ -289,6 +291,11 @@ TRANSLATIONS = {
         "rb_no_cands": "לא נמצאו שחקנים מתאימים בעמדת {pos} במסגרת התקציב של £{budget}m.",
         "rb_add_cand": "➕ הוסף שחקן זה",
         "rb_btn_chosen": "✓ נבחרה",
+        "gw_fixtures_title": "משחקי מחזור {gw}",
+        "no_fixtures_gw": "אין משחקים מתוזמנים למחזור זה",
+        "matches": "משחקים",
+        "theme_dark": "🌙 מצב כהה",
+        "theme_light": "☀️ מצב בהיר",
     },
     "en": {
         "page_title": "FPL Elite Scout | Decision Engine & Squad Spy",
@@ -496,6 +503,11 @@ TRANSLATIONS = {
         "rb_no_cands": "No eligible players found in position {pos} within £{budget}m budget.",
         "rb_add_cand": "➕ Add this player",
         "rb_btn_chosen": "✓ Selected",
+        "gw_fixtures_title": "Gameweek {gw} Fixtures",
+        "no_fixtures_gw": "No fixtures scheduled for this GW",
+        "matches": "matches",
+        "theme_dark": "🌙 Dark Mode",
+        "theme_light": "☀️ Light Mode",
     },
 }
 
@@ -510,21 +522,100 @@ def get_player_reason(p):
     return p.get("reason_he", p.get("reason", ""))
 
 # =====================================================================
+# =====================================================================
 # 4. עיצוב CSS מלא: נגישות, RTL / LTR דינמי, רספונסיביות מובייל
 # =====================================================================
-css_template = """
-<style>
-/* --- 1. הסתרת מיתוג Streamlit לחלוטין (White-Labeling) --- */
-#MainMenu {visibility: hidden !important; display: none !important;}
-header {visibility: hidden !important; display: none !important;}
-footer {visibility: hidden !important; display: none !important;}
-.stDeployButton {display: none !important;}
-div[data-testid="stDecoration"] {display: none !important;}
-div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
-div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+is_light = (st.session_state.get("app_theme", "light") == "light")
 
-:root {
+if is_light:
+    root_vars = """
+    --bg-main: #f1f5f9;
+    --bg-body-grad: radial-gradient(circle at 50% 0%, #e2e8f0 0%, #f1f5f9 100%);
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
+    --accent-mint: #059669;
+    --accent-cyan: #0284c7;
+    --accent-magenta: #e11d48;
+    --accent-purple: #37003c;
+    --accent-gold: #d97706;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-text: #0f172a;
+    --input-focus-border: #059669;
+    --input-focus-shadow: rgba(5, 150, 105, 0.2);
+    --tab-bg: #ffffff;
+    --tab-border: #cbd5e1;
+    --tab-text: #64748b;
+    --tab-hover-bg: #f1f5f9;
+    --tab-hover-text: #0f172a;
+    --tab-active-bg: #15803d;
+    --tab-active-text: #ffffff;
+    --tab-active-border: #15803d;
+    --tab-active-shadow: rgba(21, 128, 61, 0.25);
+    --gate-bg: #ffffff;
+    --gate-border: #10b981;
+    --gate-shadow: 0 16px 36px rgba(0,0,0,0.08), 0 0 24px rgba(16, 185, 129, 0.12);
+    --pitch-border: #16a34a;
+    --pitch-bg: radial-gradient(ellipse at 50% 50%, #16a34a 0%, #15803d 100%), repeating-linear-gradient(0deg, #15803d 0px, #15803d 48px, #166534 48px, #166534 96px);
+    --pitch-shadow: 0 12px 36px rgba(22, 101, 52, 0.2);
+    --pitch-line: rgba(255, 255, 255, 0.5);
+    --bench-bg: #ffffff;
+    --bench-border: #10b981;
+    --bench-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    --bench-dugout-badge-bg: #f0fdf4;
+    --bench-dugout-badge-border: #10b981;
+    --p-card-bg: #ffffff;
+    --p-card-border: #cbd5e1;
+    --p-card-border-bottom: #e2e8f0;
+    --p-card-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    --p-name-plate-bg: #0f172a;
+    --p-name-plate-text: #ffffff;
+    --p-card-btn-bg: #f8fafc;
+    --p-card-btn-border: #cbd5e1;
+    --p-card-btn-text: #0f172a;
+    --p-card-btn-hover-bg: #f1f5f9;
+    --p-card-btn-hover-text: #059669;
+    --card-bench-bg: #f8fafc;
+    --card-bench-border: #10b981;
+    --card-bench-btn-bg: #ffffff;
+    --card-bench-btn-border: #10b981;
+    --card-bench-btn-text: #059669;
+    --btn-general-bg: #ffffff;
+    --btn-general-border: #10b981;
+    --btn-general-text: #0f172a;
+    --btn-general-hover-bg: #f0fdf4;
+    --btn-general-hover-text: #059669;
+    --fxt-row-bg: #f8fafc;
+    --fxt-row-border: #e2e8f0;
+    --fxt-row-hover: #f1f5f9;
+    --fxt-card-bg: #ffffff;
+    --fxt-card-border: #cbd5e1;
+    --badge-ko-bg: #f1f5f9;
+    --badge-mint-bg: rgba(16, 185, 129, 0.12);
+    --badge-mint-border: #10b981;
+    --metric-bg: #ffffff;
+    --metric-border: #cbd5e1;
+    --kpi-score-bg: #ffffff;
+    --kpi-score-border: #10b981;
+    --kpi-score-shadow: rgba(16, 185, 129, 0.15);
+    --kpi-xp-bg: #ffffff;
+    --kpi-xp-border: #0284c7;
+    --kpi-xp-shadow: rgba(2, 132, 199, 0.15);
+    --kpi-bank-bg: #ffffff;
+    --kpi-bank-border: #eab308;
+    --kpi-bank-shadow: rgba(234, 179, 8, 0.15);
+    --kpi-rank-bg: #ffffff;
+    --kpi-rank-border: #f43f5e;
+    --kpi-rank-shadow: rgba(244, 63, 94, 0.15);
+    """
+else:
+    root_vars = """
     --bg-main: #0b0714;
+    --bg-body-grad: radial-gradient(circle at 50% -10%, rgba(55, 0, 60, 0.45) 0%, transparent 60%);
     --bg-card: rgba(26, 15, 46, 0.85);
     --bg-card-hover: rgba(38, 22, 66, 0.92);
     --border-color: rgba(168, 85, 247, 0.2);
@@ -536,17 +627,103 @@ div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none 
     --accent-magenta: #e90052;
     --accent-purple: #37003c;
     --accent-gold: #ffd700;
+    --input-bg: #140b24;
+    --input-border: rgba(168, 85, 247, 0.3);
+    --input-text: #ffffff;
+    --input-focus-border: #00ff87;
+    --input-focus-shadow: rgba(0, 255, 135, 0.3);
+    --tab-bg: #110722;
+    --tab-border: rgba(168, 85, 247, 0.25);
+    --tab-text: #a79bc8;
+    --tab-hover-bg: rgba(55, 0, 60, 0.5);
+    --tab-hover-text: #ffffff;
+    --tab-active-bg: linear-gradient(135deg, #37003c 0%, #580060 100%);
+    --tab-active-text: #00ff87;
+    --tab-active-border: #00ff87;
+    --tab-active-shadow: rgba(0, 255, 135, 0.35);
+    --gate-bg: linear-gradient(145deg, #1c0c36 0%, #0f071c 100%);
+    --gate-border: rgba(0, 255, 135, 0.4);
+    --gate-shadow: 0 16px 36px rgba(0,0,0,0.7), 0 0 28px rgba(0, 255, 135, 0.15);
+    --pitch-border: rgba(0, 255, 135, 0.45);
+    --pitch-bg: radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.9) 0%, rgba(6, 44, 20, 0.98) 100%), repeating-linear-gradient(0deg, #104822 0px, #104822 48px, #0c3b1b 48px, #0c3b1b 96px);
+    --pitch-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12);
+    --pitch-line: rgba(255, 255, 255, 0.22);
+    --bench-bg: linear-gradient(145deg, #1c0c36 0%, #2e1256 45%, #16092b 100%);
+    --bench-border: #00ff87;
+    --bench-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 135, 0.35);
+    --bench-dugout-badge-bg: linear-gradient(90deg, rgba(55, 0, 60, 0.85) 0%, rgba(0, 255, 135, 0.2) 100%);
+    --bench-dugout-badge-border: #00ff87;
+    --p-card-bg: rgba(20, 11, 38, 0.95);
+    --p-card-border: rgba(255, 255, 255, 0.14);
+    --p-card-border-bottom: rgba(255, 255, 255, 0.06);
+    --p-card-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    --p-name-plate-bg: rgba(0, 0, 0, 0.6);
+    --p-name-plate-text: #ffffff;
+    --p-card-btn-bg: rgba(14, 7, 28, 0.98);
+    --p-card-btn-border: rgba(255, 255, 255, 0.14);
+    --p-card-btn-text: #ffffff;
+    --p-card-btn-hover-bg: #251046;
+    --p-card-btn-hover-text: #00ff87;
+    --card-bench-bg: linear-gradient(145deg, #28124c 0%, #190a30 100%);
+    --card-bench-border: #00ff87;
+    --card-bench-btn-bg: #190a30;
+    --card-bench-btn-border: #00ff87;
+    --card-bench-btn-text: #00ff87;
+    --btn-general-bg: rgba(26, 15, 46, 0.85);
+    --btn-general-border: #00ff87;
+    --btn-general-text: #ffffff;
+    --btn-general-hover-bg: rgba(45, 20, 75, 0.95);
+    --btn-general-hover-text: #00ff87;
+    --fxt-row-bg: rgba(20, 11, 38, 0.7);
+    --fxt-row-border: rgba(168, 85, 247, 0.15);
+    --fxt-row-hover: rgba(35, 18, 65, 0.85);
+    --fxt-card-bg: rgba(26, 15, 46, 0.85);
+    --fxt-card-border: rgba(168, 85, 247, 0.2);
+    --badge-ko-bg: rgba(55, 0, 60, 0.6);
+    --badge-mint-bg: rgba(0, 255, 135, 0.15);
+    --badge-mint-border: rgba(0, 255, 135, 0.35);
+    --metric-bg: rgba(26, 15, 46, 0.75);
+    --metric-border: rgba(168, 85, 247, 0.2);
+    --kpi-score-bg: linear-gradient(135deg, rgba(0, 255, 135, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    --kpi-score-border: #00ff87;
+    --kpi-score-shadow: rgba(0, 255, 135, 0.25);
+    --kpi-xp-bg: linear-gradient(135deg, rgba(2, 239, 255, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    --kpi-xp-border: #02efff;
+    --kpi-xp-shadow: rgba(2, 239, 255, 0.25);
+    --kpi-bank-bg: linear-gradient(135deg, rgba(250, 204, 21, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    --kpi-bank-border: #facc15;
+    --kpi-bank-shadow: rgba(250, 204, 21, 0.25);
+    --kpi-rank-bg: linear-gradient(135deg, rgba(233, 0, 82, 0.18) 0%, rgba(55, 0, 60, 0.95) 100%);
+    --kpi-rank-border: #ff2882;
+    --kpi-rank-shadow: rgba(233, 0, 82, 0.28);
+    """
+
+css_template = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* --- 1. הסתרת מיתוג Streamlit לחלוטין (White-Labeling) --- */
+#MainMenu {visibility: hidden !important; display: none !important;}
+header {visibility: hidden !important; display: none !important;}
+footer {visibility: hidden !important; display: none !important;}
+.stDeployButton {display: none !important;}
+div[data-testid="stDecoration"] {display: none !important;}
+div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+
+:root {
+__ROOT_VARS__
 }
 
-/* --- תמיכה מושלמת ועקבית ב-RTL / LTR וערכת נושא רשמית Premier League --- */
+/* --- תמיכה מושלמת ועקבית ב-RTL / LTR ופונט מודרני --- */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     background-color: var(--bg-main) !important;
-    background-image: radial-gradient(circle at 50% -10%, rgba(55, 0, 60, 0.45) 0%, transparent 60%) !important;
+    background-image: var(--bg-body-grad) !important;
     background-attachment: fixed !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: var(--text-primary);
+    font-family: 'Heebo', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: var(--text-primary) !important;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -591,7 +768,7 @@ div[data-testid="stHorizontalBlock"] > div {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #ffffff !important;
+    color: var(--text-primary) !important;
     font-weight: 800 !important;
     letter-spacing: -0.3px !important;
 }
@@ -606,7 +783,7 @@ div[data-testid="stRadio"] label {
     text-align: __ALIGN__ !important;
     width: 100% !important;
     font-weight: 700 !important;
-    color: #e2d9f3 !important;
+    color: var(--text-secondary) !important;
     font-size: 13px !important;
 }
 
@@ -617,16 +794,16 @@ div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background-color: #140b24 !important;
-    border: 1px solid rgba(168, 85, 247, 0.3) !important;
-    color: #ffffff !important;
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--input-text) !important;
     border-radius: 8px !important;
 }
 
 div[data-baseweb="select"]:focus-within,
 div[data-baseweb="input"]:focus-within {
-    border-color: #00ff87 !important;
-    box-shadow: 0 0 10px rgba(0, 255, 135, 0.3) !important;
+    border-color: var(--input-focus-border) !important;
+    box-shadow: 0 0 10px var(--input-focus-shadow) !important;
 }
 
 div[role="radiogroup"] {
@@ -637,8 +814,8 @@ div[role="radiogroup"] {
 [data-testid="stMetric"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background: rgba(26, 15, 46, 0.75) !important;
-    border: 1px solid rgba(168, 85, 247, 0.2) !important;
+    background: var(--metric-bg) !important;
+    border: 1px solid var(--metric-border) !important;
     border-radius: 12px !important;
     padding: 10px 14px !important;
 }
@@ -649,20 +826,27 @@ div[role="radiogroup"] {
     text-align: __ALIGN__ !important;
     justify-content: flex-start !important;
 }
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
+}
+[data-testid="stMetricValue"] {
+    color: var(--text-primary) !important;
+    font-weight: 900 !important;
+}
 
 div[data-testid="stAlert"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     border-radius: 10px !important;
-    border: 1px solid rgba(168, 85, 247, 0.25) !important;
-    background: rgba(26, 15, 46, 0.8) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-card) !important;
 }
 
 div[data-testid="stExpander"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background: rgba(26, 15, 46, 0.85) !important;
-    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 12px !important;
 }
 
@@ -670,8 +854,8 @@ div[data-testid="stDataFrame"] {
     direction: __DIR__ !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    border: 1px solid rgba(168, 85, 247, 0.25) !important;
-    background: rgba(26, 15, 46, 0.65) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-card) !important;
 }
 
 /* בידוד LTR עבור נתונים באנגלית, מספרים, תגיות מחיר ויריבות */
@@ -681,12 +865,12 @@ div[data-testid="stDataFrame"] {
     display: inline-block;
 }
 
-/* --- 2. טאבים רשמיים בסגנון ה-Premier League --- */
+/* --- 2. טאבים רשמיים --- */
 div[data-baseweb="tab-list"] {
-    background: #110722 !important;
+    background: var(--tab-bg) !important;
     border-radius: 12px !important;
     padding: 5px 6px !important;
-    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    border: 1px solid var(--tab-border) !important;
     gap: 5px !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
@@ -695,7 +879,7 @@ div[data-baseweb="tab-list"] {
     -ms-overflow-style: none !important;
     margin-bottom: 16px !important;
     direction: __DIR__ !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06) !important;
 }
 div[data-baseweb="tab-list"]::-webkit-scrollbar {
     display: none !important;
@@ -705,8 +889,8 @@ div[data-baseweb="tab-list"]::-webkit-scrollbar {
 button[data-baseweb="tab"] {
     border-radius: 8px !important;
     padding: 7px 13px !important;
-    color: #a79bc8 !important;
-    font-size: 12.5px !important;
+    color: var(--tab-text) !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     transition: all 0.2s ease !important;
     border: none !important;
@@ -714,14 +898,14 @@ button[data-baseweb="tab"] {
     flex-shrink: 0 !important;
 }
 button[data-baseweb="tab"]:hover {
-    color: #ffffff !important;
-    background: rgba(55, 0, 60, 0.5) !important;
+    color: var(--tab-hover-text) !important;
+    background: var(--tab-hover-bg) !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    color: #00ff87 !important;
-    background: linear-gradient(135deg, #37003c 0%, #580060 100%) !important;
-    border: 1.5px solid #00ff87 !important;
-    box-shadow: 0 2px 14px rgba(0, 255, 135, 0.35) !important;
+    color: var(--tab-active-text) !important;
+    background: var(--tab-active-bg) !important;
+    border: 1.5px solid var(--tab-active-border) !important;
+    box-shadow: 0 2px 12px var(--tab-active-shadow) !important;
 }
 div[data-baseweb="tab-highlight"],
 div[data-baseweb="tab-border"] {
@@ -761,17 +945,17 @@ div[data-testid="stTabs"] div[data-baseweb="tab-list"] ~ div:not([data-baseweb="
 
 /* --- 3. כרטיס כניסה / שער --- */
 .gate-card {
-    background: linear-gradient(145deg, #1c0c36 0%, #0f071c 100%);
-    border: 1.5px solid rgba(0, 255, 135, 0.4);
+    background: var(--gate-bg);
+    border: 1.5px solid var(--gate-border);
     border-radius: 20px;
     padding: 30px 22px;
     margin: 20px auto;
     max-width: 560px;
     text-align: center;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.7), 0 0 28px rgba(0, 255, 135, 0.15);
+    box-shadow: var(--gate-shadow);
 }
 
-/* --- 4. מדדי KPI בראש האתר - צבעוניות רשמית של שידורי ה-PL --- */
+/* --- 4. מדדי KPI בראש האתר --- */
 .kpi-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -783,70 +967,64 @@ div[data-testid="stTabs"] div[data-baseweb="tab-list"] ~ div:not([data-baseweb="
     border-radius: 14px;
     padding: 14px 12px;
     text-align: center;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .kpi-card:hover {
     transform: translateY(-2px);
 }
 .kpi-card-score {
-    background: linear-gradient(135deg, rgba(0, 255, 135, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
-    border: 1.5px solid #00ff87;
-    box-shadow: 0 6px 20px rgba(0, 255, 135, 0.25);
+    background: var(--kpi-score-bg) !important;
+    border: 1.5px solid var(--kpi-score-border) !important;
+    box-shadow: 0 6px 20px var(--kpi-score-shadow) !important;
 }
 .kpi-card-xp {
-    background: linear-gradient(135deg, rgba(2, 239, 255, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
-    border: 1.5px solid #02efff;
-    box-shadow: 0 6px 20px rgba(2, 239, 255, 0.25);
+    background: var(--kpi-xp-bg) !important;
+    border: 1.5px solid var(--kpi-xp-border) !important;
+    box-shadow: 0 6px 20px var(--kpi-xp-shadow) !important;
 }
 .kpi-card-bank {
-    background: linear-gradient(135deg, rgba(250, 204, 21, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
-    border: 1.5px solid #facc15;
-    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.25);
+    background: var(--kpi-bank-bg) !important;
+    border: 1.5px solid var(--kpi-bank-border) !important;
+    box-shadow: 0 6px 20px var(--kpi-bank-shadow) !important;
 }
 .kpi-card-rank {
-    background: linear-gradient(135deg, rgba(233, 0, 82, 0.18) 0%, rgba(55, 0, 60, 0.95) 100%);
-    border: 1.5px solid #ff2882;
-    box-shadow: 0 6px 20px rgba(233, 0, 82, 0.28);
+    background: var(--kpi-rank-bg) !important;
+    border: 1.5px solid var(--kpi-rank-border) !important;
+    box-shadow: 0 6px 20px var(--kpi-rank-shadow) !important;
 }
 .kpi-title {
     font-size: 11px;
-    color: #e2d9f3;
+    color: var(--text-secondary);
     margin-bottom: 4px;
     font-weight: 700;
 }
 .kpi-value {
     font-size: 20px;
     font-weight: 900;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
-/* --- 5. מגרש אצטדיון פרימיום עם דשא מפוספס מואר וקווים טקטיים --- */
+/* --- 5. מגרש אצטדיון פרימיום --- */
 div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
-    max-width: 840px !important;
+    max-width: 940px !important;
     margin: 0 auto 12px auto !important;
-    background:
-        radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.9) 0%, rgba(6, 44, 20, 0.98) 100%),
-        repeating-linear-gradient(
-            0deg,
-            #104822 0px,
-            #104822 48px,
-            #0c3b1b 48px,
-            #0c3b1b 96px
-        ) !important;
-    border: 2px solid rgba(0, 255, 135, 0.45) !important;
+    background: var(--pitch-bg) !important;
+    border: 2px solid var(--pitch-border) !important;
     border-radius: 18px !important;
     padding: 18px 10px !important;
-    box-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12), inset 0 0 60px rgba(0,0,0,0.65) !important;
+    box-shadow: var(--pitch-shadow) !important;
     position: relative !important;
     text-align: center !important;
+}
+div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
+    max-width: 100% !important;
 }
 
 .pitch-anchor {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
-    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    border: 1.5px solid var(--pitch-line);
     border-radius: 14px;
     margin: 8px;
 }
@@ -857,7 +1035,7 @@ div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
     left: 0;
     right: 0;
     height: 1.5px;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--pitch-line);
     transform: translateY(-50%);
 }
 .pitch-anchor::after {
@@ -867,27 +1045,30 @@ div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
     left: 50%;
     width: 90px;
     height: 90px;
-    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border: 1.5px solid var(--pitch-line);
     border-radius: 50%;
     transform: translate(-50%, -50%);
 }
 
-/* --- 5.2 ספסל מחליפים מואר ומובלט ב-PL Mint (Tactical Dugout) --- */
+/* --- 5.2 ספסל מחליפים מובלט (Tactical Dugout) --- */
 div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
-    max-width: 840px !important;
+    max-width: 940px !important;
     margin: 14px auto 22px auto !important;
-    background: linear-gradient(145deg, #1c0c36 0%, #2e1256 45%, #16092b 100%) !important;
-    border: 2px solid #00ff87 !important;
+    background: var(--bench-bg) !important;
+    border: 2px solid var(--bench-border) !important;
     border-radius: 18px !important;
     padding: 16px 14px !important;
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 135, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    box-shadow: var(--bench-shadow) !important;
     position: relative !important;
     text-align: center !important;
 }
+div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
+    max-width: 100% !important;
+}
 
 .bench-dugout-badge {
-    background: linear-gradient(90deg, rgba(55, 0, 60, 0.85) 0%, rgba(0, 255, 135, 0.2) 100%);
-    border: 1px solid #00ff87;
+    background: var(--bench-dugout-badge-bg);
+    border: 1px solid var(--bench-dugout-badge-border);
     border-radius: 10px;
     padding: 7px 14px;
     margin-bottom: 12px;
@@ -939,26 +1120,26 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
     margin: 0 auto !important;
 }
 
-/* --- 6.1 כרטיס שחקן עליון (Top Plaque) --- */
+/* --- 6.1 כרטיס שחקן עליון (Top Plaque) - מוגדל ומרווח --- */
 .p-card-fpl {
-    background: rgba(20, 11, 38, 0.95) !important;
+    background: var(--p-card-bg) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--p-card-border) !important;
+    border-bottom: 1px solid var(--p-card-border-bottom) !important;
     border-radius: 12px 12px 0 0 !important;
-    padding: 4px 4px 4px 4px !important;
+    padding: 5px 4px !important;
     text-align: center !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.5) !important;
+    box-shadow: var(--p-card-shadow) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden !important;
     position: relative !important;
     width: 100% !important;
-    max-width: 110px !important;
+    max-width: 122px !important;
     min-width: 0 !important;
-    height: 142px !important;
-    min-height: 142px !important;
-    max-height: 142px !important;
+    height: 154px !important;
+    min-height: 154px !important;
+    max-height: 154px !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -976,116 +1157,114 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
 /* --- 6.2 עיצוב כפתורים כללי - מסגרת סגורה מכל 4 הצדדים עם פינות מעוגלות --- */
 div[data-testid="stButton"] button {
     border-radius: 10px !important;
-    border: 1.5px solid #00ff87 !important;
-    background: rgba(26, 15, 46, 0.85) !important;
-    color: #ffffff !important;
+    border: 1.5px solid var(--btn-general-border) !important;
+    background: var(--btn-general-bg) !important;
+    color: var(--btn-general-text) !important;
     font-weight: 700 !important;
     padding: 6px 14px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 div[data-testid="stButton"] button:hover {
-    border-color: #02efff !important;
-    color: #00ff87 !important;
-    background: rgba(45, 20, 75, 0.95) !important;
-    box-shadow: 0 4px 14px rgba(0, 255, 135, 0.35) !important;
+    border-color: var(--accent-mint) !important;
+    color: var(--btn-general-hover-text) !important;
+    background: var(--btn-general-hover-bg) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
     transform: translateY(-1px);
 }
 
 div[data-testid="stButton"] button[kind="primary"] {
-    background: linear-gradient(135deg, #00ff87 0%, #02efff 100%) !important;
-    border: 1.5px solid #00ff87 !important;
-    color: #090412 !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border: 1.5px solid #10b981 !important;
+    color: #ffffff !important;
     font-weight: 900 !important;
-    box-shadow: 0 0 16px rgba(0, 255, 135, 0.6) !important;
+    box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4) !important;
 }
 
 /* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
 div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-    height: 28px !important;
-    min-height: 28px !important;
+    height: 30px !important;
+    min-height: 30px !important;
     line-height: 1 !important;
     font-size: 11px !important;
     font-weight: 700 !important;
     padding: 0 2px !important;
     border-radius: 0 0 12px 12px !important;
     margin: 0 auto !important;
-    background: rgba(14, 7, 28, 0.98) !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    background: var(--p-card-btn-bg) !important;
+    border: 1px solid var(--p-card-btn-border) !important;
     border-top: none !important;
-    color: #ffffff !important;
+    color: var(--p-card-btn-text) !important;
     width: 100% !important;
-    max-width: 110px !important;
+    max-width: 122px !important;
     min-width: 0 !important;
     text-align: center !important;
     justify-content: center !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.35) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
     transition: all 0.15s ease !important;
 }
 
 /* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור תחת שחקן */
 div[data-testid="column"]:has(.p-card-fpl):hover .p-card-fpl {
-    border-color: #00ff87 !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.7), 0 0 14px rgba(0, 255, 135, 0.3) !important;
+    border-color: var(--accent-mint) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18), 0 0 14px rgba(16, 185, 129, 0.25) !important;
     transform: translateY(-2px);
 }
 div[data-testid="column"]:has(.p-card-fpl):hover div[data-testid="stButton"] button {
-    border-color: #00ff87 !important;
-    color: #00ff87 !important;
-    background: #251046 !important;
+    border-color: var(--accent-mint) !important;
+    color: var(--p-card-btn-hover-text) !important;
+    background: var(--p-card-btn-hover-bg) !important;
     transform: translateY(-2px);
 }
 
 /* מצב שחקן נבחר לחילוף */
 .p-card-selected {
-    border: 2px solid #00ff87 !important;
-    border-bottom: 1px solid rgba(0, 255, 135, 0.4) !important;
-    box-shadow: 0 0 18px rgba(0, 255, 135, 0.8) !important;
-    background: rgba(36, 17, 68, 0.98) !important;
+    border: 2px solid var(--accent-mint) !important;
+    border-bottom: 1px solid var(--accent-mint) !important;
+    box-shadow: 0 0 18px rgba(16, 185, 129, 0.6) !important;
 }
 .p-card-transfer-selected {
-    border: 2px solid #e90052 !important;
-    border-bottom: 1px solid rgba(233, 0, 82, 0.4) !important;
-    box-shadow: 0 0 18px rgba(233, 0, 82, 0.8) !important;
-    background: rgba(60, 10, 30, 0.98) !important;
+    border: 2px solid #e11d48 !important;
+    border-bottom: 1px solid #e11d48 !important;
+    box-shadow: 0 0 18px rgba(225, 29, 72, 0.6) !important;
 }
 
 div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button[kind="primary"] {
-    background: linear-gradient(135deg, #00ff87 0%, #02efff 100%) !important;
-    border: 1.5px solid #00ff87 !important;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border: 1.5px solid #10b981 !important;
     border-top: none !important;
-    color: #090412 !important;
+    color: #ffffff !important;
     font-weight: 900 !important;
-    box-shadow: 0 0 16px rgba(0, 255, 135, 0.6) !important;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.5) !important;
 }
 
 /* כרטיסים וכפתורים בספסל */
 .card-bench {
-    background: linear-gradient(145deg, #28124c 0%, #190a30 100%) !important;
-    border: 1.5px solid #00ff87 !important;
-    border-bottom: 1px solid rgba(0, 255, 135, 0.3) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 255, 135, 0.25) !important;
+    background: var(--card-bench-bg) !important;
+    border: 1.5px solid var(--card-bench-border) !important;
+    border-bottom: 1px solid var(--p-card-border-bottom) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
 }
 div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
-    background: #190a30 !important;
-    border: 1.5px solid #00ff87 !important;
+    background: var(--card-bench-btn-bg) !important;
+    border: 1.5px solid var(--card-bench-btn-border) !important;
     border-top: none !important;
     border-radius: 0 0 12px 12px !important;
-    color: #00ff87 !important;
+    color: var(--card-bench-btn-text) !important;
 }
 
-.cap-gold { border: 2px solid #ffd700 !important; border-bottom: 1px solid rgba(255, 215, 0, 0.4) !important; box-shadow: 0 0 14px rgba(255, 215, 0, 0.45) !important; }
-.vc-silver { border: 2px solid #e2d9f3 !important; border-bottom: 1px solid rgba(226, 217, 243, 0.4) !important; }
-.card-danger { border: 2px solid #e90052 !important; border-bottom: 1px solid rgba(233, 0, 82, 0.4) !important; background: rgba(233, 0, 82, 0.18) !important; }
-.card-warning { border: 2px solid #facc15 !important; border-bottom: 1px solid rgba(250, 204, 21, 0.4) !important; background: rgba(250, 204, 21, 0.18) !important; }
+.cap-gold { border: 2px solid #eab308 !important; border-bottom: 1px solid rgba(234, 179, 8, 0.4) !important; box-shadow: 0 0 14px rgba(234, 179, 8, 0.35) !important; }
+.vc-silver { border: 2px solid #94a3b8 !important; border-bottom: 1px solid rgba(148, 163, 184, 0.4) !important; }
+.card-danger { border: 2px solid #e11d48 !important; border-bottom: 1px solid rgba(225, 29, 72, 0.4) !important; background: rgba(225, 29, 72, 0.12) !important; }
+.card-warning { border: 2px solid #eab308 !important; border-bottom: 1px solid rgba(234, 179, 8, 0.4) !important; background: rgba(234, 179, 8, 0.12) !important; }
 
 /* תגיות C ו-VC רשמיות */
 .badge-c {
-    background: #ffd700;
-    color: #090412;
+    background: #eab308;
+    color: #0f172a;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -1093,13 +1272,13 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     border-radius: 4px;
     margin-left: 3px;
     display: inline-block;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     vertical-align: middle;
 }
 
 .badge-vc {
-    background: #e2d9f3;
-    color: #090412;
+    background: #94a3b8;
+    color: #ffffff;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -1107,16 +1286,16 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     border-radius: 4px;
     margin-left: 3px;
     display: inline-block;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
     vertical-align: middle;
 }
 
-/* לוחית שם שחקן - ניגודיות גבוהה */
+/* לוחית שם שחקן - LiveFPL High Contrast */
 .p-name-plate {
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--p-name-plate-bg) !important;
     border-radius: 5px;
-    padding: 2px 4px;
-    margin: 2px 0 1px 0;
+    padding: 3px 5px;
+    margin: 3px 0 2px 0;
     width: 96%;
     display: flex;
     align-items: center;
@@ -1128,18 +1307,18 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 
 .p-name-txt {
     font-weight: 800;
-    font-size: 10px;
-    color: #ffffff;
+    font-size: 11.5px !important;
+    color: var(--p-name-plate-text) !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.1;
+    line-height: 1.15;
     direction: ltr;
 }
 
 .p-sub {
-    font-size: 8.5px;
-    color: #a79bc8;
+    font-size: 9px;
+    color: var(--text-muted);
     margin: 1px 0;
     width: 100%;
     text-align: center;
@@ -1153,30 +1332,30 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     width: 92%;
     margin-top: auto;
     padding-top: 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--border-color);
 }
 .p-card-cost {
-    font-size: 8.5px;
+    font-size: 9.5px;
     font-weight: 700;
-    color: #e2d9f3;
+    color: var(--text-secondary);
     direction: ltr;
 }
 .p-card-xp {
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: 900;
-    color: #00ff87;
+    color: var(--accent-mint);
     direction: ltr;
 }
 
 .badge-fdr {
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 800;
-    padding: 1px 4px;
+    padding: 1px 5px;
     border-radius: 4px;
     display: inline-block;
     line-height: 1.2;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 .fdr-2 { background: #15803d; color: #ffffff; }
 .fdr-3 { background: #475569; color: #ffffff; }
@@ -1184,7 +1363,7 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 .fdr-5 { background: #7f1d1d; color: #ffffff; }
 
 .prob-badge {
-    font-size: 7.5px;
+    font-size: 8px;
     font-weight: 800;
     padding: 1px 4px;
     border-radius: 3px;
@@ -1192,8 +1371,8 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     width: fit-content;
     line-height: 1.1;
 }
-.prob-red { background: rgba(233, 0, 82, 0.25); color: #ff85ad; border: 1px solid #e90052; }
-.prob-yellow { background: rgba(250, 204, 21, 0.25); color: #fde68a; border: 1px solid #facc15; }
+.prob-red { background: rgba(225, 29, 72, 0.18); color: #e11d48; border: 1px solid #e11d48; }
+.prob-yellow { background: rgba(234, 179, 8, 0.18); color: #d97706; border: 1px solid #eab308; }
 
 .mini-fxt-container { 
     display: flex !important; 
@@ -1205,42 +1384,40 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     width: 100% !important;
 }
 .mini-fxt { 
-    font-size: 7.5px !important; 
+    font-size: 8px !important; 
     font-weight: 800 !important; 
     text-transform: uppercase !important; 
     padding: 1px 3px !important; 
     border-radius: 3px !important; 
     color: #ffffff !important; 
     line-height: 1.1 !important; 
-    text-shadow: 0 1px 1px rgba(0,0,0,0.5) !important;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4) !important;
     direction: ltr !important;
     display: inline-block !important;
 }
 
 /* --- 7. מערכת כרטיסים גלובלית ואחידה לכל הקטגוריות (Tabs 2-7) --- */
 .accessible-card {
-    background: rgba(26, 15, 46, 0.85) !important;
-    backdrop-filter: blur(14px) !important;
-    -webkit-backdrop-filter: blur(14px) !important;
-    border: 1px solid rgba(168, 85, 247, 0.2) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 14px !important;
     padding: 16px 18px !important;
     margin-bottom: 14px !important;
-    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
     transition: all 0.2s ease !important;
     direction: __DIR__ !important;
 }
 .accessible-card:hover {
-    background: rgba(38, 22, 66, 0.92) !important;
-    border-color: rgba(0, 255, 135, 0.45) !important;
-    box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 255, 135, 0.2) !important;
+    background: var(--bg-card-hover) !important;
+    border-color: var(--accent-mint) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
 }
 
 .split-box {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    border-bottom: 1px solid rgba(168, 85, 247, 0.2) !important;
+    border-bottom: 1px solid var(--border-color) !important;
     padding-bottom: 8px !important;
     margin-bottom: 10px !important;
     direction: __DIR__ !important;
@@ -1249,19 +1426,19 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 .meta-chip {
     font-size: 11px !important;
     font-weight: 700 !important;
-    background: rgba(55, 0, 60, 0.65) !important;
-    border: 1px solid rgba(168, 85, 247, 0.35) !important;
-    color: #e2d9f3 !important;
+    background: var(--badge-mint-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
     padding: 2px 8px !important;
     border-radius: 6px !important;
     display: inline-block !important;
 }
 
 .flaw-row {
-    background: rgba(233, 0, 82, 0.08) !important;
-    border: 1px solid rgba(233, 0, 82, 0.3) !important;
-    border-right: 4px solid #e90052 !important;
-    border-left: 4px solid #e90052 !important;
+    background: rgba(225, 29, 72, 0.08) !important;
+    border: 1px solid rgba(225, 29, 72, 0.25) !important;
+    border-right: 4px solid #e11d48 !important;
+    border-left: 4px solid #e11d48 !important;
     border-radius: 10px !important;
     padding: 10px 14px !important;
     margin-bottom: 8px !important;
@@ -1270,12 +1447,12 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     justify-content: space-between !important;
     align-items: center !important;
     direction: __DIR__ !important;
-    color: #ffd1df !important;
+    color: var(--text-primary) !important;
 }
 .flaw-pen {
-    background: rgba(233, 0, 82, 0.25) !important;
-    border: 1px solid rgba(233, 0, 82, 0.5) !important;
-    color: #ff85ad !important;
+    background: rgba(225, 29, 72, 0.2) !important;
+    border: 1px solid rgba(225, 29, 72, 0.4) !important;
+    color: #e11d48 !important;
     padding: 2px 8px !important;
     border-radius: 6px !important;
     font-weight: 800 !important;
@@ -1283,18 +1460,17 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     direction: ltr !important;
 }
 
-/* פאנלים רשמיים להשוואת שחקנים (PL Magenta vs Electric Mint) */
 .comparison-panel-out {
-    background: rgba(233, 0, 82, 0.08) !important;
-    border: 1px solid rgba(233, 0, 82, 0.32) !important;
+    background: rgba(225, 29, 72, 0.08) !important;
+    border: 1px solid rgba(225, 29, 72, 0.25) !important;
     border-radius: 10px !important;
     padding: 10px 12px !important;
     line-height: 1.5 !important;
     direction: __DIR__ !important;
 }
 .comparison-panel-in {
-    background: rgba(0, 255, 135, 0.08) !important;
-    border: 1px solid rgba(0, 255, 135, 0.32) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
     border-radius: 10px !important;
     padding: 10px 12px !important;
     line-height: 1.5 !important;
@@ -1302,25 +1478,165 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 }
 
 .transfer-drawer {
-    background: linear-gradient(145deg, #1c0c36 0%, #110722 100%) !important;
-    border: 1.5px solid #00ff87 !important;
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--accent-mint) !important;
     border-radius: 14px !important;
     padding: 16px !important;
     margin: 12px auto 18px auto !important;
-    max-width: 840px !important;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 24px rgba(0, 255, 135, 0.2) !important;
+    max-width: 940px !important;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.1) !important;
     direction: __DIR__ !important;
 }
 
 .rebuild-banner {
-    background: linear-gradient(135deg, #1c0c36 0%, #2e1256 100%) !important;
-    border: 1.5px solid #00ff87 !important;
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--accent-mint) !important;
     border-radius: 14px !important;
     padding: 14px 18px !important;
     margin: 12px auto 16px auto !important;
-    max-width: 840px !important;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.65), 0 0 20px rgba(0, 255, 135, 0.2) !important;
+    max-width: 940px !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.1) !important;
     direction: __DIR__ !important;
+}
+
+/* --- פאנל משחקי מחזור LiveFPL (Gameweek Fixtures Panel) --- */
+.gw-fixtures-card {
+    background: var(--fxt-card-bg) !important;
+    border: 1.5px solid var(--fxt-card-border) !important;
+    border-radius: 16px !important;
+    padding: 14px 16px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+    direction: ltr !important;
+    margin-bottom: 16px !important;
+}
+
+.gw-fixtures-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    direction: __DIR__ !important;
+}
+
+.gw-fixtures-scroll {
+    max-height: 600px !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+    scrollbar-width: thin !important;
+}
+
+.fxt-date-header {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: var(--text-secondary) !important;
+    margin: 12px 0 6px 2px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    direction: __DIR__ !important;
+    text-align: __ALIGN__ !important;
+}
+
+.fxt-match-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: var(--fxt-row-bg) !important;
+    border: 1px solid var(--fxt-row-border) !important;
+    border-radius: 10px !important;
+    padding: 7px 10px !important;
+    margin-bottom: 6px !important;
+    transition: all 0.15s ease !important;
+    direction: ltr !important;
+}
+
+.fxt-match-row:hover {
+    background: var(--fxt-row-hover) !important;
+    border-color: var(--accent-mint) !important;
+    transform: translateY(-1px) !important;
+}
+
+.fxt-team {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex: 1 !important;
+    direction: ltr !important;
+}
+
+.fxt-home {
+    justify-content: flex-end !important;
+}
+
+.fxt-away {
+    justify-content: flex-start !important;
+}
+
+.fxt-team-name {
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: 0.3px !important;
+}
+
+.fxt-jersey svg {
+    width: 28px !important;
+    height: 24px !important;
+    display: block !important;
+}
+
+.fxt-mid {
+    min-width: 72px !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    direction: ltr !important;
+}
+
+.fxt-mid-time {
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+    background: var(--badge-ko-bg) !important;
+    padding: 2px 8px !important;
+    border-radius: 6px !important;
+    letter-spacing: 0.5px !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.fxt-mid-score {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+
+.fxt-score-num {
+    font-size: 13.5px !important;
+    font-weight: 900 !important;
+    color: var(--text-primary) !important;
+    letter-spacing: 1px !important;
+}
+
+.fxt-score-live {
+    color: #ef4444 !important;
+}
+
+.fxt-status-badge {
+    font-size: 8.5px !important;
+    font-weight: 800 !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+}
+
+.fxt-badge-live {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    padding: 1px 5px !important;
+    border-radius: 3px !important;
 }
 
 /* --- 8. התאמות מובייל קפדניות (Mobile Media Queries) --- */
@@ -1338,34 +1654,34 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
         min-width: 0 !important;
     }
     .p-card-fpl {
-        padding: 2px 1px 2px 1px !important;
+        padding: 3px 2px !important;
         border-radius: 8px 8px 0 0 !important;
-        max-width: 74px !important;
-        height: 124px !important;
-        min-height: 124px !important;
-        max-height: 124px !important;
+        max-width: 78px !important;
+        height: 130px !important;
+        min-height: 130px !important;
+        max-height: 130px !important;
     }
     .p-name-plate {
         padding: 1px 2px !important;
     }
     .p-name-txt {
-        font-size: 8px !important;
+        font-size: 9px !important;
     }
     .p-sub, .badge-fdr, .mini-fxt {
-        font-size: 7px !important;
+        font-size: 7.5px !important;
         padding: 1px 2px !important;
     }
     .badge-c, .badge-vc {
-        font-size: 7px !important;
+        font-size: 7.5px !important;
         padding: 1px 2px !important;
     }
     div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-        height: 24px !important;
-        min-height: 24px !important;
-        font-size: 9.5px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        font-size: 10px !important;
         padding: 0 1px !important;
         border-radius: 0 0 8px 8px !important;
-        max-width: 74px !important;
+        max-width: 78px !important;
     }
     .kpi-container {
         grid-template-columns: repeat(2, 1fr) !important;
@@ -1384,6 +1700,20 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
         padding: 6px 10px !important;
         font-size: 12px !important;
     }
+    .fxt-team-name {
+        font-size: 10.5px !important;
+    }
+    .fxt-jersey svg {
+        width: 22px !important;
+        height: 19px !important;
+    }
+    .fxt-mid {
+        min-width: 54px !important;
+    }
+    .fxt-mid-time {
+        font-size: 10px !important;
+        padding: 1px 5px !important;
+    }
 }
 </style>
 """
@@ -1391,7 +1721,7 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 is_rtl = (st.session_state.get("app_lang", "he") == "he")
 dir_val = "rtl" if is_rtl else "ltr"
 align_val = "right" if is_rtl else "left"
-rendered_css = css_template.replace("__DIR__", dir_val).replace("__ALIGN__", align_val)
+rendered_css = css_template.replace("__ROOT_VARS__", root_vars).replace("__DIR__", dir_val).replace("__ALIGN__", align_val)
 st.markdown(rendered_css, unsafe_allow_html=True)
 
 # =====================================================================
@@ -1408,10 +1738,34 @@ def fetch_league_data():
         bootstrap = requests.get(f"{base}bootstrap-static/", headers=API_HEADERS, timeout=12).json()
         fixtures = requests.get(f"{base}fixtures/", headers=API_HEADERS, timeout=12).json()
     except Exception:
-        return {}, 4, ""
+        return {}, 4, "", {}
 
     teams = {t["id"]: t for t in bootstrap["teams"]}
     elements = {el["id"]: el for el in bootstrap["elements"]}
+
+    gw_fixtures_by_event = {}
+    for f in fixtures:
+        ev = f.get("event")
+        if ev is not None:
+            if ev not in gw_fixtures_by_event:
+                gw_fixtures_by_event[ev] = []
+            h_team = teams.get(f["team_h"], {}).get("short_name", "H")
+            a_team = teams.get(f["team_a"], {}).get("short_name", "A")
+            gw_fixtures_by_event[ev].append({
+                "id": f.get("id"),
+                "team_h": h_team,
+                "team_a": a_team,
+                "team_h_diff": f.get("team_h_difficulty", 3),
+                "team_a_diff": f.get("team_a_difficulty", 3),
+                "team_h_score": f.get("team_h_score"),
+                "team_a_score": f.get("team_a_score"),
+                "started": f.get("started", False),
+                "finished": f.get("finished", False),
+                "kickoff_time": f.get("kickoff_time", ""),
+            })
+
+    for ev in gw_fixtures_by_event:
+        gw_fixtures_by_event[ev].sort(key=lambda x: x["kickoff_time"] or "")
 
     next_gw = 4
     next_deadline = ""
@@ -1593,9 +1947,9 @@ def fetch_league_data():
             "fdr_list_full": fdr_list,
         }
 
-    return processed, next_gw, next_deadline
+    return processed, next_gw, next_deadline, gw_fixtures_by_event
 
-all_players, next_gw, next_deadline = fetch_league_data()
+all_players, next_gw, next_deadline, gw_fixtures_by_event = fetch_league_data()
 
 def is_swap_legal(player1_id, player2_id, current_squad_list):
     """
@@ -1661,7 +2015,12 @@ if "user_team_id" not in st.session_state:
     )
 
 if not st.session_state.user_team_id:
-    c_gate_top1, c_gate_top2 = st.columns([5, 1])
+    c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([4, 1.2, 1])
+    with c_gate_theme:
+        theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
+        if st.button(theme_btn_lbl, key="gate_theme_btn", use_container_width=True):
+            st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
+            st.rerun()
     with c_gate_top2:
         if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="gate_lang_btn", use_container_width=True):
             st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
@@ -1671,12 +2030,12 @@ if not st.session_state.user_team_id:
         f"""
     <div class="gate-card">
         <div style="font-size:36px; margin-bottom:8px;">⚽</div>
-        <h1 style="color:#38bdf8; font-size:26px; font-weight:800; margin-bottom:6px; letter-spacing:-0.5px;">{t('app_title')}</h1>
-        <div style="font-size:14px; color:#94a3b8; font-weight:500; margin-bottom:14px;">
+        <h1 style="color:var(--accent-mint); font-size:26px; font-weight:800; margin-bottom:6px; letter-spacing:-0.5px;">{t('app_title')}</h1>
+        <div style="font-size:14px; color:var(--text-secondary); font-weight:500; margin-bottom:14px;">
             {t('app_subtitle')}
         </div>
-        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.35), transparent); margin:12px 0 16px 0;"></div>
-        <p style="font-size:13px; color:#cbd5e1; line-height:1.6; margin-bottom:8px;">
+        <div style="height:1px; background:linear-gradient(90deg, transparent, var(--border-color), transparent); margin:12px 0 16px 0;"></div>
+        <p style="font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:8px;">
             {t('gate_desc')}
         </p>
     </div>
@@ -1924,21 +2283,26 @@ rating_color = (
 # =====================================================================
 # 7. סרגל עליון ומדדים ראשיים
 # =====================================================================
-h_col1, h_col2, h_col3 = st.columns([3, 1, 1])
+h_col1, h_col_theme, h_col2, h_col3 = st.columns([3, 1.1, 1, 1])
 with h_col1:
     render_html(
         f"""
         <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
             <div style="font-size:28px;">⚽</div>
             <div>
-                <div style="font-size:22px; font-weight:800; color:#ffffff; letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
-                <div style="font-size:12px; color:#e2d9f3; margin-top:2px;">
-                    {t("engine_for_gw")} <b style="color:#00ff87;">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
+                <div style="font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
+                <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                    {t("engine_for_gw")} <b style="color:var(--accent-mint);">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
                 </div>
             </div>
         </div>
         """
     )
+with h_col_theme:
+    theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
+    if st.button(theme_btn_lbl, key="hdr_theme_toggle", use_container_width=True):
+        st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
+        st.rerun()
 with h_col2:
     if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="hdr_lang_toggle", use_container_width=True):
         st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
@@ -1960,19 +2324,19 @@ st.markdown(
 <div class="kpi-container">
     <div class="kpi-card kpi-card-score">
         <div class="kpi-title">{t('squad_score')}</div>
-        <div class="kpi-value" style="color:{rating_color};">{squad_rating} <span style="font-size:12px; color:#a7f3d0;">/ 100</span></div>
+        <div class="kpi-value" style="color:{rating_color};">{squad_rating} <span style="font-size:12px; color:var(--accent-mint);">/ 100</span></div>
     </div>
     <div class="kpi-card kpi-card-xp">
         <div class="kpi-title">{t('xp_forecast')}</div>
-        <div class="kpi-value" style="color:#02efff;">{starting_xp_total:.1f}</div>
+        <div class="kpi-value" style="color:var(--accent-cyan);">{starting_xp_total:.1f}</div>
     </div>
     <div class="kpi-card kpi-card-bank">
         <div class="kpi-title">{t('in_bank')}</div>
-        <div class="kpi-value" style="color:#ffd700;"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
+        <div class="kpi-value" style="color:var(--accent-gold);"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
     </div>
     <div class="kpi-card kpi-card-rank">
         <div class="kpi-title">{t('overall_rank')}</div>
-        <div class="kpi-value" style="color:#ff85ad;"><span class="ltr-tag">{rank_txt}</span></div>
+        <div class="kpi-value" style="color:var(--accent-magenta);"><span class="ltr-tag">{rank_txt}</span></div>
     </div>
 </div>
 """,
@@ -1985,10 +2349,17 @@ clock_loading = "טוען שעון..." if st.session_state.app_lang == "he" else
 clock_expired = "הדד-ליין עבר!" if st.session_state.app_lang == "he" else "Deadline Passed!"
 clock_dir = "rtl" if st.session_state.app_lang == "he" else "ltr"
 
+is_lt = (st.session_state.get("app_theme", "light") == "light")
+clock_bg = "#ffffff" if is_lt else "linear-gradient(135deg, #180930 0%, #2a0f4d 100%)"
+clock_border = "#10b981" if is_lt else "#00ff87"
+clock_title_col = "#334155" if is_lt else "#e2d9f3"
+clock_num_col = "#059669" if is_lt else "#00ff87"
+clock_shadow = "rgba(16, 185, 129, 0.15)" if is_lt else "rgba(0, 255, 135, 0.25)"
+
 clock_html = f"""
-<div style="background:linear-gradient(135deg, #180930 0%, #2a0f4d 100%); border:1.5px solid #00ff87; border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:#ffffff; box-shadow:0 4px 18px rgba(0, 255, 135, 0.25);">
-    <div style="font-size:12px; color:#e2d9f3; font-weight:700; margin-bottom:4px;">{clock_title}</div>
-    <div id="fpl-clock" style="font-size:20px; font-weight:900; color:#00ff87; direction:ltr; letter-spacing:1.5px;">{clock_loading}</div>
+<div style="background:{clock_bg}; border:1.5px solid {clock_border}; border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:{clock_num_col}; box-shadow:0 4px 18px {clock_shadow};">
+    <div style="font-size:12px; color:{clock_title_col}; font-weight:700; margin-bottom:4px;">{clock_title}</div>
+    <div id="fpl-clock" style="font-size:20px; font-weight:900; color:{clock_num_col}; direction:ltr; letter-spacing:1.5px;">{clock_loading}</div>
 </div>
 <script>
     var deadline = new Date("{next_deadline}").getTime();
@@ -2015,8 +2386,122 @@ clock_html = f"""
 components.html(clock_html, height=80)
 
 # =====================================================================
-# 8. פונקציות עזר לרינדור כרטיס שחקן עשיר ב-HTML
+# 8. פונקציות עזר לרינדור משחקים וכרטיס שחקן עשיר ב-HTML
 # =====================================================================
+def parse_fixture_datetime(ko_str):
+    if not ko_str:
+        return "", ""
+    try:
+        dt = datetime.fromisoformat(ko_str.replace("Z", "+00:00"))
+        months_he = {1: "ינו'", 2: "פבר'", 3: "מרץ", 4: "אפר'", 5: "מאי", 6: "יוני", 7: "יולי", 8: "אוג'", 9: "ספט'", 10: "אוק'", 11: "נוב'", 12: "דצמ'"}
+        months_en = {1: "Jan", 2: "Feb", 3: "Mar", 4: "Apr", 5: "May", 6: "Jun", 7: "Jul", 8: "Aug", 9: "Sep", 10: "Oct", 11: "Nov", 12: "Dec"}
+        days_he = {0: "שני", 1: "שלישי", 2: "רביעי", 3: "חמישי", 4: "שישי", 5: "שבת", 6: "ראשון"}
+        days_en = {0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun"}
+        lang = st.session_state.get("app_lang", "he")
+        
+        if lang == "he":
+            d_name = days_he.get(dt.weekday(), "")
+            m_name = months_he.get(dt.month, "")
+            date_label = f"{d_name}, {dt.day} ב{m_name}"
+        else:
+            d_name = days_en.get(dt.weekday(), "")
+            m_name = months_en.get(dt.month, "")
+            date_label = f"{d_name} {dt.day} {m_name}"
+            
+        time_label = dt.strftime("%H:%M")
+        return date_label, time_label
+    except Exception:
+        return "", ko_str[11:16] if len(ko_str) >= 16 else ""
+
+def render_gw_fixtures_panel(gw_num):
+    fxts = gw_fixtures_by_event.get(gw_num, [])
+    fxt_title = t("gw_fixtures_title").replace("{gw}", str(gw_num))
+    
+    if not fxts:
+        empty_msg = t("no_fixtures_gw")
+        render_html(
+            f"""
+            <div class="gw-fixtures-card">
+                <div class="gw-fixtures-header">
+                    <span style="font-size:14px; font-weight:800; color:var(--text-primary);">{fxt_title}</span>
+                </div>
+                <div style="text-align:center; padding:30px 10px; color:var(--text-muted); font-size:13px;">
+                    {empty_msg}
+                </div>
+            </div>
+            """
+        )
+        return
+
+    grouped = {}
+    for fx in fxts:
+        d_lbl, t_lbl = parse_fixture_datetime(fx.get("kickoff_time", ""))
+        fx["_time_label"] = t_lbl
+        if d_lbl not in grouped:
+            grouped[d_lbl] = []
+        grouped[d_lbl].append(fx)
+
+    group_blocks = []
+    for d_lbl, day_fixtures in grouped.items():
+        rows_html = []
+        for fx in day_fixtures:
+            h_team = fx["team_h"]
+            a_team = fx["team_a"]
+            h_diff = fx.get("team_h_diff", 3)
+            a_diff = fx.get("team_a_diff", 3)
+            h_jersey = get_jersey_svg(h_team)
+            a_jersey = get_jersey_svg(a_team)
+            
+            if fx.get("finished"):
+                h_sc = fx.get("team_h_score", 0)
+                a_sc = fx.get("team_a_score", 0)
+                mid_html = f'<div class="fxt-mid-score"><span class="fxt-score-num">{h_sc} - {a_sc}</span><span class="fxt-status-badge">FT</span></div>'
+            elif fx.get("started"):
+                h_sc = fx.get("team_h_score", 0)
+                a_sc = fx.get("team_a_score", 0)
+                mid_html = f'<div class="fxt-mid-score"><span class="fxt-score-num fxt-score-live">{h_sc} - {a_sc}</span><span class="fxt-status-badge fxt-badge-live">LIVE</span></div>'
+            else:
+                mid_html = f'<div class="fxt-mid-time">{fx["_time_label"]}</div>'
+
+            row = f"""
+            <div class="fxt-match-row">
+                <div class="fxt-team fxt-home">
+                    <span class="fxt-team-name">{h_team}</span>
+                    <span class="badge-fdr fdr-{h_diff}">{h_diff}</span>
+                    <div class="fxt-jersey">{h_jersey}</div>
+                </div>
+                <div class="fxt-mid">
+                    {mid_html}
+                </div>
+                <div class="fxt-team fxt-away">
+                    <div class="fxt-jersey">{a_jersey}</div>
+                    <span class="badge-fdr fdr-{a_diff}">{a_diff}</span>
+                    <span class="fxt-team-name">{a_team}</span>
+                </div>
+            </div>
+            """
+            rows_html.append(row)
+
+        date_hdr = f'<div class="fxt-date-header">{d_lbl}</div>' if d_lbl else ""
+        group_blocks.append(f'{date_hdr}{"".join(rows_html)}')
+
+    all_content = "".join(group_blocks)
+    panel_html = f"""
+    <div class="gw-fixtures-card">
+        <div class="gw-fixtures-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:16px;">🗓️</span>
+                <span style="font-size:15px; font-weight:800; color:var(--text-primary);">{fxt_title}</span>
+            </div>
+            <span class="meta-chip">{len(fxts)} {t('matches')}</span>
+        </div>
+        <div class="gw-fixtures-scroll">
+            {all_content}
+        </div>
+    </div>
+    """
+    render_html(panel_html)
+
 def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None, custom_cap=None, custom_vc=None):
     is_c = custom_cap if custom_cap is not None else p.get("is_cap", False)
     is_v = custom_vc if custom_vc is not None else p.get("is_vc", False)
@@ -2268,8 +2753,8 @@ with t_squad:
                         <div class="accessible-card" style="text-align:center; padding:10px;">
                             {r_j}
                             <b>{r_p['name']}</b> ({r_p['team']})<br>
-                            <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
-                            <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{get_player_reason(r_p)}</div>
+                            <span class="ltr-tag" style="color:var(--accent-cyan);">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
+                            <div style="font-size:10px; color:var(--text-secondary); margin:4px 0;">{get_player_reason(r_p)}</div>
                             <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
                         </div>
                         """
@@ -2313,9 +2798,9 @@ with t_squad:
             <div class="bench-dugout-badge">
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="font-size:16px;">🪑</span>
-                    <span style="font-weight:800; font-size:14px; color:#00ff87;">{t('bench_title')}</span>
+                    <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
                 </div>
-                <span style="font-size:11px; color:#00ff87; background:rgba(0, 255, 135, 0.15); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(0, 255, 135, 0.35);">{t('bench_sub_order')}</span>
+                <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -3444,22 +3929,45 @@ with t_planner:
                         st.session_state.planner_selected_id = None
                         st.rerun()
 
-        st.markdown(f"#### 🏟️ {t('tab_squad')} — Gameweek {selected_gw}")
-        with st.container():
-            st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-            # חלוצים
-            render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 4])
+        col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
+        with col_pl_pitch:
+            st.markdown(f"#### 🏟️ {t('tab_squad')} — Gameweek {selected_gw}")
+            with st.container():
+                st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
+                # חלוצים
+                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 4])
+                st.write("")
+                # קשרים
+                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 3])
+                st.write("")
+                # מגנים
+                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 2])
+                st.write("")
+                # שוער
+                pl_gks = [p for p in cur_gw_sim["starters"] if p["pos_code"] == 1]
+                if pl_gks:
+                    render_clean_planner_row(pl_gks)
+
+            # ספסל מואר ומובלט בעיצוב Dugout ב-Planner
             st.write("")
-            # קשרים
-            render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 3])
-            st.write("")
-            # מגנים
-            render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 2])
-            st.write("")
-            # שוער
-            pl_gks = [p for p in cur_gw_sim["starters"] if p["pos_code"] == 1]
-            if pl_gks:
-                render_clean_planner_row(pl_gks)
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div class="bench-anchor"></div>
+                    <div class="bench-dugout-badge">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:16px;">🪑</span>
+                            <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
+                        </div>
+                        <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+                render_clean_planner_row(cur_gw_sim["bench"], is_bench=True)
+
+        with col_pl_fixtures:
+            render_gw_fixtures_panel(selected_gw)
 
         # חלון תכנון העברות שוק בפלנר
         with st.expander(f"🛒 {t('planner_tr_expander')} (GW {selected_gw})"):
@@ -3495,8 +4003,8 @@ with t_planner:
                             <div class="accessible-card" style="text-align:center; padding:10px;">
                                 {r_jersey}
                                 <b>{r_p['name']}</b> ({r_p['team']})<br>
-                                <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
-                                <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{get_player_reason(r_p)}</div>
+                                <span class="ltr-tag" style="color:var(--accent-cyan);">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
+                                <div style="font-size:10px; color:var(--text-secondary); margin:4px 0;">{get_player_reason(r_p)}</div>
                                 <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
                             </div>
                             """
@@ -3528,24 +4036,6 @@ with t_planner:
                         )
                         st.toast(f"✅ {p_tr_out['name']} ⬅️ {all_players[chosen_pool_id]['name']}")
                         st.rerun()
-
-        # ספסל מואר ומובלט בעיצוב Dugout ב-Planner
-        st.write("")
-        with st.container():
-            st.markdown(
-                f"""
-                <div class="bench-anchor"></div>
-                <div class="bench-dugout-badge">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:16px;">🪑</span>
-                        <span style="font-weight:800; font-size:14px; color:#00ff87;">{t('bench_title')}</span>
-                    </div>
-                    <span style="font-size:11px; color:#00ff87; background:rgba(0, 255, 135, 0.15); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid rgba(0, 255, 135, 0.35);">{t('bench_sub_order')}</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-            render_clean_planner_row(cur_gw_sim["bench"], is_bench=True)
 
 # ---------------------------------------------------------------------
 # טאב 7: 🏆 מרגל מיני-ליגות (Mini-League Spy)
