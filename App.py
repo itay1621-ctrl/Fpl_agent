@@ -88,7 +88,7 @@ TRANSLATIONS = {
         "app_subtitle": "סוכן בינה, אסטרטגיית הרכב ומרגל מיני-ליגות המכוון ל-Top 50K",
         "gate_desc": "הזן את מספר הקבוצה שלך כדי לטעון ניתוח כשירות, ציון סגל מכויל, חסרונות הרכב, מתכנן מחזורים ומרגל ליגות.",
         "team_id_label": "מספר קבוצה (Team ID):",
-        "team_id_placeholder": "למשל: 139453",
+        "team_id_placeholder": "למשל: 139103",
         "team_id_help": "המספר שמופיע בכתובת הדפדפן בלשונית Points",
         "login_btn": "🚀 כניסה לסגל שלי",
         "demo_btn": "👀 סגל דמו לדוגמה",
@@ -267,11 +267,20 @@ def t(key):
 # =====================================================================
 css_template = """
 <style>
+/* --- 1. הסתרת מיתוג Streamlit לחלוטין (White-Labeling) --- */
+#MainMenu {visibility: hidden !important; display: none !important;}
+header {visibility: hidden !important; display: none !important;}
+footer {visibility: hidden !important; display: none !important;}
+.stDeployButton {display: none !important;}
+div[data-testid="stDecoration"] {display: none !important;}
+div[data-testid="stToolbar"] {visibility: hidden !important; display: none !important;}
+div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
+
 :root {
-    --bg-main: #090e17;
-    --bg-card: #111a28;
-    --bg-card-hover: #162235;
-    --border-color: #1e2e46;
+    --bg-main: #06090e;
+    --bg-card: #0d1522;
+    --bg-card-hover: #131e31;
+    --border-color: #1a273e;
     --text-primary: #f8fafc;
     --text-muted: #94a3b8;
     --accent-blue: #38bdf8;
@@ -284,7 +293,7 @@ css_template = """
     direction: __DIR__;
     text-align: __ALIGN__;
     background-color: var(--bg-main);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--text-primary);
 }
 
@@ -301,86 +310,177 @@ div[data-testid="stMarkdownContainer"] p {
     font-weight: 600;
 }
 
-.gate-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 24px 18px;
-    margin: 16px auto;
-    max-width: 560px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+/* --- 2. טאבים מעוצבים בסגנון פרימיום --- */
+div[data-baseweb="tab-list"] {
+    background: #090e17 !important;
+    border-radius: 12px !important;
+    padding: 5px 6px !important;
+    border: 1px solid #1e2e46 !important;
+    gap: 5px !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+    margin-bottom: 16px !important;
+}
+div[data-baseweb="tab-list"]::-webkit-scrollbar {
+    display: none !important;
+}
+button[data-baseweb="tab"] {
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+    background: transparent !important;
+}
+button[data-baseweb="tab"]:hover {
+    color: #f8fafc !important;
+    background: rgba(30, 41, 59, 0.6) !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4) !important;
+}
+div[data-baseweb="tab-highlight"],
+div[data-baseweb="tab-border"] {
+    display: none !important;
 }
 
+/* --- 3. כרטיס כניסה / שער --- */
+.gate-card {
+    background: linear-gradient(145deg, #0e1726 0%, #090e17 100%);
+    border: 1px solid rgba(56, 189, 248, 0.22);
+    border-radius: 20px;
+    padding: 30px 22px;
+    margin: 20px auto;
+    max-width: 560px;
+    text-align: center;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.6), 0 0 24px rgba(56, 189, 248, 0.08);
+}
+
+/* --- 4. מדדי KPI בראש האתר --- */
 .kpi-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px;
-    margin-bottom: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
 }
 .kpi-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 10px 8px;
+    background: rgba(13, 21, 34, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 10px;
     text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 .kpi-title {
     font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 4px;
+    font-weight: 500;
 }
 .kpi-value {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
     color: var(--text-primary);
 }
 
-/* מגרש תחום ורספונסיבי */
+/* --- 5. מגרש אצטדיון פרימיום עם דשא מפוספס וקווים טקטיים --- */
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
-    max-width: 820px !important;
-    margin: 0 auto 10px auto !important;
-    background: radial-gradient(circle at center, #1b4d27 0%, #103819 70%, #0c2b13 100%) !important;
-    border: 2px solid #285e35 !important;
-    border-radius: 14px !important;
-    padding: 14px 8px !important;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.5) !important;
+    max-width: 840px !important;
+    margin: 0 auto 12px auto !important;
+    background:
+        radial-gradient(ellipse at 50% 50%, rgba(22, 101, 52, 0.78) 0%, rgba(6, 40, 18, 0.96) 100%),
+        repeating-linear-gradient(
+            0deg,
+            #11431f 0px,
+            #11431f 48px,
+            #0e3819 48px,
+            #0e3819 96px
+        ) !important;
+    border: 2px solid #1f6832 !important;
+    border-radius: 18px !important;
+    padding: 18px 10px !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.65), inset 0 0 60px rgba(0,0,0,0.65) !important;
+    position: relative !important;
+}
+
+.pitch-anchor {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-radius: 14px;
+    margin: 8px;
+}
+.pitch-anchor::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-50%);
+}
+.pitch-anchor::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90px;
+    height: 90px;
+    border: 1.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
 }
 
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
-    max-width: 720px !important;
-    margin: 10px auto 16px auto !important;
-    background: rgba(15, 23, 42, 0.75) !important;
-    border: 1px dashed #334155 !important;
-    border-radius: 12px !important;
-    padding: 10px 8px !important;
+    max-width: 760px !important;
+    margin: 12px auto 18px auto !important;
+    background: rgba(13, 21, 34, 0.88) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px dashed rgba(56, 189, 248, 0.25) !important;
+    border-radius: 14px !important;
+    padding: 12px 10px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
 }
 
-/* שורת פעולות וחילוף מתחת למגרש */
+/* --- 6. שורת פעולות וניהול מתחת למגרש --- */
 .action-bar-under-pitch {
-    background: linear-gradient(135deg, #111a28 0%, #18283f 100%);
+    background: linear-gradient(135deg, rgba(13, 21, 34, 0.96) 0%, rgba(22, 33, 50, 0.96) 100%);
+    backdrop-filter: blur(12px);
     border: 1px solid #38bdf8;
-    border-radius: 12px;
-    padding: 12px 14px;
-    margin: 10px auto 14px auto;
-    max-width: 820px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin: 12px auto 16px auto;
+    max-width: 840px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.6), 0 0 16px rgba(56, 189, 248, 0.2);
     direction: __DIR__;
 }
 
 /* כפתורי פעולה בודדים ונוחים במגרש ובספסל */
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button,
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
-    height: 26px !important;
-    min-height: 26px !important;
+    height: 27px !important;
+    min-height: 27px !important;
     line-height: 1 !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     padding: 0 4px !important;
-    border-radius: 5px !important;
-    margin: 3px auto 0 auto !important;
-    background: rgba(15, 23, 42, 0.92) !important;
-    border: 1px solid #334155 !important;
+    border-radius: 6px !important;
+    margin: 4px auto 0 auto !important;
+    background: rgba(13, 21, 34, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #cbd5e1 !important;
     width: 100% !important;
     transition: all 0.15s ease !important;
@@ -391,50 +491,57 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     background: #1e293b !important;
     border-color: #38bdf8 !important;
     color: #38bdf8 !important;
+    transform: translateY(-1px) !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button[kind="primary"],
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button[kind="primary"] {
-    background: #38bdf8 !important;
-    border-color: #7dd3fc !important;
-    color: #090e17 !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
     font-weight: 800 !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4) !important;
 }
 
-/* כרטיס שחקן במגרש */
+/* --- 7. כרטיס שחקן פרימיום בעיצוב Glassmorphism --- */
 .p-card-fpl {
-    background: rgba(17, 26, 40, 0.95);
-    border: 1px solid #1e2e46;
-    border-radius: 8px;
-    padding: 5px 3px;
+    background: rgba(13, 21, 34, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 6px 3px;
     text-align: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.45);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     position: relative;
     max-width: 120px;
     margin: 0 auto;
 }
 .p-card-fpl:hover {
-    transform: translateY(-2px);
-    border-color: #38bdf8;
+    transform: translateY(-3px) scale(1.02);
+    border-color: rgba(56, 189, 248, 0.5);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6), 0 0 12px rgba(56, 189, 248, 0.35);
 }
 .p-card-selected {
     border: 2px solid #38bdf8 !important;
-    box-shadow: 0 0 14px rgba(56, 189, 248, 0.8) !important;
-    background: rgba(20, 45, 75, 0.98) !important;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.85), inset 0 0 12px rgba(56, 189, 248, 0.25) !important;
+    background: rgba(14, 42, 71, 0.95) !important;
+    transform: translateY(-2px) scale(1.03) !important;
 }
 .p-card-transfer-selected {
     border: 2px solid #ef4444 !important;
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.8) !important;
-    background: rgba(55, 20, 30, 0.98) !important;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.85), inset 0 0 12px rgba(239, 68, 68, 0.25) !important;
+    background: rgba(60, 18, 28, 0.95) !important;
+    transform: translateY(-2px) scale(1.03) !important;
 }
 
-.cap-gold { border: 2px solid #facc15 !important; }
+.cap-gold { border: 2px solid #facc15 !important; box-shadow: 0 0 10px rgba(250, 204, 21, 0.3) !important; }
 .vc-silver { border: 2px solid #94a3b8 !important; }
-.card-bench { background: rgba(30, 41, 59, 0.75); border: 1px dashed #475569; }
-.card-danger { border: 2px solid #f87171 !important; background: rgba(248, 113, 113, 0.15) !important; }
-.card-warning { border: 2px solid #fbd38d !important; background: rgba(251, 211, 141, 0.15) !important; }
+.card-bench { background: rgba(22, 33, 50, 0.8); border: 1px dashed rgba(148, 163, 184, 0.4); }
+.card-danger { border: 2px solid #f87171 !important; background: rgba(248, 113, 113, 0.16) !important; }
+.card-warning { border: 2px solid #fbd38d !important; background: rgba(251, 211, 141, 0.16) !important; }
 
 /* תגיות C ו-VC רשמיות */
 .badge-c {
@@ -568,40 +675,40 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 }
 
 .transfer-drawer {
-    background: #0d1726;
+    background: linear-gradient(145deg, #0d1726 0%, #090e17 100%);
     border: 1px solid #38bdf8;
-    border-radius: 12px;
-    padding: 14px;
-    margin: 10px auto 16px auto;
-    max-width: 820px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 12px auto 18px auto;
+    max-width: 840px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 20px rgba(56, 189, 248, 0.15);
     direction: __DIR__;
 }
 
 .rebuild-banner {
-    background: linear-gradient(135deg, #111a28 0%, #18283f 100%);
+    background: linear-gradient(135deg, #0e1726 0%, #162438 100%);
     border: 1px solid #38bdf8;
-    border-radius: 12px;
-    padding: 12px 16px;
-    margin: 10px auto 14px auto;
-    max-width: 820px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin: 12px auto 16px auto;
+    max-width: 840px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.55);
     direction: __DIR__;
 }
 
-/* התאמות מובייל קפדניות (Mobile Media Queries) */
+/* --- 8. התאמות מובייל קפדניות (Mobile Media Queries) --- */
 @media (max-width: 640px) {
     div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
-        padding: 6px 2px !important;
-        border-radius: 8px !important;
+        padding: 8px 3px !important;
+        border-radius: 12px !important;
     }
     div[data-testid="column"] {
         padding: 0 1px !important;
         min-width: 0 !important;
     }
     .p-card-fpl {
-        padding: 3px 1px !important;
-        border-radius: 6px !important;
+        padding: 4px 1px !important;
+        border-radius: 8px !important;
         max-width: 78px !important;
     }
     .p-name {
@@ -616,8 +723,8 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     }
     div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button,
     div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
-        height: 24px !important;
-        min-height: 24px !important;
+        height: 25px !important;
+        min-height: 25px !important;
         font-size: 10px !important;
         padding: 0 1px !important;
     }
@@ -626,13 +733,17 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
         gap: 6px !important;
     }
     .kpi-card {
-        padding: 6px 4px !important;
+        padding: 8px 6px !important;
     }
     .kpi-title {
         font-size: 10px !important;
     }
     .kpi-value {
-        font-size: 15px !important;
+        font-size: 16px !important;
+    }
+    button[data-baseweb="tab"] {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
     }
 }
 </style>
@@ -914,11 +1025,13 @@ if not st.session_state.user_team_id:
     st.markdown(
         f"""
     <div class="gate-card">
-        <h1 style="color:#38bdf8; margin-bottom:6px;">{t('app_title')}</h1>
-        <div style="font-size:15px; color:#94a3b8; margin-bottom:18px;">
+        <div style="font-size:36px; margin-bottom:8px;">⚽</div>
+        <h1 style="color:#38bdf8; font-size:26px; font-weight:800; margin-bottom:6px; letter-spacing:-0.5px;">{t('app_title')}</h1>
+        <div style="font-size:14px; color:#94a3b8; font-weight:500; margin-bottom:14px;">
             {t('app_subtitle')}
         </div>
-        <p style="font-size:13px; color:#cbd5e1; line-height:1.6; margin-bottom:20px;">
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.35), transparent); margin:12px 0 16px 0;"></div>
+        <p style="font-size:13px; color:#cbd5e1; line-height:1.6; margin-bottom:8px;">
             {t('gate_desc')}
         </p>
     </div>
@@ -926,7 +1039,7 @@ if not st.session_state.user_team_id:
         unsafe_allow_html=True,
     )
 
-    c_form = st.columns([1, 2, 1])[1]
+    c_form = st.columns([1, 1.8, 1])[1]
     with c_form:
         input_val = st.text_input(
             t("team_id_label"),
@@ -935,7 +1048,7 @@ if not st.session_state.user_team_id:
         )
         b1, b2 = st.columns(2)
         with b1:
-            if st.button(t("login_btn"), use_container_width=True):
+            if st.button(t("login_btn"), use_container_width=True, type="primary"):
                 if input_val.strip().isdigit():
                     st.session_state.user_team_id = input_val.strip()
                     st.query_params["team"] = input_val.strip()
@@ -1169,10 +1282,18 @@ rating_color = (
 # =====================================================================
 h_col1, h_col2, h_col3 = st.columns([3, 1, 1])
 with h_col1:
-    st.title(f"⚽ {my_team_name}")
-    st.caption(
-        f'{t("engine_for_gw")} {next_gw} | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>',
-        unsafe_allow_html=True,
+    render_html(
+        f"""
+        <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
+            <div style="font-size:28px;">⚽</div>
+            <div>
+                <div style="font-size:22px; font-weight:800; color:#f8fafc; letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
+                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">
+                    {t("engine_for_gw")} <b style="color:#38bdf8;">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
+                </div>
+            </div>
+        </div>
+        """
     )
 with h_col2:
     st.write("")
@@ -1217,10 +1338,15 @@ st.markdown(
 )
 
 # שעון דד-ליין חי ב-HTML/JS
+clock_title = f"⏳ זמן נותר עד נעילת חילופים (GW {next_gw})" if st.session_state.app_lang == "he" else f"⏳ Time left until deadline (GW {next_gw})"
+clock_loading = "טוען שעון..." if st.session_state.app_lang == "he" else "Loading clock..."
+clock_expired = "הדד-ליין עבר!" if st.session_state.app_lang == "he" else "Deadline Passed!"
+clock_dir = "rtl" if st.session_state.app_lang == "he" else "ltr"
+
 clock_html = f"""
-<div style="background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; text-align:center; direction:rtl; margin-bottom:15px; color:#f8fafc;">
-    <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;">⏳ זמן נותר עד נעילת חילופים (GW {next_gw})</div>
-    <div id="fpl-clock" style="font-size:20px; font-weight:bold; color:#10b981; direction:ltr;">טוען שעון...</div>
+<div style="background:linear-gradient(135deg, rgba(13, 21, 34, 0.9) 0%, rgba(9, 14, 23, 0.9) 100%); border:1px solid rgba(56, 189, 248, 0.25); border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:#f8fafc; box-shadow:0 4px 16px rgba(0,0,0,0.4);">
+    <div style="font-size:12px; color:#94a3b8; font-weight:600; margin-bottom:4px;">{clock_title}</div>
+    <div id="fpl-clock" style="font-size:20px; font-weight:800; color:#10b981; direction:ltr; letter-spacing:1px;">{clock_loading}</div>
 </div>
 <script>
     var deadline = new Date("{next_deadline}").getTime();
@@ -1230,7 +1356,7 @@ clock_html = f"""
         
         if (distance < 0) {{
             clearInterval(x);
-            document.getElementById("fpl-clock").innerHTML = "הדד-ליין עבר!";
+            document.getElementById("fpl-clock").innerHTML = "{clock_expired}";
             document.getElementById("fpl-clock").style.color = "#ef4444";
             return;
         }}
