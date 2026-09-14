@@ -777,15 +777,9 @@ with t_squad:
         f" נקודות: **{starting_xp_total:.1f}**"
     )
 
-    fwd_h = "".join(
-        render_pitch_card(p) for p in starters if p["pos_code"] == 4
-    )
-    mid_h = "".join(
-        render_pitch_card(p) for p in starters if p["pos_code"] == 3
-    )
-    def_h = "".join(
-        render_pitch_card(p) for p in starters if p["pos_code"] == 2
-    )
+    fwd_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 4)
+    mid_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 3)
+    def_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 2)
     gk_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 1)
 
     st.markdown(
@@ -802,62 +796,62 @@ with t_squad:
     bench_h = "".join(render_pitch_card(p, is_bench=True) for p in bench)
     st.markdown(
         f'<div style="display:flex; justify-content:center; gap:8px;'
-        f' margin-bottom:12px;">{bench_h}</div>',
+        f' margin-bottom:20px;">{bench_h}</div>',
         unsafe_allow_html=True,
     )
 
-    with st.expander("🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל"):
-        starters_opts = {
-            p["id"]: (
-                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | xP: {p['xp']}"
-            )
-            for p in starters
-        }
-        bench_opts = {
-            p["id"]: (
-                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | xP: {p['xp']}"
-            )
-            for p in bench
-        }
+    # --- מנגנון חילופים ב-2 קליקים (במקום רשימות נפתחות) ---
+    st.markdown("#### 🔄 מערכת חילופים מהירה")
+    
+    if "swap_state" not in st.session_state:
+        st.session_state.swap_state = {"out_id": None}
 
-        sc1, sc2, sc3 = st.columns([1.5, 1.5, 1])
-        with sc1:
-            sub_out_id = st.selectbox(
-                "שחקן הרכב שיורד:",
-                list(starters_opts.keys()),
-                format_func=lambda x: starters_opts[x],
-            )
-        with sc2:
-            sub_in_id = st.selectbox(
-                "שחקן ספסל שעולה:",
-                list(bench_opts.keys()),
-                format_func=lambda x: bench_opts[x],
-            )
-        with sc3:
-            st.write("")
-            st.write("")
-            if st.button("בצע חילוף 🔁", use_container_width=True):
-                sim = [
-                    p["pos_code"] for p in starters if p["id"] != sub_out_id
-                ] + [all_players[sub_in_id]["pos_code"]]
-                if (
-                    sim.count(1) != 1
-                    or not (3 <= sim.count(2) <= 5)
-                    or not (1 <= sim.count(4) <= 3)
-                ):
-                    st.error("חילוף לא חוקי (חובה שוער 1, 3–5 מגנים ולפחות חלוץ 1).")
+    if st.session_state.swap_state["out_id"] is None:
+        st.info("1️⃣ בחר שחקן להורדה לספסל:")
+        out_opts = {p["id"]: f"❌ {p['name']}" for p in starters}
+        sel_out = st.radio(
+            "בחר שחקן הרכב:", 
+            list(out_opts.keys()), 
+            format_func=lambda x: out_opts[x], 
+            horizontal=True, 
+            label_visibility="collapsed"
+        )
+        if st.button("סמן שחקן זה להחלפה ⬅️", use_container_width=True):
+            st.session_state.swap_state["out_id"] = sel_out
+            st.rerun()
+    else:
+        p_out_name = all_players[st.session_state.swap_state["out_id"]]["name"]
+        st.warning(f"⬇️ **{p_out_name}** סומן לירידה לספסל.\n\n2️⃣ בחר מי יעלה במקומו:")
+        in_opts = {p["id"]: f"⬆️ {p['name']}" for p in bench}
+        sel_in = st.radio(
+            "בחר שחקן ספסל:", 
+            list(in_opts.keys()), 
+            format_func=lambda x: in_opts[x], 
+            horizontal=True, 
+            label_visibility="collapsed"
+        )
+
+        c_ok, c_cancel = st.columns(2)
+        with c_ok:
+            if st.button("✅ בצע חילוף עכשיו", use_container_width=True):
+                p_out_id = st.session_state.swap_state["out_id"]
+                p_in_id = sel_in
+                
+                # בדיקת חוקיות מערך
+                sim = [p["pos_code"] for p in starters if p["id"] != p_out_id] + [all_players[p_in_id]["pos_code"]]
+                if sim.count(1) != 1 or not (3 <= sim.count(2) <= 5) or not (1 <= sim.count(4) <= 3):
+                    st.error("מערך לא חוקי! חובה שוער 1, 3-5 מגנים, 2-5 קשרים ולפחות חלוץ 1.")
                 else:
-                    p_o = next(
-                        p
-                        for p in st.session_state.user_squad
-                        if p["element"] == sub_out_id
-                    )
-                    p_i = next(
-                        p for p in st.session_state.user_squad if p["element"] == sub_in_id
-                    )
+                    p_o = next(p for p in st.session_state.user_squad if p["element"] == p_out_id)
+                    p_i = next(p for p in st.session_state.user_squad if p["element"] == p_in_id)
                     p_o["position"], p_i["position"] = p_i["position"], p_o["position"]
+                    st.session_state.swap_state["out_id"] = None
                     st.rerun()
-
+                    
+        with c_cancel:
+            if st.button("✖️ ביטול", use_container_width=True):
+                st.session_state.swap_state["out_id"] = None
+                st.rerun()
 # טאב 2: מעבדת חילופים
 with t_transfers:
     st.subheader("🔄 מעבדת חילופים מותאמת עמדה ותקציב")
