@@ -18,7 +18,7 @@ st.set_page_config(
 # =====================================================================
 st.markdown(
     """
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#090e17">
@@ -901,8 +901,8 @@ div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none 
 __ROOT_VARS__
 }
 
-/* --- תמיכה מושלמת ועקבית ב-RTL / LTR ופונט מודרני --- */
-html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
+/* --- תמיכה מושלמת ועקבית ב-RTL / LTR, מובייל, ופונט מודרני --- */
+.stApp, html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     background-color: var(--bg-main) !important;
@@ -911,6 +911,17 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .
     font-family: 'Plus Jakarta Sans', 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     color: var(--text-primary) !important;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ביטול ריפודים ענקיים מיותרים בראש הדף ובמובייל */
+.block-container {
+    padding-top: 1.2rem !important;
+    padding-bottom: 3rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 1240px !important;
+    margin: 0 auto !important;
 }
 
 /* ביטול מוחלט של כל רקעים ומרובעים כהים בעמודות ובלוקים פנימיים */
@@ -956,7 +967,7 @@ div[data-testid="stHorizontalBlock"] > div {
     color: var(--text-primary) !important;
 }
 
-/* החרגה והגנה מלאה על כרטיסי שחקנים במגרש - לוחיות שם שחקן תמיד בטקסט לבן בוהק */
+/* החרגה והגנה מלאה על כרטיסי שחקנים במגרש */
 [data-testid="stMarkdownContainer"] .p-card-fpl,
 [data-testid="stMarkdownContainer"] .p-card-fpl * {
     direction: ltr !important;
@@ -990,11 +1001,6 @@ div[data-testid="stRadio"] div {
     color: var(--text-primary) !important;
 }
 
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] div {
-    color: var(--input-text) !important;
-}
-
 div[data-testid="stExpander"] details summary p,
 div[data-testid="stExpander"] details summary span {
     color: var(--text-primary) !important;
@@ -1013,6 +1019,13 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em !important;
 }
 
+/* --- 1.2 תיבות בחירה וקלט - הגנה מוחלטת מכל רקע כהה/שחור --- */
+div[data-testid="stSelectbox"],
+div[data-testid="stTextInput"],
+div[data-testid="stNumberInput"] {
+    direction: __DIR__ !important;
+}
+
 div[data-testid="stWidgetLabel"] label,
 div[data-testid="stWidgetLabel"] p,
 div[data-testid="stSelectbox"] label,
@@ -1025,64 +1038,111 @@ div[data-testid="stRadio"] label {
     font-weight: 700 !important;
     color: var(--text-secondary) !important;
     font-size: 13px !important;
+    margin-bottom: 4px !important;
 }
 
+/* BaseWeb Select Container - הגנה מוחלטת מכל רקע כהה/שחור ב-Light Mode */
+div[data-testid="stSelectbox"] div[data-baseweb="select"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
 div[data-baseweb="select"],
-div[data-baseweb="select"] > div,
-div[data-baseweb="select"] > div > div,
+div[data-baseweb="select"] *,
+div[data-baseweb="select"] div,
+div[data-baseweb="select"] span,
 div[data-baseweb="select"] [role="combobox"],
-div[data-baseweb="input"],
-div[data-baseweb="input"] > div,
-div[data-baseweb="input"] input,
+div[data-baseweb="select"] [role="combobox"] * {
+    background-color: var(--input-bg) !important;
+    background: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--input-border) !important;
+}
+
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+    border: 1.5px solid var(--input-border) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    min-height: 38px !important;
+    background-color: var(--input-bg) !important;
+    background: var(--input-bg) !important;
+}
+
+div[data-testid="stSelectbox"] label,
+div[data-testid="stSelectbox"] label *,
+div[data-testid="stSelectbox"] [data-testid="stWidgetLabel"],
+div[data-testid="stSelectbox"] [data-testid="stWidgetLabel"] * {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--text-secondary) !important;
+}
+
+div[data-testid="stSelectbox"] svg,
+div[data-baseweb="select"] svg {
+    fill: var(--input-text) !important;
+    color: var(--input-text) !important;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     background-color: var(--input-bg) !important;
     background: var(--input-bg) !important;
-    border: 1px solid var(--input-border) !important;
-    border-color: var(--input-border) !important;
+    border: 1.5px solid var(--input-border) !important;
     color: var(--input-text) !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important;
+    min-height: 38px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] p,
-div[data-baseweb="select"] div {
-    color: var(--input-text) !important;
+div[data-testid="stSelectbox"]:focus-within div[data-baseweb="select"] > div,
+div[data-testid="stTextInput"]:focus-within input,
+div[data-testid="stNumberInput"]:focus-within input {
+    border-color: var(--input-focus-border) !important;
+    box-shadow: 0 0 0 3px var(--input-focus-shadow) !important;
 }
 
-div[data-baseweb="select"] svg {
-    fill: var(--input-text) !important;
-    color: var(--input-text) !important;
-}
-
+/* תפריט נפתח (Dropdown popover & options) */
 div[data-baseweb="popover"],
-div[data-baseweb="popover"] > div,
+div[data-baseweb="popover"] *,
 div[data-baseweb="menu"],
-ul[role="listbox"] {
+div[data-baseweb="menu"] *,
+ul[role="listbox"],
+ul[role="listbox"] *,
+div[data-testid="stSelectboxVirtualDropdown"],
+div[data-testid="stSelectboxVirtualDropdown"] * {
     background-color: var(--bg-card) !important;
     background: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+div[data-baseweb="popover"] > div,
+ul[role="listbox"] {
+    border: 1.5px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12) !important;
+    padding: 4px !important;
 }
 
 li[role="option"] {
     background-color: var(--bg-card) !important;
     background: var(--bg-card) !important;
     color: var(--text-primary) !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    margin: 2px 0 !important;
+    padding: 8px 12px !important;
+    transition: all 0.15s ease !important;
 }
 
 li[role="option"]:hover,
-li[aria-selected="true"] {
+li[role="option"]:hover *,
+li[role="option"][aria-selected="true"],
+li[role="option"][aria-selected="true"] * {
     background-color: var(--bg-card-hover) !important;
     background: var(--bg-card-hover) !important;
     color: var(--accent-mint) !important;
-}
-
-div[data-baseweb="select"]:focus-within,
-div[data-baseweb="input"]:focus-within {
-    border-color: var(--input-focus-border) !important;
-    box-shadow: 0 0 10px var(--input-focus-shadow) !important;
+    font-weight: 700 !important;
 }
 
 div[role="radiogroup"] {
@@ -1368,7 +1428,9 @@ div[data-testid="column"]:has(.card-bench),
 div[data-testid="column"]:has(.p-card-fpl) > div,
 div[data-testid="column"]:has(.card-bench) > div,
 div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stVerticalBlock"],
-div[data-testid="column"]:has(.card-bench) div[data-testid="stVerticalBlock"] {
+div[data-testid="column"]:has(.card-bench) div[data-testid="stVerticalBlock"],
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) [data-testid="column"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="column"] {
     gap: 0 !important;
     row-gap: 0 !important;
     background: transparent !important;
@@ -1376,6 +1438,15 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stVerticalBlock"] {
     background-image: none !important;
     border: none !important;
     box-shadow: none !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) [data-testid="element-container"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="element-container"],
+div[data-testid="column"]:has(.p-card-fpl) [data-testid="element-container"],
+div[data-testid="column"]:has(.card-bench) [data-testid="element-container"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] div[data-testid="stMarkdownContainer"],
@@ -1391,12 +1462,16 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
 }
 
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] div[data-testid="stButton"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] div[data-testid="stButton"] {
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] div[data-testid="stButton"],
+div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"],
+div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
     width: 100% !important;
     margin: 0 auto !important;
+    margin-top: -3px !important;
+    padding: 0 !important;
 }
 
 /* --- 6.1 כרטיס שחקן עליון (Top Plaque) - מוגדל ומרווח --- */
@@ -1462,7 +1537,10 @@ div[data-testid="stButton"] button[kind="primary"] {
 }
 
 /* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
-div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
+div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
+div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button,
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) [data-testid="column"] div[data-testid="stButton"] button,
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="column"] div[data-testid="stButton"] button {
     height: 32px !important;
     min-height: 32px !important;
     line-height: 1 !important;
@@ -1470,7 +1548,10 @@ div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
     font-weight: 700 !important;
     padding: 0 2px !important;
     border-radius: 0 0 12px 12px !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
     margin: 0 auto !important;
+    margin-top: -2px !important;
     background: var(--p-card-btn-bg) !important;
     border: 1px solid var(--p-card-btn-border) !important;
     border-top: none !important;
@@ -1482,7 +1563,7 @@ div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
     justify-content: center !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06) !important;
     transition: all 0.15s ease !important;
 }
 
@@ -1926,15 +2007,72 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     border-radius: 3px !important;
 }
 
+/* מגרש כדורגל וספסל - שורות שחקנים רספונסיביות ללא שבירת עמודות */
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] {
+    min-width: 0 !important;
+    flex: 1 1 0px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 2px !important;
+}
+
+/* מרכז טופס הכניסה לשער */
+div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+}
+
+/* מתכנן מחזורים - פריסה אנכית במכשירים עם מסך עד 900px */
+@media (max-width: 900px) {
+    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) > div[data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        flex-wrap: wrap !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) > div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+}
+
 /* --- 8. התאמות מובייל קפדניות (Mobile Media Queries) --- */
 @media (max-width: 640px) {
+    .block-container {
+        padding-top: 0.6rem !important;
+        padding-bottom: max(2rem, env(safe-area-inset-bottom)) !important;
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
+    }
     div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
-        padding: 8px 2px !important;
+        padding: 6px 2px !important;
         border-radius: 12px !important;
     }
     div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
-        padding: 8px 2px !important;
+        padding: 6px 2px !important;
         border-radius: 12px !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"],
+    div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] {
+        gap: 2px !important;
+        flex-wrap: nowrap !important;
     }
     div[data-testid="column"] {
         padding: 0 1px !important;
@@ -1943,35 +2081,53 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     .p-card-fpl {
         padding: 3px 2px !important;
         border-radius: 8px 8px 0 0 !important;
-        max-width: 78px !important;
-        height: 130px !important;
-        min-height: 130px !important;
-        max-height: 130px !important;
+        max-width: 70px !important;
+        width: 100% !important;
+        height: 134px !important;
+        min-height: 134px !important;
+        max-height: 134px !important;
+    }
+    .p-card-fpl svg {
+        width: 32px !important;
+        height: 28px !important;
     }
     .p-name-plate {
-        padding: 2px 3px !important;
+        padding: 2px 2px !important;
+        border-radius: 4px !important;
+        margin: 2px 0 1px 0 !important;
+        width: 98% !important;
         background: var(--p-name-plate-bg) !important;
         border: 1px solid var(--p-name-plate-border) !important;
     }
     .p-name-txt {
-        font-size: 9.5px !important;
+        font-size: 9px !important;
+        font-weight: 800 !important;
         color: var(--p-name-plate-text) !important;
     }
     .p-sub, .badge-fdr, .mini-fxt {
-        font-size: 7.5px !important;
+        font-size: 7px !important;
         padding: 1px 2px !important;
     }
     .badge-c, .badge-vc {
-        font-size: 7.5px !important;
+        font-size: 7px !important;
         padding: 1px 2px !important;
     }
-    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
+    .p-card-cost {
+        font-size: 8px !important;
+    }
+    .p-card-xp {
+        font-size: 9px !important;
+    }
+    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
+    div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
         height: 26px !important;
         min-height: 26px !important;
-        font-size: 10px !important;
+        font-size: 9.5px !important;
         padding: 0 1px !important;
         border-radius: 0 0 8px 8px !important;
-        max-width: 78px !important;
+        max-width: 70px !important;
+        width: 100% !important;
+        margin-top: -3px !important;
     }
     .kpi-container {
         grid-template-columns: repeat(2, 1fr) !important;
@@ -1986,23 +2142,31 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     .kpi-value {
         font-size: 17px !important;
     }
+    div[data-baseweb="tab-list"] {
+        -webkit-overflow-scrolling: touch !important;
+        padding: 4px !important;
+    }
     button[data-baseweb="tab"] {
         padding: 6px 10px !important;
-        font-size: 12px !important;
+        font-size: 11.5px !important;
+    }
+    div[data-testid="stButton"] button {
+        padding: 5px 8px !important;
+        font-size: 11.5px !important;
     }
     .fxt-team-name {
         font-size: 10.5px !important;
     }
     .fxt-jersey svg {
-        width: 22px !important;
-        height: 19px !important;
+        width: 20px !important;
+        height: 18px !important;
     }
     .fxt-mid {
-        min-width: 54px !important;
+        min-width: 50px !important;
     }
     .fxt-mid-time {
-        font-size: 10px !important;
-        padding: 1px 5px !important;
+        font-size: 9.5px !important;
+        padding: 1px 4px !important;
     }
 }
 </style>
@@ -2333,8 +2497,8 @@ if not st.session_state.user_team_id:
         unsafe_allow_html=True,
     )
 
-    c_form = st.columns([1, 1.8, 1])[1]
-    with c_form:
+    with st.container():
+        st.markdown('<div class="gate-form-anchor"></div>', unsafe_allow_html=True)
         input_val = st.text_input(
             t("team_id_label"),
             placeholder=t("team_id_placeholder"),
@@ -2988,17 +3152,7 @@ with t_squad:
     def render_clean_squad_row(player_list, is_bench=False):
         if not player_list:
             return
-        n = len(player_list)
-        if n == 1:
-            cols = [st.columns([2, 1.2, 2])[1]]
-        elif n == 2:
-            cols = st.columns([1.5, 2, 2, 1.5])[1:3]
-        elif n == 3:
-            cols = st.columns([1, 2, 2, 2, 1])[1:4]
-        elif n == 4:
-            cols = st.columns([0.5, 2, 2, 2, 2, 0.5])[1:5]
-        else:
-            cols = st.columns(n)
+        cols = st.columns(len(player_list))
 
         for i, p in enumerate(player_list):
             with cols[i]:
@@ -3985,17 +4139,7 @@ with t_planner:
     def render_clean_planner_row(player_list, is_bench=False):
         if not player_list:
             return
-        n = len(player_list)
-        if n == 1:
-            cols = [st.columns([2, 1.2, 2])[1]]
-        elif n == 2:
-            cols = st.columns([1.5, 2, 2, 1.5])[1:3]
-        elif n == 3:
-            cols = st.columns([1, 2, 2, 2, 1])[1:4]
-        elif n == 4:
-            cols = st.columns([0.5, 2, 2, 2, 2, 0.5])[1:5]
-        else:
-            cols = st.columns(n)
+        cols = st.columns(len(player_list))
 
         for i, p in enumerate(player_list):
             with cols[i]:
@@ -4374,6 +4518,7 @@ with t_planner:
                         st.session_state.planner_selected_id = None
                         st.rerun()
 
+        st.markdown('<div class="planner-split-anchor"></div>', unsafe_allow_html=True)
         col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
         with col_pl_pitch:
             st.markdown(f"#### {t('tab_squad')} — Gameweek {selected_gw}")
