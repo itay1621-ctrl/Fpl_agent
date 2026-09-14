@@ -522,24 +522,26 @@ div[data-testid="stToolbar"] {visibility: hidden !important; display: none !impo
 div[data-testid="stStatusWidget"] {visibility: hidden !important; display: none !important;}
 
 :root {
-    --bg-main: #06090e;
-    --bg-card: rgba(13, 21, 35, 0.82);
-    --bg-card-hover: rgba(20, 32, 52, 0.9);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --accent-blue: #38bdf8;
-    --accent-green: #10b981;
-    --accent-yellow: #f59e0b;
-    --accent-red: #ef4444;
+    --bg-main: #0b0714;
+    --bg-card: rgba(26, 15, 46, 0.85);
+    --bg-card-hover: rgba(38, 22, 66, 0.92);
+    --border-color: rgba(168, 85, 247, 0.2);
+    --text-primary: #ffffff;
+    --text-secondary: #e2d9f3;
+    --text-muted: #a79bc8;
+    --accent-mint: #00ff87;
+    --accent-cyan: #02efff;
+    --accent-magenta: #e90052;
+    --accent-purple: #37003c;
+    --accent-gold: #ffd700;
 }
 
-/* --- תמיכה מושלמת ועקבית ב-RTL / LTR בכל האלמנטים של האפליקציה --- */
+/* --- תמיכה מושלמת ועקבית ב-RTL / LTR וערכת נושא רשמית Premier League --- */
 html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .block-container, div[data-testid="stVerticalBlock"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 50% -10%, rgba(55, 0, 60, 0.45) 0%, transparent 60%) !important;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
@@ -563,9 +565,9 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #f8fafc !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.2px !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.3px !important;
 }
 
 div[data-testid="stWidgetLabel"] label,
@@ -577,8 +579,8 @@ div[data-testid="stRadio"] label {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     width: 100% !important;
-    font-weight: 600 !important;
-    color: #cbd5e1 !important;
+    font-weight: 700 !important;
+    color: #e2d9f3 !important;
     font-size: 13px !important;
 }
 
@@ -589,10 +591,16 @@ div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background-color: #0b1320 !important;
-    border-color: #1e2e46 !important;
-    color: #f8fafc !important;
+    background-color: #140b24 !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+    color: #ffffff !important;
     border-radius: 8px !important;
+}
+
+div[data-baseweb="select"]:focus-within,
+div[data-baseweb="input"]:focus-within {
+    border-color: #00ff87 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 135, 0.3) !important;
 }
 
 div[role="radiogroup"] {
@@ -603,8 +611,8 @@ div[role="radiogroup"] {
 [data-testid="stMetric"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background: rgba(13, 21, 35, 0.7) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(26, 15, 46, 0.75) !important;
+    border: 1px solid rgba(168, 85, 247, 0.2) !important;
     border-radius: 12px !important;
     padding: 10px 14px !important;
 }
@@ -620,14 +628,15 @@ div[data-testid="stAlert"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     border-radius: 10px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    background: rgba(26, 15, 46, 0.8) !important;
 }
 
 div[data-testid="stExpander"] {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
-    background: rgba(13, 21, 35, 0.8) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(26, 15, 46, 0.85) !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
     border-radius: 12px !important;
 }
 
@@ -635,8 +644,8 @@ div[data-testid="stDataFrame"] {
     direction: __DIR__ !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    background: rgba(13, 21, 35, 0.6) !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    background: rgba(26, 15, 46, 0.65) !important;
 }
 
 /* בידוד LTR עבור נתונים באנגלית, מספרים, תגיות מחיר ויריבות */
@@ -646,18 +655,19 @@ div[data-testid="stDataFrame"] {
     display: inline-block;
 }
 
-/* --- 2. טאבים מעוצבים בסגנון פרימיום --- */
+/* --- 2. טאבים רשמיים בסגנון ה-Premier League --- */
 div[data-baseweb="tab-list"] {
-    background: #090e17 !important;
+    background: #110722 !important;
     border-radius: 12px !important;
     padding: 5px 6px !important;
-    border: 1px solid #1e2e46 !important;
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
     gap: 5px !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
     margin-bottom: 16px !important;
     direction: __DIR__ !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
 }
 div[data-baseweb="tab-list"]::-webkit-scrollbar {
     display: none !important;
@@ -665,21 +675,22 @@ div[data-baseweb="tab-list"]::-webkit-scrollbar {
 button[data-baseweb="tab"] {
     border-radius: 8px !important;
     padding: 8px 16px !important;
-    color: #94a3b8 !important;
+    color: #a79bc8 !important;
     font-size: 13px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     transition: all 0.2s ease !important;
     border: none !important;
     background: transparent !important;
 }
 button[data-baseweb="tab"]:hover {
-    color: #f8fafc !important;
-    background: rgba(30, 41, 59, 0.6) !important;
+    color: #ffffff !important;
+    background: rgba(55, 0, 60, 0.5) !important;
 }
 button[data-baseweb="tab"][aria-selected="true"] {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.4) !important;
+    color: #00ff87 !important;
+    background: linear-gradient(135deg, #37003c 0%, #580060 100%) !important;
+    border: 1.5px solid #00ff87 !important;
+    box-shadow: 0 2px 14px rgba(0, 255, 135, 0.35) !important;
 }
 div[data-baseweb="tab-highlight"],
 div[data-baseweb="tab-border"] {
@@ -688,17 +699,17 @@ div[data-baseweb="tab-border"] {
 
 /* --- 3. כרטיס כניסה / שער --- */
 .gate-card {
-    background: linear-gradient(145deg, #0e1726 0%, #090e17 100%);
-    border: 1px solid rgba(56, 189, 248, 0.3);
+    background: linear-gradient(145deg, #1c0c36 0%, #0f071c 100%);
+    border: 1.5px solid rgba(0, 255, 135, 0.4);
     border-radius: 20px;
     padding: 30px 22px;
     margin: 20px auto;
     max-width: 560px;
     text-align: center;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.6), 0 0 24px rgba(56, 189, 248, 0.1);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.7), 0 0 28px rgba(0, 255, 135, 0.15);
 }
 
-/* --- 4. מדדי KPI בראש האתר - מובלטים בצבעוניות עשירה ויוקרתית --- */
+/* --- 4. מדדי KPI בראש האתר - צבעוניות רשמית של שידורי ה-PL --- */
 .kpi-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -706,65 +717,65 @@ div[data-baseweb="tab-border"] {
     margin-bottom: 18px;
 }
 .kpi-card {
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
     border-radius: 14px;
     padding: 14px 12px;
     text-align: center;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .kpi-card:hover {
     transform: translateY(-2px);
 }
 .kpi-card-score {
-    background: linear-gradient(135deg, rgba(6, 78, 59, 0.85) 0%, rgba(2, 44, 34, 0.95) 100%);
-    border: 1.5px solid #10b981;
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
+    background: linear-gradient(135deg, rgba(0, 255, 135, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    border: 1.5px solid #00ff87;
+    box-shadow: 0 6px 20px rgba(0, 255, 135, 0.25);
 }
 .kpi-card-xp {
-    background: linear-gradient(135deg, rgba(14, 60, 105, 0.85) 0%, rgba(8, 36, 64, 0.95) 100%);
-    border: 1.5px solid #38bdf8;
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.25);
+    background: linear-gradient(135deg, rgba(2, 239, 255, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    border: 1.5px solid #02efff;
+    box-shadow: 0 6px 20px rgba(2, 239, 255, 0.25);
 }
 .kpi-card-bank {
-    background: linear-gradient(135deg, rgba(95, 48, 8, 0.85) 0%, rgba(55, 26, 3, 0.95) 100%);
-    border: 1.5px solid #f59e0b;
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.15) 0%, rgba(19, 9, 36, 0.95) 100%);
+    border: 1.5px solid #facc15;
+    box-shadow: 0 6px 20px rgba(250, 204, 21, 0.25);
 }
 .kpi-card-rank {
-    background: linear-gradient(135deg, rgba(76, 29, 149, 0.85) 0%, rgba(46, 16, 101, 0.95) 100%);
-    border: 1.5px solid #c084fc;
-    box-shadow: 0 6px 20px rgba(192, 132, 252, 0.25);
+    background: linear-gradient(135deg, rgba(233, 0, 82, 0.18) 0%, rgba(55, 0, 60, 0.95) 100%);
+    border: 1.5px solid #ff2882;
+    box-shadow: 0 6px 20px rgba(233, 0, 82, 0.28);
 }
 .kpi-title {
     font-size: 11px;
-    color: #cbd5e1;
+    color: #e2d9f3;
     margin-bottom: 4px;
-    font-weight: 600;
+    font-weight: 700;
 }
 .kpi-value {
     font-size: 20px;
-    font-weight: 800;
+    font-weight: 900;
     color: #ffffff;
 }
 
-/* --- 5. מגרש אצטדיון פרימיום עם דשא מפוספס וקווים טקטיים --- */
+/* --- 5. מגרש אצטדיון פרימיום עם דשא מפוספס מואר וקווים טקטיים --- */
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
     max-width: 840px !important;
     margin: 0 auto 12px auto !important;
     background:
-        radial-gradient(ellipse at 50% 50%, rgba(22, 101, 52, 0.85) 0%, rgba(6, 40, 18, 0.98) 100%),
+        radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.9) 0%, rgba(6, 44, 20, 0.98) 100%),
         repeating-linear-gradient(
             0deg,
-            #11431f 0px,
-            #11431f 48px,
-            #0e3819 48px,
-            #0e3819 96px
+            #104822 0px,
+            #104822 48px,
+            #0c3b1b 48px,
+            #0c3b1b 96px
         ) !important;
-    border: 2px solid #1f6832 !important;
+    border: 2px solid rgba(0, 255, 135, 0.45) !important;
     border-radius: 18px !important;
     padding: 18px 10px !important;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.65), inset 0 0 60px rgba(0,0,0,0.65) !important;
+    box-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12), inset 0 0 60px rgba(0,0,0,0.65) !important;
     position: relative !important;
 }
 
@@ -772,7 +783,7 @@ div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     pointer-events: none;
-    border: 1.5px solid rgba(255, 255, 255, 0.18);
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
     border-radius: 14px;
     margin: 8px;
 }
@@ -783,7 +794,7 @@ div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
     left: 0;
     right: 0;
     height: 1.5px;
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-50%);
 }
 .pitch-anchor::after {
@@ -793,26 +804,26 @@ div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
     left: 50%;
     width: 90px;
     height: 90px;
-    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     transform: translate(-50%, -50%);
 }
 
-/* --- 5.2 ספסל מחליפים מואר ומובלט (Tactical Illuminated Dugout) --- */
+/* --- 5.2 ספסל מחליפים מואר ומובלט ב-PL Mint (Tactical Dugout) --- */
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
     max-width: 840px !important;
     margin: 14px auto 22px auto !important;
-    background: linear-gradient(145deg, #112238 0%, #19385e 45%, #0e2035 100%) !important;
-    border: 2px solid #38bdf8 !important;
+    background: linear-gradient(145deg, #1c0c36 0%, #2e1256 45%, #16092b 100%) !important;
+    border: 2px solid #00ff87 !important;
     border-radius: 18px !important;
     padding: 16px 14px !important;
-    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.75), 0 0 28px rgba(56, 189, 248, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 135, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     position: relative !important;
 }
 
 .bench-dugout-badge {
-    background: linear-gradient(90deg, rgba(2, 132, 199, 0.35) 0%, rgba(56, 189, 248, 0.15) 100%);
-    border: 1px solid rgba(56, 189, 248, 0.5);
+    background: linear-gradient(90deg, rgba(55, 0, 60, 0.85) 0%, rgba(0, 255, 135, 0.2) 100%);
+    border: 1px solid #00ff87;
     border-radius: 10px;
     padding: 7px 14px;
     margin-bottom: 12px;
@@ -861,15 +872,15 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
 
 /* --- 6.1 כרטיס שחקן עליון (Top Plaque) --- */
 .p-card-fpl {
-    background: rgba(13, 21, 34, 0.94) !important;
+    background: rgba(20, 11, 38, 0.95) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     border-radius: 12px 12px 0 0 !important;
     padding: 4px 4px 4px 4px !important;
     text-align: center !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.45) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden !important;
     position: relative !important;
@@ -904,10 +915,10 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     padding: 0 2px !important;
     border-radius: 0 0 12px 12px !important;
     margin: 0 auto !important;
-    background: rgba(11, 18, 29, 0.96) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: rgba(14, 7, 28, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
     border-top: none !important;
-    color: #e2e8f0 !important;
+    color: #ffffff !important;
     width: 100% !important;
     max-width: 110px !important;
     min-width: 0 !important;
@@ -915,72 +926,73 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     justify-content: center !important;
     display: flex !important;
     align-items: center !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35) !important;
     transition: all 0.15s ease !important;
 }
 
 /* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור */
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"]:hover .p-card-fpl,
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"]:hover .p-card-fpl {
-    border-color: rgba(56, 189, 248, 0.5) !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 12px rgba(56, 189, 248, 0.25) !important;
+    border-color: #00ff87 !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.7), 0 0 14px rgba(0, 255, 135, 0.3) !important;
     transform: translateY(-2px);
 }
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"]:hover div[data-testid="stButton"] button,
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"]:hover div[data-testid="stButton"] button {
-    border-color: rgba(56, 189, 248, 0.5) !important;
-    color: #38bdf8 !important;
-    background: #142236 !important;
+    border-color: #00ff87 !important;
+    color: #00ff87 !important;
+    background: #251046 !important;
     transform: translateY(-2px);
 }
 
 /* מצב שחקן נבחר לחילוף */
 .p-card-selected {
-    border: 2px solid #38bdf8 !important;
-    border-bottom: 1px solid rgba(56, 189, 248, 0.4) !important;
-    box-shadow: 0 0 16px rgba(56, 189, 248, 0.7) !important;
-    background: rgba(14, 42, 71, 0.98) !important;
+    border: 2px solid #00ff87 !important;
+    border-bottom: 1px solid rgba(0, 255, 135, 0.4) !important;
+    box-shadow: 0 0 18px rgba(0, 255, 135, 0.8) !important;
+    background: rgba(36, 17, 68, 0.98) !important;
 }
 .p-card-transfer-selected {
-    border: 2px solid #ef4444 !important;
-    border-bottom: 1px solid rgba(239, 68, 68, 0.4) !important;
-    box-shadow: 0 0 16px rgba(239, 68, 68, 0.7) !important;
-    background: rgba(60, 18, 28, 0.98) !important;
+    border: 2px solid #e90052 !important;
+    border-bottom: 1px solid rgba(233, 0, 82, 0.4) !important;
+    box-shadow: 0 0 18px rgba(233, 0, 82, 0.8) !important;
+    background: rgba(60, 10, 30, 0.98) !important;
 }
 
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button[kind="primary"],
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button[kind="primary"] {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-    border: 1.5px solid #38bdf8 !important;
+    background: linear-gradient(135deg, #00ff87 0%, #02efff 100%) !important;
+    border: 1.5px solid #00ff87 !important;
     border-top: none !important;
-    color: #ffffff !important;
-    font-weight: 800 !important;
-    box-shadow: 0 0 16px rgba(56, 189, 248, 0.5) !important;
+    color: #090412 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 16px rgba(0, 255, 135, 0.6) !important;
 }
 
 /* כרטיסים וכפתורים בספסל */
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) .p-card-fpl,
 .card-bench {
-    background: linear-gradient(145deg, #182c47 0%, #0f1d30 100%) !important;
-    border: 1.5px solid #38bdf8 !important;
-    border-bottom: 1px solid rgba(56, 189, 248, 0.3) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.2) !important;
+    background: linear-gradient(145deg, #28124c 0%, #190a30 100%) !important;
+    border: 1.5px solid #00ff87 !important;
+    border-bottom: 1px solid rgba(0, 255, 135, 0.3) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 255, 135, 0.25) !important;
 }
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
-    background: #0f1d30 !important;
-    border: 1.5px solid #38bdf8 !important;
+    background: #190a30 !important;
+    border: 1.5px solid #00ff87 !important;
     border-top: none !important;
+    color: #00ff87 !important;
 }
 
-.cap-gold { border: 2px solid #facc15 !important; border-bottom: 1px solid rgba(250, 204, 21, 0.4) !important; box-shadow: 0 0 12px rgba(250, 204, 21, 0.35) !important; }
-.vc-silver { border: 2px solid #94a3b8 !important; border-bottom: 1px solid rgba(148, 163, 184, 0.4) !important; }
-.card-danger { border: 2px solid #f87171 !important; border-bottom: 1px solid rgba(248, 113, 113, 0.4) !important; background: rgba(248, 113, 113, 0.16) !important; }
-.card-warning { border: 2px solid #fbd38d !important; border-bottom: 1px solid rgba(251, 211, 141, 0.4) !important; background: rgba(251, 211, 141, 0.16) !important; }
+.cap-gold { border: 2px solid #ffd700 !important; border-bottom: 1px solid rgba(255, 215, 0, 0.4) !important; box-shadow: 0 0 14px rgba(255, 215, 0, 0.45) !important; }
+.vc-silver { border: 2px solid #e2d9f3 !important; border-bottom: 1px solid rgba(226, 217, 243, 0.4) !important; }
+.card-danger { border: 2px solid #e90052 !important; border-bottom: 1px solid rgba(233, 0, 82, 0.4) !important; background: rgba(233, 0, 82, 0.18) !important; }
+.card-warning { border: 2px solid #facc15 !important; border-bottom: 1px solid rgba(250, 204, 21, 0.4) !important; background: rgba(250, 204, 21, 0.18) !important; }
 
 /* תגיות C ו-VC רשמיות */
 .badge-c {
-    background: #facc15;
-    color: #000000;
+    background: #ffd700;
+    color: #090412;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -988,13 +1000,13 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     border-radius: 4px;
     margin-left: 3px;
     display: inline-block;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.6);
     vertical-align: middle;
 }
 
 .badge-vc {
-    background: #94a3b8;
-    color: #000000;
+    background: #e2d9f3;
+    color: #090412;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -1002,13 +1014,13 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     border-radius: 4px;
     margin-left: 3px;
     display: inline-block;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.6);
     vertical-align: middle;
 }
 
 /* לוחית שם שחקן - ניגודיות גבוהה */
 .p-name-plate {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 5px;
     padding: 2px 4px;
     margin: 2px 0 1px 0;
@@ -1034,7 +1046,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 
 .p-sub {
     font-size: 8.5px;
-    color: var(--text-muted);
+    color: #a79bc8;
     margin: 1px 0;
     width: 100%;
     text-align: center;
@@ -1048,18 +1060,18 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     width: 92%;
     margin-top: auto;
     padding-top: 2px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 .p-card-cost {
     font-size: 8.5px;
     font-weight: 700;
-    color: #94a3b8;
+    color: #e2d9f3;
     direction: ltr;
 }
 .p-card-xp {
     font-size: 9.5px;
     font-weight: 900;
-    color: #38bdf8;
+    color: #00ff87;
     direction: ltr;
 }
 
@@ -1071,7 +1083,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     display: inline-block;
     line-height: 1.2;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 .fdr-2 { background: #15803d; color: #ffffff; }
 .fdr-3 { background: #475569; color: #ffffff; }
@@ -1087,8 +1099,8 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     width: fit-content;
     line-height: 1.1;
 }
-.prob-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-.prob-yellow { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid #f59e0b; }
+.prob-red { background: rgba(233, 0, 82, 0.25); color: #ff85ad; border: 1px solid #e90052; }
+.prob-yellow { background: rgba(250, 204, 21, 0.25); color: #fde68a; border: 1px solid #facc15; }
 
 .mini-fxt-container { 
     display: flex !important; 
@@ -1114,28 +1126,28 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 
 /* --- 7. מערכת כרטיסים גלובלית ואחידה לכל הקטגוריות (Tabs 2-7) --- */
 .accessible-card {
-    background: rgba(13, 21, 35, 0.82) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: rgba(26, 15, 46, 0.85) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(168, 85, 247, 0.2) !important;
     border-radius: 14px !important;
     padding: 16px 18px !important;
     margin-bottom: 14px !important;
-    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45) !important;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
     transition: all 0.2s ease !important;
     direction: __DIR__ !important;
 }
 .accessible-card:hover {
-    background: rgba(18, 30, 49, 0.88) !important;
-    border-color: rgba(56, 189, 248, 0.35) !important;
-    box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.6), 0 0 14px rgba(56, 189, 248, 0.15) !important;
+    background: rgba(38, 22, 66, 0.92) !important;
+    border-color: rgba(0, 255, 135, 0.45) !important;
+    box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 255, 135, 0.2) !important;
 }
 
 .split-box {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(168, 85, 247, 0.2) !important;
     padding-bottom: 8px !important;
     margin-bottom: 10px !important;
     direction: __DIR__ !important;
@@ -1144,19 +1156,19 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 .meta-chip {
     font-size: 11px !important;
     font-weight: 700 !important;
-    background: rgba(30, 41, 59, 0.7) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    color: var(--text-muted) !important;
+    background: rgba(55, 0, 60, 0.65) !important;
+    border: 1px solid rgba(168, 85, 247, 0.35) !important;
+    color: #e2d9f3 !important;
     padding: 2px 8px !important;
     border-radius: 6px !important;
     display: inline-block !important;
 }
 
 .flaw-row {
-    background: rgba(239, 68, 68, 0.08) !important;
-    border: 1px solid rgba(239, 68, 68, 0.25) !important;
-    border-right: 4px solid #ef4444 !important;
-    border-left: 4px solid #ef4444 !important;
+    background: rgba(233, 0, 82, 0.08) !important;
+    border: 1px solid rgba(233, 0, 82, 0.3) !important;
+    border-right: 4px solid #e90052 !important;
+    border-left: 4px solid #e90052 !important;
     border-radius: 10px !important;
     padding: 10px 14px !important;
     margin-bottom: 8px !important;
@@ -1165,12 +1177,12 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     justify-content: space-between !important;
     align-items: center !important;
     direction: __DIR__ !important;
-    color: #fecaca !important;
+    color: #ffd1df !important;
 }
 .flaw-pen {
-    background: rgba(239, 68, 68, 0.25) !important;
-    border: 1px solid rgba(239, 68, 68, 0.5) !important;
-    color: #fca5a5 !important;
+    background: rgba(233, 0, 82, 0.25) !important;
+    border: 1px solid rgba(233, 0, 82, 0.5) !important;
+    color: #ff85ad !important;
     padding: 2px 8px !important;
     border-radius: 6px !important;
     font-weight: 800 !important;
@@ -1178,18 +1190,18 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     direction: ltr !important;
 }
 
-/* פאנלים אלגנטיים להשוואת שחקנים (Tabs 2 & 5) */
+/* פאנלים רשמיים להשוואת שחקנים (PL Magenta vs Electric Mint) */
 .comparison-panel-out {
-    background: rgba(239, 68, 68, 0.08) !important;
-    border: 1px solid rgba(239, 68, 68, 0.28) !important;
+    background: rgba(233, 0, 82, 0.08) !important;
+    border: 1px solid rgba(233, 0, 82, 0.32) !important;
     border-radius: 10px !important;
     padding: 10px 12px !important;
     line-height: 1.5 !important;
     direction: __DIR__ !important;
 }
 .comparison-panel-in {
-    background: rgba(16, 185, 129, 0.08) !important;
-    border: 1px solid rgba(16, 185, 129, 0.28) !important;
+    background: rgba(0, 255, 135, 0.08) !important;
+    border: 1px solid rgba(0, 255, 135, 0.32) !important;
     border-radius: 10px !important;
     padding: 10px 12px !important;
     line-height: 1.5 !important;
@@ -1197,24 +1209,24 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 }
 
 .transfer-drawer {
-    background: linear-gradient(145deg, #0d1e33 0%, #091424 100%) !important;
-    border: 1.5px solid #38bdf8 !important;
+    background: linear-gradient(145deg, #1c0c36 0%, #110722 100%) !important;
+    border: 1.5px solid #00ff87 !important;
     border-radius: 14px !important;
     padding: 16px !important;
     margin: 12px auto 18px auto !important;
     max-width: 840px !important;
-    box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 24px rgba(0, 255, 135, 0.2) !important;
     direction: __DIR__ !important;
 }
 
 .rebuild-banner {
-    background: linear-gradient(135deg, #0e2038 0%, #162f52 100%) !important;
-    border: 1.5px solid #38bdf8 !important;
+    background: linear-gradient(135deg, #1c0c36 0%, #2e1256 100%) !important;
+    border: 1.5px solid #00ff87 !important;
     border-radius: 14px !important;
     padding: 14px 18px !important;
     margin: 12px auto 16px auto !important;
     max-width: 840px !important;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.55), 0 0 16px rgba(56, 189, 248, 0.2) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.65), 0 0 20px rgba(0, 255, 135, 0.2) !important;
     direction: __DIR__ !important;
 }
 
@@ -1812,9 +1824,9 @@ if not formation_valid:
 
 squad_rating = int(max(48, min(86, base_score - total_penalty)))
 rating_color = (
-    "#10b981"
+    "#00ff87"
     if squad_rating >= 78
-    else ("#38bdf8" if squad_rating >= 70 else "#f59e0b")
+    else ("#02efff" if squad_rating >= 70 else "#facc15")
 )
 
 # =====================================================================
@@ -1827,9 +1839,9 @@ with h_col1:
         <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
             <div style="font-size:28px;">⚽</div>
             <div>
-                <div style="font-size:22px; font-weight:800; color:#f8fafc; letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
-                <div style="font-size:12px; color:#94a3b8; margin-top:2px;">
-                    {t("engine_for_gw")} <b style="color:#38bdf8;">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
+                <div style="font-size:22px; font-weight:800; color:#ffffff; letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
+                <div style="font-size:12px; color:#e2d9f3; margin-top:2px;">
+                    {t("engine_for_gw")} <b style="color:#00ff87;">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
                 </div>
             </div>
         </div>
@@ -1862,15 +1874,15 @@ st.markdown(
     </div>
     <div class="kpi-card kpi-card-xp">
         <div class="kpi-title">{t('xp_forecast')}</div>
-        <div class="kpi-value" style="color:#38bdf8;">{starting_xp_total:.1f}</div>
+        <div class="kpi-value" style="color:#02efff;">{starting_xp_total:.1f}</div>
     </div>
     <div class="kpi-card kpi-card-bank">
         <div class="kpi-title">{t('in_bank')}</div>
-        <div class="kpi-value" style="color:#fbbf24;"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
+        <div class="kpi-value" style="color:#ffd700;"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
     </div>
     <div class="kpi-card kpi-card-rank">
         <div class="kpi-title">{t('overall_rank')}</div>
-        <div class="kpi-value" style="color:#e9d5ff;"><span class="ltr-tag">{rank_txt}</span></div>
+        <div class="kpi-value" style="color:#ff85ad;"><span class="ltr-tag">{rank_txt}</span></div>
     </div>
 </div>
 """,
@@ -1884,9 +1896,9 @@ clock_expired = "הדד-ליין עבר!" if st.session_state.app_lang == "he" e
 clock_dir = "rtl" if st.session_state.app_lang == "he" else "ltr"
 
 clock_html = f"""
-<div style="background:linear-gradient(135deg, rgba(13, 21, 34, 0.9) 0%, rgba(9, 14, 23, 0.9) 100%); border:1px solid rgba(56, 189, 248, 0.25); border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:#f8fafc; box-shadow:0 4px 16px rgba(0,0,0,0.4);">
-    <div style="font-size:12px; color:#94a3b8; font-weight:600; margin-bottom:4px;">{clock_title}</div>
-    <div id="fpl-clock" style="font-size:20px; font-weight:800; color:#10b981; direction:ltr; letter-spacing:1px;">{clock_loading}</div>
+<div style="background:linear-gradient(135deg, #180930 0%, #2a0f4d 100%); border:1.5px solid #00ff87; border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:#ffffff; box-shadow:0 4px 18px rgba(0, 255, 135, 0.25);">
+    <div style="font-size:12px; color:#e2d9f3; font-weight:700; margin-bottom:4px;">{clock_title}</div>
+    <div id="fpl-clock" style="font-size:20px; font-weight:900; color:#00ff87; direction:ltr; letter-spacing:1.5px;">{clock_loading}</div>
 </div>
 <script>
     var deadline = new Date("{next_deadline}").getTime();
@@ -1897,7 +1909,7 @@ clock_html = f"""
         if (distance < 0) {{
             clearInterval(x);
             document.getElementById("fpl-clock").innerHTML = "{clock_expired}";
-            document.getElementById("fpl-clock").style.color = "#ef4444";
+            document.getElementById("fpl-clock").style.color = "#e90052";
             return;
         }}
         
@@ -3541,10 +3553,11 @@ with t_leagues:
                         rival_pids = [p["element"] for p in rival_picks_res["picks"]]
                         my_pids = [p["element"] for p in st.session_state.user_squad]
 
-                        my_diffs = [all_players[pid]["name"] for pid in my_pids if pid not in rival_pids and pid in all_players]
-                        rival_diffs = [all_players[pid]["name"] for pid in rival_pids if pid not in my_pids and pid in all_players]
-                        
+                        r_cap_obj = next((all_players[p["element"]]["name"] for p in rival_picks_res["picks"] if p.get("is_captain") and p["element"] in all_players), "—")
+                        r_chip = rival_picks_res.get("active_chip", t("t7_no_chip"))
                         chip_txt = r_chip if r_chip else t("t7_no_chip")
+                        my_diffs = [all_players[p]["name"] for p in my_pids if p not in rival_pids and p in all_players]
+                        rival_diffs = [all_players[p]["name"] for p in rival_pids if p not in my_pids and p in all_players]
                         my_diffs_str = ', '.join(my_diffs[:6]) if my_diffs else t("t7_h2h_none")
                         rival_diffs_str = ', '.join(rival_diffs[:6]) if rival_diffs else t("t7_h2h_none")
 
@@ -3554,12 +3567,12 @@ with t_leagues:
                                 f"""
                                 <div class="accessible-card">
                                     <div class="split-box">
-                                        <b style="color:#f8fafc; font-size:13.5px;">🕵️ {t('t7_rival_details')}</b>
-                                        <span class="meta-chip" style="color:#facc15;">GW {next_gw - 1}</span>
+                                        <b style="color:#ffffff; font-size:13.5px;">🕵️ {t('t7_rival_details')}</b>
+                                        <span class="meta-chip" style="color:#ffd700;">GW {next_gw - 1}</span>
                                     </div>
-                                    <div style="font-size:13px; color:#cbd5e1; line-height:1.7;">
-                                        👑 {t('t7_rival_cap')} <b style="color:#facc15;">{r_cap_obj}</b><br>
-                                        🎮 {t('t7_rival_chip')} <span class="ltr-tag" style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; padding:1px 6px; border-radius:4px; font-weight:700;">{chip_txt}</span>
+                                    <div style="font-size:13px; color:#e2d9f3; line-height:1.7;">
+                                        👑 {t('t7_rival_cap')} <b style="color:#ffd700;">{r_cap_obj}</b><br>
+                                        🎮 {t('t7_rival_chip')} <span class="ltr-tag" style="background:rgba(0, 255, 135, 0.15); color:#00ff87; padding:1px 6px; border-radius:4px; font-weight:700;">{chip_txt}</span>
                                     </div>
                                 </div>
                                 """,
@@ -3570,13 +3583,13 @@ with t_leagues:
                                 f"""
                                 <div class="accessible-card">
                                     <div class="split-box">
-                                        <b style="color:#f8fafc; font-size:13.5px;">🎯 {t('t7_differentials')}</b>
-                                        <span class="meta-chip" style="color:#38bdf8;">H2H Edge</span>
+                                        <b style="color:#ffffff; font-size:13.5px;">🎯 {t('t7_differentials')}</b>
+                                        <span class="meta-chip" style="color:#00ff87; background:rgba(0, 255, 135, 0.15); border:1px solid rgba(0, 255, 135, 0.3);">H2H Edge</span>
                                     </div>
-                                    <div style="font-size:11.5px; color:#94a3b8; margin-bottom:4px;">{t('t7_you_have')}</div>
-                                    <div style="color:#34d399; font-size:12px; font-weight:700; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.25); padding:4px 8px; border-radius:6px; margin-bottom:8px;">{my_diffs_str}</div>
-                                    <div style="font-size:11.5px; color:#94a3b8; margin-bottom:4px;">{t('t7_rival_has')}</div>
-                                    <div style="color:#f87171; font-size:12px; font-weight:700; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.25); padding:4px 8px; border-radius:6px;">{rival_diffs_str}</div>
+                                    <div style="font-size:11.5px; color:#a79bc8; margin-bottom:4px;">{t('t7_you_have')}</div>
+                                    <div style="color:#00ff87; font-size:12px; font-weight:700; background:rgba(0, 255, 135, 0.12); border:1px solid rgba(0, 255, 135, 0.3); padding:5px 8px; border-radius:6px; margin-bottom:8px;">{my_diffs_str}</div>
+                                    <div style="font-size:11.5px; color:#a79bc8; margin-bottom:4px;">{t('t7_rival_has')}</div>
+                                    <div style="color:#ff85ad; font-size:12px; font-weight:700; background:rgba(233, 0, 82, 0.12); border:1px solid rgba(233, 0, 82, 0.3); padding:5px 8px; border-radius:6px;">{rival_diffs_str}</div>
                                 </div>
                                 """,
                                 unsafe_allow_html=True,
