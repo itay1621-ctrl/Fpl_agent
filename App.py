@@ -73,7 +73,7 @@ def get_jersey_svg(team_code, is_gk=False):
             stripe_defs = ""
             fill_attr = f'fill="{c1}"'
 
-    return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="36" height="32" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
+    return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="46" height="40" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
 
 # =====================================================================
 # 3. תמיכה דו-לשונית מלאה (i18n): עברית / אנגלית
@@ -255,11 +255,13 @@ TRANSLATIONS = {
         "t7_or_search": "או חפש לפי קוד ליגה אחר:",
         "t7_league_table": "טבלת ליגה:",
         "t7_leader": "מוביל הליגה",
-        "t7_your_rank": "המיקום שלך בליגה",
+        "t7_your_rank": "הדירוג שלך בליגה",
         "t7_rank_pos": "מקום",
         "t7_gap_top": "פער מהפסגה:",
-        "t7_not_in_league": "לא משתתפת בליגה זו",
-        "t7_total_members": "סך משתתפים בליגה",
+        "t7_not_in_league": "אינך חבר בליגה זו",
+        "t7_outside_top_50": "מחוץ ל-50 הראשונים",
+        "t7_showing_top_50": "מציג את 50 המובילים בליגה",
+        "t7_total_members": "משתתפים בליגה",
         "t7_th_rank": "מיקום",
         "t7_th_team_name": "שם קבוצה",
         "t7_th_manager": "מאמן",
@@ -473,8 +475,10 @@ TRANSLATIONS = {
         "t7_your_rank": "Your Rank in League",
         "t7_rank_pos": "Rank",
         "t7_gap_top": "Gap from top:",
-        "t7_not_in_league": "Not participating in this league",
-        "t7_total_members": "Total League Members",
+        "t7_not_in_league": "Not in this league",
+        "t7_outside_top_50": "Outside Top 50",
+        "t7_showing_top_50": "Showing top 50 managers in this league",
+        "t7_total_members": "League Members",
         "t7_th_rank": "Rank",
         "t7_th_team_name": "Team Name",
         "t7_th_manager": "Manager",
@@ -777,6 +781,26 @@ div[data-testid="stHorizontalBlock"] > div {
     text-align: __ALIGN__ !important;
     line-height: 1.5;
     color: var(--text-primary) !important;
+}
+
+/* החרגה והגנה מלאה על כרטיסי שחקנים במגרש - לוחיות שם שחקן תמיד בטקסט לבן בוהק */
+[data-testid="stMarkdownContainer"] .p-card-fpl,
+[data-testid="stMarkdownContainer"] .p-card-fpl * {
+    direction: ltr !important;
+    text-align: center !important;
+}
+[data-testid="stMarkdownContainer"] .p-name-plate,
+[data-testid="stMarkdownContainer"] .p-card-fpl .p-name-plate {
+    background: #0f172a !important;
+    color: #ffffff !important;
+}
+[data-testid="stMarkdownContainer"] .p-name-txt,
+[data-testid="stMarkdownContainer"] .p-card-fpl .p-name-txt,
+[data-testid="stMarkdownContainer"] .p-name-plate span {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 12.5px !important;
+    text-align: center !important;
 }
 
 .stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
@@ -1176,11 +1200,11 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
     overflow: hidden !important;
     position: relative !important;
     width: 100% !important;
-    max-width: 122px !important;
+    max-width: 126px !important;
     min-width: 0 !important;
-    height: 154px !important;
-    min-height: 154px !important;
-    max-height: 154px !important;
+    height: 164px !important;
+    min-height: 164px !important;
+    max-height: 164px !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -1225,10 +1249,10 @@ div[data-testid="stButton"] button[kind="primary"] {
 
 /* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
 div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-    height: 30px !important;
-    min-height: 30px !important;
+    height: 32px !important;
+    min-height: 32px !important;
     line-height: 1 !important;
-    font-size: 11px !important;
+    font-size: 11.5px !important;
     font-weight: 700 !important;
     padding: 0 2px !important;
     border-radius: 0 0 12px 12px !important;
@@ -1238,7 +1262,7 @@ div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
     border-top: none !important;
     color: var(--p-card-btn-text) !important;
     width: 100% !important;
-    max-width: 122px !important;
+    max-width: 126px !important;
     min-width: 0 !important;
     text-align: center !important;
     justify-content: center !important;
@@ -1332,29 +1356,34 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 }
 
 /* לוחית שם שחקן - LiveFPL High Contrast */
-.p-name-plate {
-    background: var(--p-name-plate-bg) !important;
-    border-radius: 5px;
-    padding: 3px 5px;
-    margin: 3px 0 2px 0;
-    width: 96%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    overflow: hidden;
-    box-sizing: border-box;
+.p-name-plate,
+[data-testid="stMarkdownContainer"] .p-name-plate {
+    background: #0f172a !important;
+    border-radius: 6px !important;
+    padding: 3px 6px !important;
+    margin: 3px 0 2px 0 !important;
+    width: 96% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
-.p-name-txt {
-    font-weight: 800;
-    font-size: 11.5px !important;
-    color: var(--p-name-plate-text) !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.15;
-    direction: ltr;
+.p-name-txt,
+[data-testid="stMarkdownContainer"] .p-name-txt,
+.p-card-fpl .p-name-txt {
+    font-weight: 800 !important;
+    font-size: 12.5px !important;
+    color: #ffffff !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    direction: ltr !important;
+    display: inline-block !important;
 }
 
 .p-sub {
@@ -1705,10 +1734,12 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
         max-height: 130px !important;
     }
     .p-name-plate {
-        padding: 1px 2px !important;
+        padding: 2px 3px !important;
+        background: #0f172a !important;
     }
     .p-name-txt {
-        font-size: 9px !important;
+        font-size: 9.5px !important;
+        color: #ffffff !important;
     }
     .p-sub, .badge-fdr, .mini-fxt {
         font-size: 7.5px !important;
@@ -2597,8 +2628,8 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     card_html = (
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
         f'{top_color_bar}'
-        f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:1px 0;">{jersey_svg}</div>'
-        f'<div class="p-name-plate">{cap_badge}<span class="p-name-txt">{p["name"]}</span></div>'
+        f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:2px 0;">{jersey_svg}</div>'
+        f'<div class="p-name-plate" style="background:#0f172a !important; color:#ffffff !important;">{cap_badge}<span class="p-name-txt" style="color:#ffffff !important; font-size:12.5px !important; font-weight:800 !important; text-align:center !important;">{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:2px 0;">{fixture_html}</div>'
         f'{status_pill}'
         f'<div class="p-card-footer">'
@@ -4125,6 +4156,7 @@ with t_leagues:
             if results:
                 leader = results[0]
                 my_entry = next((r for r in results if str(r["entry"]) == str(team_id)), None)
+                my_league_item = next((l for l in my_leagues if str(l.get("id")) == str(league_id_input)), None)
 
                 c_lg1, c_lg2, c_lg3 = st.columns(3)
                 with c_lg1:
@@ -4133,10 +4165,16 @@ with t_leagues:
                     if my_entry:
                         gap = leader["total"] - my_entry["total"]
                         st.metric(t("t7_your_rank"), f"{t('t7_rank_pos')} {my_entry['rank']}", f"{t('t7_gap_top')} -{gap} {t('pts')}")
+                    elif my_league_item and my_league_item.get("entry_rank"):
+                        st.metric(t("t7_your_rank"), f"{t('t7_rank_pos')} {my_league_item['entry_rank']}", t("t7_outside_top_50"))
                     else:
-                        st.metric(t("team_label"), t("t7_not_in_league"))
+                        st.metric(t("t7_your_rank"), "—", t("t7_not_in_league"))
                 with c_lg3:
-                    st.metric(t("t7_total_members"), f"{len(results)}")
+                    has_more = league_data.get("standings", {}).get("has_next", False)
+                    tot_count = f"{len(results)}+" if has_more else f"{len(results)}"
+                    st.metric(t("t7_total_members"), tot_count)
+
+                st.caption(t("t7_showing_top_50"))
 
                 # טבלת תוצאות מעוצבת
                 table_rows = []
