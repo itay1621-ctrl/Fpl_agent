@@ -98,8 +98,14 @@ st.markdown(
     direction: rtl;
     text-align: right;
     background-color: var(--bg-main);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     color: var(--text-primary);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+div[data-testid="stMarkdownContainer"] p {
+    direction: rtl;
+    text-align: right;
+    line-height: 1.5;
 }
 
 .ltr-tag {
@@ -446,291 +452,304 @@ API_HEADERS = {
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
-    r_boot = requests.get(base + "bootstrap-static/", headers=API_HEADERS, timeout=15)
-    if r_boot.status_code != 200:
-        return None, None
-    boot = r_boot.json()
-    r_fix = requests.get(base + "fixtures/", headers=API_HEADERS, timeout=15)
-    fix = r_fix.json() if r_fix.status_code == 200 else []
-    return boot, fix
+    try:
+        bootstrap = requests.get(f"{base}bootstrap-static/", headers=API_HEADERS, timeout=12).json()
+        fixtures = requests.get(f"{base}fixtures/", headers=API_HEADERS, timeout=12).json()
+    except Exception:
+        return {}, 4, ""
 
-boot_data, fixtures_data = fetch_league_data()
-if not boot_data:
-    st.error("שגיאה במשיכת נתוני הליגה הרשמיים. אנא רענן את הדף בעוד מספר שניות.")
-    st.stop()
+    teams = {t["id"]: t for t in bootstrap["teams"]}
+    elements = {el["id"]: el for el in bootstrap["elements"]}
 
-# =====================================================================
-# 5. ניהול סשן ו-Login Gate
-# =====================================================================
-if "active_team_id" not in st.session_state:
-    st.session_state.active_team_id = None
-if "user_squad" not in st.session_state:
-    st.session_state.user_squad = None
-if "user_bank" not in st.session_state:
-    st.session_state.user_bank = 0.0
-if "transfers_log" not in st.session_state:
-    st.session_state.transfers_log = []
-
-# מסך כניסה
-if not st.session_state.active_team_id:
-    st.markdown(
-        """
-        <div class="gate-card">
-            <h2 style="color:#38bdf8; margin-bottom:6px;">⚽ FPL Elite Scout</h2>
-            <p style="color:#94a3b8; font-size:14px; margin-bottom:14px;">
-                מערכת קבלת החלטות מסחרית לקראת מחזורי הפרמיירליג: מגרש חי עם תגיות C/VC, סימולטור צ'יפים והעברות, ומנוע ריגול למיני-ליגות.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    col_g1, col_g2, col_g3 = st.columns([1, 1.2, 1])
-    with col_g2:
-        in_team = st.text_input(
-            "הזן FPL Team ID:",
-            value="10469619",
-            help="מזהה הקבוצה הרשמי מתוך ה-URL באתר ה-FPL הרשמי",
-        )
-        if st.button("🚀 טען סגל ופתח מערכת", use_container_width=True, type="primary"):
-            clean_id = in_team.strip()
-            if clean_id.isdigit():
-                st.session_state.active_team_id = clean_id
-                st.rerun()
-            else:
-                st.error("אנא הזן מספר מזהה תקין.")
-    st.stop()
-
-team_id = st.session_state.active_team_id
-
-# =====================================================================
-# 6. משיכת נתוני הקבוצה הספציפית
-# =====================================================================
-events = boot_data.get("events", [])
-next_gw = 1
-for ev in events:
-    if ev.get("is_next"):
-        next_gw = ev.get("id", 1)
-        break
-else:
-    for ev in events:
-        if ev.get("is_current"):
-            next_gw = min(38, ev.get("id", 1) + 1)
+    next_gw = 4
+    next_deadline = ""
+    for ev in bootstrap["events"]:
+        if ev.get("is_next"):
+            next_gw = ev["id"]
+            next_deadline = ev["deadline_time"]
             break
 
-target_history_gw = max(1, next_gw - 1)
+    pos_map = {1: "שוער", 2: "הגנה", 3: "קישור", 4: "חלוץ"}
+    elite_defenses = ["ARS", "MCI", "LIV", "NEW", "CHE"]
+    processed = {}
 
+    target_gws = [next_gw + i for i in range(35)]
+
+    for el_id, el in elements.items():
+        if el["status"] == "u":
+            continue
+
+        team_short = teams[el["team"]]["short_name"]
+        gw_fixtures_map = {}
+        upcoming = []
+        fdr_list = []
+
+        for f in fixtures:
+            ev = f.get("event")
+            if ev in target_gws:
+                if f["team_h"] == el["team"]:
+                    opp = teams[f["team_a"]]["short_name"]
+                    diff = f["team_h_difficulty"]
+                    gw_fixtures_map[ev] = (f"{opp} (H)", diff)
+                elif f["team_a"] == el["team"]:
+                    opp = teams[f["team_h"]]["short_name"]
+                    diff = f["team_a_difficulty"]
+                    gw_fixtures_map[ev] = (f"{opp} (A)", diff)
+
+        for g in target_gws:
+            if g in gw_fixtures_map:
+                match_str, diff = gw_fixtures_map[g]
+                upcoming.append(match_str)
+                fdr_list.append(diff)
+            else:
+                upcoming.append("BLANK")
+                fdr_list.append(3)
+
+        weights = [0.50, 0.30, 0.20]
+        weighted_fdr = sum(
+            (5.3 - fdr) * weights[i] for i, fdr in enumerate(fdr_list[:3])
+        )
+        avg_fdr = sum(fdr_list[:3]) / 3.0
+
+        mins = el.get("minutes", 0)
+        actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
+        expected_gi = float(el.get("expected_goal_involvements", 0.0))
+        form = float(el.get("form", 0.0))
+        cost = el["now_cost"] / 10
+        threat = float(el.get("threat", 0.0))
+
+        status = el.get("status", "a")
+        chance_raw = el.get("chance_of_playing_next_round")
+        if chance_raw is not None:
+            chance = int(chance_raw)
+        elif status in ["i", "s", "u"]:
+            chance = 0
+        elif status == "d":
+            chance = 50
+        else:
+            chance = 100
+
+        mins_per_gw = mins / max(1, (next_gw - 1))
+        
+        if mins_per_gw >= 75 or cost >= 8.0:
+            tactical_rate = 100
+        elif mins_per_gw >= 55:
+            tactical_rate = 85
+        elif mins_per_gw >= 35:
+            tactical_rate = 65
+        else:
+            tactical_rate = 40 if mins_per_gw > 0 else 20
+            
+        start_prob = (
+            int(round(tactical_rate * (chance / 100.0))) if chance > 0 else 0
+        )
+
+        xgi_p90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
+
+        tag_status = None
+        buy_low_bonus = 0.0
+        if expected_gi >= 1.2 and actual_gi <= 1:
+            tag_status = "BUY_LOW"
+            buy_low_bonus = 1.0
+        elif actual_gi >= 3 and expected_gi < 0.9:
+            tag_status = "OVERPERFORMING_TRAP"
+            buy_low_bonus = -0.8
+
+        nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
+        score = (
+            (xgi_p90 * 3.2)
+            + (form * 1.3)
+            + (weighted_fdr * 1.8)
+            + (threat * 0.015)
+            + buy_low_bonus
+        )
+        if el["element_type"] in [1, 2]:
+            if team_short in elite_defenses:
+                score *= 1.3
+            elif threat > 35:
+                score *= 1.15
+        else:
+            if form >= 5.0 or actual_gi >= 2:
+                score *= 1.2
+
+        score *= nailed_mult
+
+        next_fdr = fdr_list[0] if fdr_list else 3
+        cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_fdr, 0.22)
+        base_app = 2.0 if chance >= 75 else (1.0 if chance >= 25 else 0.0)
+
+        if el["element_type"] in [1, 2]:
+            pred_xp = base_app + (cs_prob * 4.0) + (xgi_p90 * 0.4 * 5.0)
+        elif el["element_type"] == 3:
+            pred_xp = base_app + (cs_prob * 1.0) + (xgi_p90 * 5.5)
+        else:
+            pred_xp = base_app + (xgi_p90 * 5.2)
+
+        if form >= 5.0:
+            pred_xp += 0.6
+        if chance < 100:
+            pred_xp *= chance / 100.0
+        pred_xp = round(max(0.0, pred_xp), 1)
+
+        if tag_status == "BUY_LOW":
+            reason = "מייצר מצבים ברצף (xGI גבוה) אך טרם תוגמל במספרים. פוטנציאל התפוצצות."
+        elif tag_status == "OVERPERFORMING_TRAP":
+            reason = "כבש מעבר למצבים הממשיים שייצר. סכנת ירידה לממוצע ולוח מתקשה."
+        elif el["element_type"] in [1, 2]:
+            reason = (
+                "עוגן רשת נקייה מוביל מקבוצה בכירה."
+                if team_short in elite_defenses
+                else "מגן פעיל התקפית בלוח ירוק."
+            )
+        else:
+            reason = (
+                "כושר שיא עם מעורבות ישירה בהתקפה."
+                if form >= 5.0
+                else "תוחלת שערים יציבה לקראת משחקים נוחים."
+            )
+
+        processed[el_id] = {
+            "id": el_id,
+            "name": el["web_name"],
+            "team": team_short,
+            "pos": pos_map[el["element_type"]],
+            "pos_code": el["element_type"],
+            "cost": cost,
+            "form": form,
+            "total_points": el.get("total_points", 0),
+            "xgi_p90": round(xgi_p90, 2),
+            "selected_by": float(el["selected_by_percent"]),
+            "score": round(score, 2),
+            "xp": pred_xp,
+            "tag": tag_status,
+            "reason": reason,
+            "status": status,
+            "chance": chance,
+            "start_prob": start_prob,
+            "next_match": upcoming[0] if upcoming else "—",
+            "next_fdr": next_fdr,
+            "avg_fdr": round(avg_fdr, 2),
+            "fixtures": " | ".join(upcoming[:3]),
+            "gw_fixtures_map": gw_fixtures_map,
+            "upcoming_list": upcoming,
+            "fdr_list_full": fdr_list,
+        }
+
+    return processed, next_gw, next_deadline
+
+all_players, next_gw, next_deadline = fetch_league_data()
+
+# =====================================================================
+# 5. שער כניסה ומסך נחיתה
+# =====================================================================
+query_params = st.query_params
+url_id = query_params.get("team", None)
+
+if "user_team_id" not in st.session_state:
+    st.session_state.user_team_id = (
+        url_id.strip() if url_id and url_id.strip().isdigit() else None
+    )
+
+if not st.session_state.user_team_id:
+    st.write("")
+    st.markdown(
+        """
+    <div class="gate-card">
+        <h1 style="color:#38bdf8; margin-bottom:6px;">⚽ FPL Elite Scout</h1>
+        <div style="font-size:15px; color:#94a3b8; margin-bottom:18px;">
+            סוכן בינה, אסטרטגיית הרכב ומרגל מיני-ליגות המכוון ל-<b class="ltr-tag">Top 50K</b>
+        </div>
+        <p style="font-size:13px; color:#cbd5e1; line-height:1.6; margin-bottom:20px;">
+            הזן את מספר הקבוצה שלך כדי לטעון ניתוח כשירות, ציון סגל מכויל, חסרונות הרכב, מתכנן מחזורים ומרגל ליגות.
+        </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    c_form = st.columns([1, 2, 1])[1]
+    with c_form:
+        input_val = st.text_input(
+            "מספר קבוצה (Team ID):",
+            placeholder="למשל: 139103",
+            help="המספר שמופיע בכתובת הדפדפן בלשונית Points",
+        )
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("🚀 כניסה לסגל שלי", use_container_width=True):
+                if input_val.strip().isdigit():
+                    st.session_state.user_team_id = input_val.strip()
+                    st.query_params["team"] = input_val.strip()
+                    st.rerun()
+                else:
+                    st.error("נא להזין ספרות בלבד.")
+        with b2:
+            if st.button("👀 סגל דמו לדוגמה", use_container_width=True):
+                st.session_state.user_team_id = "1"
+                st.query_params["team"] = "1"
+                st.rerun()
+
+        with st.expander("❓ איפה מוצאים את ה-Team ID?"):
+            st.markdown(
+                """
+            1. היכנס ל-<span class="ltr-tag">fantasy.premierleague.com</span> והתחבר.
+            2. לחץ על לשונית **Points** (נקודות).
+            3. העתק את רצף הספרות מתוך שורת הכתובת:  
+               `.../entry/XXXXXX/event/...`  
+            """,
+                unsafe_allow_html=True,
+            )
+    st.stop()
+
+team_id = st.session_state.user_team_id
+
+# =====================================================================
+# 6. משיכת נתוני הקבוצה מה-API
+# =====================================================================
 @st.cache_data(ttl=300)
 def fetch_user_team(t_id, gw):
     try:
-        url_picks = f"https://fantasy.premierleague.com/api/entry/{t_id}/event/{gw}/picks/"
-        r_p = requests.get(url_picks, headers=API_HEADERS, timeout=12)
-        url_entry = f"https://fantasy.premierleague.com/api/entry/{t_id}/"
-        r_e = requests.get(url_entry, headers=API_HEADERS, timeout=12)
-        if r_p.status_code != 200:
-            return None, None
-        return r_p.json(), (r_e.json() if r_e.status_code == 200 else {})
-    except Exception:
-        return None, None
+        last_gw = max(1, gw - 1)
+        base = "https://fantasy.premierleague.com/api/"
+        picks_url = f"{base}entry/{t_id}/event/{last_gw}/picks/"
+        picks_res = requests.get(picks_url, headers=API_HEADERS, timeout=12).json()
+        entry_url = f"{base}entry/{t_id}/"
+        entry_res = requests.get(entry_url, headers=API_HEADERS, timeout=12).json()
 
-user_picks_data, user_entry_data = fetch_user_team(team_id, target_history_gw)
-if not user_picks_data or "picks" not in user_picks_data:
-    st.error(f"לא ניתן למשוך את נתוני קבוצה {team_id} למחזור {target_history_gw}.")
-    if st.button("החלף Team ID ↩️"):
-        st.session_state.active_team_id = None
+        if picks_res.get("active_chip") == "free_hit" and last_gw > 1:
+            base_gw = last_gw - 1
+            base_url = f"{base}entry/{t_id}/event/{base_gw}/picks/"
+            picks_res = requests.get(base_url, headers=API_HEADERS, timeout=12).json()
+
+        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10
+        picks = picks_res.get("picks", [])
+        team_name = entry_res.get("name", f"Team {t_id}")
+        rank = entry_res.get("summary_overall_rank", "—")
+        leagues = entry_res.get("leagues", {}).get("classic", [])
+        return picks, bank, team_name, rank, leagues
+    except Exception:
+        return None, 0.0, None, None, []
+
+raw_picks, initial_bank, my_team_name, my_rank, my_leagues = fetch_user_team(team_id, next_gw)
+if not raw_picks:
+    st.error(f"❌ לא ניתן למשוך נתונים עבור מזהה {team_id}. ודא שהמספר תקין.")
+    if st.button("🔄 חזרה להזנת ID"):
+        st.session_state.user_team_id = None
+        st.query_params.clear()
         st.rerun()
     st.stop()
 
-raw_picks = user_picks_data["picks"]
-initial_bank = user_picks_data.get("entry_history", {}).get("bank", 0) / 10.0
-
-if st.session_state.user_squad is None:
+# ניהול סגל גלובלי
+if (
+    "user_squad" not in st.session_state
+    or st.session_state.get("synced_team_id") != team_id
+):
     st.session_state.user_squad = [dict(p) for p in raw_picks]
     st.session_state.user_bank = initial_bank
+    st.session_state.synced_team_id = team_id
+    st.session_state.transfers_log = []
 
-# =====================================================================
-# 7. עיבוד מודל השחקנים ולוח המשחקים
-# =====================================================================
-teams_dict = {t["id"]: t for t in boot_data.get("teams", [])}
-elements_list = boot_data.get("elements", [])
-element_types = {et["id"]: et["singular_name_short"] for et in boot_data.get("element_types", [])}
-
-team_fixtures = {t_id: [] for t_id in teams_dict}
-for f in fixtures_data:
-    event = f.get("event")
-    if event and event >= next_gw:
-        t_h, t_a = f["team_h"], f["team_a"]
-        diff_h = f.get("team_h_difficulty", 3)
-        diff_a = f.get("team_a_difficulty", 3)
-        opp_a = teams_dict.get(t_a, {}).get("short_name", "OPP")
-        opp_h = teams_dict.get(t_h, {}).get("short_name", "OPP")
-        team_fixtures[t_h].append({
-            "gw": event,
-            "match": f"{opp_a} (H)",
-            "fdr": diff_h,
-            "is_home": True,
-        })
-        team_fixtures[t_a].append({
-            "gw": event,
-            "match": f"{opp_h} (A)",
-            "fdr": diff_a,
-            "is_home": False,
-        })
-
-elite_defenses = ["ARS", "MCI", "LIV"]
-all_players = {}
-
-for el in elements_list:
-    pid = el["id"]
-    t_id = el["team"]
-    team_obj = teams_dict.get(t_id, {})
-    team_short = team_obj.get("short_name", "UNK")
-    f_list = sorted(team_fixtures.get(t_id, []), key=lambda x: x["gw"])
-
-    upcoming = []
-    fdr_list = []
-    gw_fixtures_map = {}
-    for g in range(next_gw, next_gw + 10):
-        m_gw = [x for x in f_list if x["gw"] == g]
-        if m_gw:
-            m_strs = [m["match"] for m in m_gw]
-            max_fdr = max(m["fdr"] for m in m_gw)
-            upcoming.append(" & ".join(m_strs))
-            fdr_list.append(max_fdr)
-            gw_fixtures_map[g] = (" & ".join(m_strs), max_fdr)
-        else:
-            upcoming.append("BLANK")
-            fdr_list.append(3)
-
-    weights = [0.50, 0.30, 0.20]
-    weighted_fdr = sum(
-        (5.3 - fdr) * weights[i] for i, fdr in enumerate(fdr_list[:3])
-    )
-    avg_fdr = sum(fdr_list[:3]) / 3.0
-
-    mins = el.get("minutes", 0)
-    actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
-    expected_gi = float(el.get("expected_goal_involvements", 0.0))
-    form = float(el.get("form", 0.0))
-    cost = el["now_cost"] / 10
-    threat = float(el.get("threat", 0.0))
-
-    status = el.get("status", "a")
-    chance_raw = el.get("chance_of_playing_next_round")
-    if chance_raw is not None:
-        chance = int(chance_raw)
-    elif status in ["i", "s", "u"]:
-        chance = 0
-    elif status == "d":
-        chance = 50
-    else:
-        chance = 100
-
-    mins_per_gw = mins / max(1, (next_gw - 1))
-    
-    if mins_per_gw >= 75 or cost >= 8.0:
-        tactical_rate = 100
-    elif mins_per_gw >= 55:
-        tactical_rate = 85
-    elif mins_per_gw >= 35:
-        tactical_rate = 65
-    else:
-        tactical_rate = 40 if mins_per_gw > 0 else 20
-        
-    start_prob = (
-        int(round(tactical_rate * (chance / 100.0))) if chance > 0 else 0
-    )
-
-    xgi_p90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
-
-    tag_status = None
-    buy_low_bonus = 0.0
-    if expected_gi >= 1.2 and actual_gi <= 1:
-        tag_status = "BUY_LOW"
-        buy_low_bonus = 1.0
-    elif actual_gi >= 3 and expected_gi < 0.9:
-        tag_status = "OVERPERFORMING_TRAP"
-        buy_low_bonus = -0.8
-
-    nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
-    score = (
-        (xgi_p90 * 3.2)
-        + (form * 1.3)
-        + (weighted_fdr * 1.8)
-        + (threat * 0.015)
-        + buy_low_bonus
-    )
-    if el["element_type"] in [1, 2]:
-        if team_short in elite_defenses:
-            score *= 1.3
-        elif threat > 35:
-            score *= 1.15
-    else:
-        if form >= 5.0 or actual_gi >= 2:
-            score *= 1.2
-
-    score *= nailed_mult
-
-    next_fdr = fdr_list[0] if fdr_list else 3
-    cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_fdr, 0.22)
-    base_app = 2.0 if chance >= 75 else (1.0 if chance >= 25 else 0.0)
-
-    if el["element_type"] in [1, 2]:
-        pred_xp = base_app + (cs_prob * 4.0) + (xgi_p90 * 0.4 * 5.0)
-    elif el["element_type"] == 3:
-        pred_xp = base_app + (cs_prob * 1.0) + (xgi_p90 * 5.5)
-    else:
-        pred_xp = base_app + (xgi_p90 * 5.2)
-
-    if form >= 5.0:
-        pred_xp += 0.6
-    if chance < 100:
-        pred_xp *= chance / 100.0
-    pred_xp = round(max(0.0, pred_xp), 1)
-
-    if tag_status == "BUY_LOW":
-        reason = "מייצר מצבים ברצף (xGI גבוה) אך טרם תוגמל במספרים. פוטנציאל התפוצצות."
-    elif tag_status == "OVERPERFORMING_TRAP":
-        reason = "כבש מעבר למצבים הממשיים שייצר. סכנת ירידה לממוצע ולוח מתקשה."
-    elif el["element_type"] in [1, 2]:
-        reason = (
-            "עוגן רשת נקייה מוביל מקבוצה בכירה."
-            if team_short in elite_defenses
-            else "מגן פעיל התקפית בלוח ירוק."
-        )
-    else:
-        reason = (
-            "יוצר מצבים מרכזי ומעורב בשערים."
-            if xgi_p90 >= 0.45
-            else "שחקן הרכב סדיר עם משחק נוח."
-        )
-
-    all_players[pid] = {
-        "id": pid,
-        "name": el["web_name"],
-        "team": team_short,
-        "pos": element_types.get(el["element_type"], ""),
-        "pos_code": el["element_type"],
-        "cost": cost,
-        "score": round(score, 2),
-        "xp": pred_xp,
-        "chance": chance,
-        "start_prob": start_prob,
-        "status": status,
-        "news": el.get("news", ""),
-        "next_match": upcoming[0] if upcoming else "None",
-        "next_fdr": next_fdr,
-        "avg_fdr": round(avg_fdr, 2),
-        "tag": tag_status,
-        "reason": reason,
-        "total_points": el.get("total_points", 0),
-        "selected_by": float(el.get("selected_by_percent", 0.0)),
-        "form": form,
-        "gw_fixtures_map": gw_fixtures_map,
-    }
-
-# =====================================================================
-# 8. ניהול סגל, חילופי מגרש והתקנה ראשונית
-# =====================================================================
+# ניהול מצבי בחירה וקפטנים
 if "squad_swap_id" not in st.session_state:
     st.session_state.squad_swap_id = None
 
@@ -758,6 +777,7 @@ for p in st.session_state.user_squad:
     if p_info:
         item = {
             **p_info,
+            "element": pid,
             "is_cap": p.get("is_captain", False),
             "is_vc": p.get("is_vice_captain", False),
             "position": p["position"],
@@ -834,73 +854,122 @@ for p in starters:
         pen = 2.0
         total_penalty += pen
         squad_flaws.append({
-            "type": "התקפה קרה",
+            "type": "כושר התקפי דל",
             "penalty": f"-{pen:.1f}",
             "text": (
-                f"<b>{p['name']}</b> בכושר ירוד (Form {p['form']}) ללא שער/בישול"
-                " לאחרונה."
+                f"<b>{p['name']}</b> בבצורת (כושר {p['form']}) במחזורים האחרונים."
             ),
         })
 
-squad_rating = int(round(max(30.0, min(99.0, base_score - total_penalty))))
+for p in starters:
+    if p["tag"] == "OVERPERFORMING_TRAP":
+        pen = 1.5
+        total_penalty += pen
+        squad_flaws.append({
+            "type": "סכנת דעיכה (מלכודת)",
+            "penalty": f"-{pen:.1f}",
+            "text": f"<b>{p['name']}</b> הבקיע מעבר למצבי השער שייצר (xGI נמוך).",
+        })
+
+if not formation_valid:
+    pen = 8.0
+    total_penalty += pen
+    squad_flaws.append({
+        "type": "מערך לא חוקי",
+        "penalty": f"-{pen:.1f}",
+        "text": (
+            "המערך הנוכחי אינו חוקי (חובה שוער 1, 3–5 מגנים, 2–5 קשרים ולפחות חלוץ 1)."
+        ),
+    })
+
+squad_rating = int(max(48, min(86, base_score - total_penalty)))
 rating_color = (
     "#10b981"
-    if squad_rating >= 80
-    else ("#facc15" if squad_rating >= 65 else "#ef4444")
+    if squad_rating >= 78
+    else ("#38bdf8" if squad_rating >= 70 else "#f59e0b")
 )
 
-# Header עליון ומדדי KPI
-st.markdown(
-    f"""
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
-        <div>
-            <h2 style="margin:0; color:#38bdf8;">⚽ FPL Elite Scout</h2>
-            <div style="font-size:12px; color:#94a3b8;">
-                קבוצה: <b>{user_entry_data.get('name', team_id)}</b> | 
-                מאמן: <b>{user_entry_data.get('player_first_name', '')} {user_entry_data.get('player_last_name', '')}</b> | 
-                מחזור קרוב: <b>GW {next_gw}</b>
-            </div>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-c_ch1, c_ch2 = st.columns([4, 1])
-with c_ch2:
-    if st.button("החלף קבוצה 🔁", use_container_width=True):
-        st.session_state.active_team_id = None
-        st.session_state.user_squad = None
-        st.session_state.transfers_log = []
-        st.session_state.planner_swap_out = None
-        st.session_state.planner_transfer_out = None
+# =====================================================================
+# 7. סרגל עליון ומדדים ראשיים
+# =====================================================================
+h_col1, h_col2 = st.columns([3, 1])
+with h_col1:
+    st.title(f"⚽ {my_team_name}")
+    st.caption(
+        f'מנוע החלטות למחזור {next_gw} | קבוצה: <span'
+        f' class="ltr-tag"><b>{team_id}</b></span>',
+        unsafe_allow_html=True,
+    )
+with h_col2:
+    st.write("")
+    if st.button("🔄 החלף קבוצה", use_container_width=True):
+        st.session_state.user_team_id = None
+        st.query_params.clear()
         st.rerun()
 
+rank_txt = (
+    f"{my_rank:,}"
+    if isinstance(my_rank, int)
+    else (str(my_rank) if my_rank else "—")
+)
+
 st.markdown(
     f"""
-    <div class="kpi-container">
-        <div class="kpi-card">
-            <div class="kpi-title">ציון סגל מכויל</div>
-            <div class="kpi-value" style="color:{rating_color};">{squad_rating} <span style="font-size:12px; color:#64748b;">/100</span></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">תוחלת הרכב (xP)</div>
-            <div class="kpi-value" style="color:#38bdf8;">{starting_xp_total:.1f}</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">יתרה בבנק</div>
-            <div class="kpi-value" style="color:#10b981;">£{st.session_state.user_bank:.1f}m</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-title">מערך הרכב</div>
-            <div class="kpi-value">{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}</div>
-        </div>
+<div class="kpi-container">
+    <div class="kpi-card">
+        <div class="kpi-title">ציון סגל מכויל</div>
+        <div class="kpi-value" style="color:{rating_color};">{squad_rating} <span style="font-size:12px; color:#64748b;">/ 100</span></div>
     </div>
-    """,
+    <div class="kpi-card">
+        <div class="kpi-title">תחזית נקודות (xP)</div>
+        <div class="kpi-value" style="color:#10b981;">{starting_xp_total:.1f}</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">יתרה בבנק</div>
+        <div class="kpi-value"><span class="ltr-tag">£{st.session_state.user_bank:.1f}m</span></div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">דירוג עולמי</div>
+        <div class="kpi-value"><span class="ltr-tag">{rank_txt}</span></div>
+    </div>
+</div>
+""",
     unsafe_allow_html=True,
 )
 
-# פונקציית רינדור כרטיס שחקן נקייה ואטומה לבאגי Markdown
+# שעון דד-ליין חי ב-HTML/JS
+clock_html = f"""
+<div style="background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; text-align:center; direction:rtl; margin-bottom:15px; color:#f8fafc;">
+    <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;">⏳ זמן נותר עד נעילת חילופים (GW {next_gw})</div>
+    <div id="fpl-clock" style="font-size:20px; font-weight:bold; color:#10b981; direction:ltr;">טוען שעון...</div>
+</div>
+<script>
+    var deadline = new Date("{next_deadline}").getTime();
+    var x = setInterval(function() {{
+        var now = new Date().getTime();
+        var distance = deadline - now;
+        
+        if (distance < 0) {{
+            clearInterval(x);
+            document.getElementById("fpl-clock").innerHTML = "הדד-ליין עבר!";
+            document.getElementById("fpl-clock").style.color = "#ef4444";
+            return;
+        }}
+        
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("fpl-clock").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+    }}, 1000);
+</script>
+"""
+components.html(clock_html, height=80)
+
+# =====================================================================
+# 8. פונקציות עזר לרינדור כרטיס שחקן עשיר ב-HTML
+# =====================================================================
 def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None, custom_cap=None, custom_vc=None):
     is_c = custom_cap if custom_cap is not None else p.get("is_cap", False)
     is_v = custom_vc if custom_vc is not None else p.get("is_vc", False)
@@ -921,7 +990,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
 
     jersey_svg = get_jersey_svg(p["team"], is_gk=(p["pos_code"] == 1))
     club_cfg = TEAM_KIT_COLORS.get(p["team"], {"primary": "#38bdf8"})
-    top_color_bar = f'<div style="height:3px;background:{club_cfg["primary"]};border-radius:3px 3px 0 0;margin:-5px -3px 3px -3px;"></div>'
+    top_color_bar = f'<div style="height:3px; background:{club_cfg["primary"]}; border-radius:3px 3px 0 0; margin:-5px -3px 3px -3px;"></div>'
 
     if target_gw is not None:
         gw_map = p.get("gw_fixtures_map", {})
@@ -1074,11 +1143,10 @@ with t_squad:
 
     # -----------------------------------------------------------------
     # שורת החילוף והניהול - ממוקמת בלעדית מתחת למגרש!
-    # -----------------------------------------------------------------
     if st.session_state.squad_swap_id is not None:
         p_sel = all_players.get(st.session_state.squad_swap_id)
         if p_sel:
-            is_starter = any(p["element"] == p_sel["id"] for p in starters)
+            is_starter = any(p["id"] == p_sel["id"] for p in starters)
             render_html(
                 f"""
                 <div class="action-bar-under-pitch">
@@ -1662,6 +1730,7 @@ with t_planner:
                 is_v = (pid == custom_vc_id) if custom_vc_id else p.get("is_vice_captain", False)
                 item = {
                     **p_data,
+                    "element": pid,
                     "position": p["position"],
                     "is_cap": is_c,
                     "is_vc": is_v,
@@ -1758,8 +1827,7 @@ with t_planner:
                 if orig_o and orig_i:
                     orig_o["position"], orig_i["position"] = orig_i["position"], orig_o["position"]
             st.session_state.planner_swap_out = None
-            st.session_state.planner_transfer_out = None
-            st.toast(f"✅ חילוף בוצע ב-GW {selected_gw}: {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
+            st.toast(f"✅ חילוף בוצע: {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
             st.rerun()
 
     def handle_planner_card_click(target_id):
@@ -1776,23 +1844,19 @@ with t_planner:
         if selected_gw not in st.session_state.planner_captains:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["cap"] = target_id
-        if st.session_state.planner_captains[selected_gw].get("vc") == target_id:
-            st.session_state.planner_captains[selected_gw]["vc"] = None
         st.session_state.planner_swap_out = None
-        st.toast(f"👑 {all_players[target_id]['name']} נבחר לקפטן (C) ב-GW {selected_gw}!")
+        st.toast(f"👑 {all_players[target_id]['name']} הוגדר לקפטן (C) עבור GW {selected_gw}!")
         st.rerun()
 
     def set_planner_vice_captain(target_id):
         if selected_gw not in st.session_state.planner_captains:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["vc"] = target_id
-        if st.session_state.planner_captains[selected_gw].get("cap") == target_id:
-            st.session_state.planner_captains[selected_gw]["cap"] = None
         st.session_state.planner_swap_out = None
-        st.toast(f"🥈 {all_players[target_id]['name']} נבחר לסגן קפטן (VC) ב-GW {selected_gw}!")
+        st.toast(f"🥈 {all_players[target_id]['name']} הוגדר לסגן קפטן (VC) עבור GW {selected_gw}!")
         st.rerun()
 
-    # רינדור שורת מגרש נקייה בפלנר
+    # רינדור מגרש פלנר נקי
     def render_clean_planner_row(player_list):
         if not player_list:
             return
@@ -1801,13 +1865,16 @@ with t_planner:
             with cols[i]:
                 is_sw_active = (st.session_state.planner_swap_out == p["id"])
                 is_tr_active = (st.session_state.planner_transfer_out == p["id"])
+
                 st.markdown(render_player_card_html(p, is_selected=is_sw_active, is_transfer_selected=is_tr_active, target_gw=selected_gw), unsafe_allow_html=True)
+                
                 btn_lbl = "✓ נבחר" if (is_sw_active or is_tr_active) else ("C" if p.get("is_cap") else ("VC" if p.get("is_vc") else "בחר"))
                 btn_type = "primary" if (is_sw_active or is_tr_active) else "secondary"
                 if st.button(btn_lbl, key=f"pl_pick_{p['id']}_{selected_gw}", use_container_width=True, type=btn_type):
                     handle_planner_card_click(p["id"])
 
-    # מגרש הפלנר
+    # מגרש פלנר
+    st.markdown(f"#### 🏟️ הרכב הסגל על המגרש עבור Gameweek {selected_gw}")
     with st.container():
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
         # חלוצים
@@ -1839,11 +1906,11 @@ with t_planner:
     if st.session_state.planner_swap_out is not None:
         p_pl_sel = all_players.get(st.session_state.planner_swap_out)
         if p_pl_sel:
-            is_pl_starter = any(p["element"] == p_pl_sel["id"] for p in cur_gw_sim["starters"])
+            is_pl_starter = any(p["id"] == p_pl_sel["id"] for p in cur_gw_sim["starters"])
             render_html(
                 f"""
                 <div class="action-bar-under-pitch">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:gap:6px;">
                         <div>
                             <span style="font-size:14px; font-weight:700; color:#38bdf8;">⚙️ שורת ניהול והעברות (GW {selected_gw}):</span>
                             <b style="color:#ffffff; margin-right:6px; font-size:14px;">{p_pl_sel['name']}</b>
@@ -1951,39 +2018,38 @@ with t_planner:
                         </div>
                         """
                     )
-                    if st.button(f"רכוש את {r_p['name']} 🛒", key=f"buy_rec_{r_p['id']}_{selected_gw}", use_container_width=True, type="primary"):
-                        st.session_state.planner_plan[selected_gw]["transfers"].append((p_tr_out["id"], r_p["id"]))
+                    if st.button("➕ קנה שחקן זה", key=f"buy_rec_{r_p['id']}_{selected_gw}", use_container_width=True):
+                        st.session_state.planner_plan[selected_gw]["transfers"].append(
+                            (p_tr_out["id"], r_p["id"])
+                        )
                         st.session_state.planner_transfer_out = None
                         st.session_state.planner_swap_out = None
-                        st.toast(f"✅ רכש הושלם: {p_tr_out['name']} ⬅️ {r_p['name']}")
+                        st.toast(f"✅ נרכש בהצלחה: {r_p['name']}!")
                         st.rerun()
 
-        st.markdown("##### 📋 כלל השחקנים הזמינים לרכש (ממוינים לפי נקודות):")
-        sorted_pool = sorted(eligible_pool, key=lambda x: x["total_points"], reverse=True)
-        if sorted_pool:
-            table_records = []
-            for sp in sorted_pool[:25]:
-                table_records.append({
-                    "id": sp["id"],
-                    "שחקן": sp["name"],
-                    "קבוצה": sp["team"],
-                    "מחיר": f"£{sp['cost']}m",
-                    "נקודות עונה": sp["total_points"],
-                    "xP צפוי": sp["xp"],
-                    "משחק קרוב": sp["next_match"],
-                    "FDR": sp["next_fdr"],
-                })
-            df_pool = pd.DataFrame(table_records)
-            st.dataframe(df_pool.drop(columns=["id"]), use_container_width=True, hide_index=True)
+        st.write("")
+        all_sorted_by_pts = sorted(eligible_pool, key=lambda x: x["total_points"], reverse=True)
 
-            pool_dict = {p["id"]: f"{p['name']} ({p['team']}) - £{p['cost']}m | {p['total_points']} נק׳ | xP: {p['xp']}" for p in sorted_pool}
-            chosen_buy_id = st.selectbox("בחר שחקן לרכישה מתוך הרשימה:", list(pool_dict.keys()), format_func=lambda x: pool_dict[x], key=f"pick_buy_sel_{selected_gw}")
-            if st.button("בצע רכישה סופית 🛒", key=f"confirm_pool_buy_{selected_gw}", use_container_width=True):
-                st.session_state.planner_plan[selected_gw]["transfers"].append((p_tr_out["id"], chosen_buy_id))
-                st.session_state.planner_transfer_out = None
-                st.session_state.planner_swap_out = None
-                st.toast(f"✅ רכש הושלם: {p_tr_out['name']} ⬅️ {all_players[chosen_buy_id]['name']}")
-                st.rerun()
+        if all_sorted_by_pts:
+            pick_opts = {p["id"]: f"{p['name']} ({p['team']}) | £{p['cost']}m | {p['total_points']} נק׳ | xP: {p['xp']} | מול: {p['next_match']}" for p in all_sorted_by_pts}
+            c_sel_p, c_btn_p = st.columns([3, 1])
+            with c_sel_p:
+                chosen_pool_id = st.selectbox(
+                    "או בחר שחקן לרכש מהרשימה המלאה:",
+                    list(pick_opts.keys()),
+                    format_func=lambda x: pick_opts[x],
+                    key=f"pool_sel_{selected_gw}",
+                )
+            with c_btn_p:
+                st.write("")
+                if st.button("➕ אשר העברה", key=f"confirm_pool_{selected_gw}", use_container_width=True):
+                    st.session_state.planner_plan[selected_gw]["transfers"].append(
+                        (p_tr_out["id"], chosen_pool_id)
+                    )
+                    st.session_state.planner_transfer_out = None
+                    st.session_state.planner_swap_out = None
+                    st.toast(f"✅ בוצעה העברה: {p_tr_out['name']} ⬅️ {all_players[chosen_pool_id]['name']}!")
+                    st.rerun()
         else:
             st.warning("לא נמצאו שחקנים מתאימים במסגרת התקציב.")
 
@@ -2019,62 +2085,70 @@ with t_leagues:
             return None
 
     # בחירת ליגה מתוך הליגות הקיימות של הקבוצה או הזנה ידנית
-    user_classic_leagues = user_entry_data.get("leagues", {}).get("classic", [])
-    user_league_map = {l["id"]: l["name"] for l in user_classic_leagues if l.get("league_type") == "x"}
+    user_league_options = {l["id"]: l["name"] for l in my_leagues if l.get("league_type") == "x" or "League" in l.get("name", "")}
 
     col_l1, col_l2 = st.columns([2, 1])
     with col_l1:
-        if user_league_map:
-            chosen_league_id = st.selectbox(
-                "בחר מיני-ליגה פרטית של הקבוצה שלך:",
-                options=list(user_league_map.keys()),
-                format_func=lambda x: f"{user_league_map[x]} (ID: {x})",
+        if user_league_options:
+            sel_user_lid = st.selectbox(
+                "בחר מתוך המיני-ליגות של הקבוצה שלך:",
+                list(user_league_options.keys()),
+                format_func=lambda x: user_league_options[x],
             )
+            league_id_input = str(sel_user_lid)
         else:
-            chosen_league_id = None
-            st.info("לא נמצאו מיני-ליגות פרטיות מקושרות אוטומטית. באפשרותך להזין מזהה ידנית.")
-
+            league_id_input = st.text_input("הזן קוד מיני-ליגה קלאסית (League ID):", placeholder="למשל: 314 או קוד הליגה של החברים").strip()
     with col_l2:
-        manual_league_input = st.text_input("או הזן League ID ידנית:", placeholder="למשל 123456").strip()
-        if manual_league_input.isdigit():
-            chosen_league_id = int(manual_league_input)
+        st.write("")
+        custom_lid = st.text_input("או חפש לפי קוד ליגה אחר:", placeholder="קוד ליגה ידני...").strip()
+        if custom_lid and custom_lid.isdigit():
+            league_id_input = custom_lid
 
-    if chosen_league_id:
-        standings_data = fetch_classic_league_standings(chosen_league_id)
-        if standings_data and "standings" in standings_data:
-            st.markdown(f"### 🏆 טבלת הליגה: **{standings_data.get('league', {}).get('name', 'Classic League')}**")
-            results = standings_data["standings"].get("results", [])
+    if league_id_input and league_id_input.isdigit():
+        league_data = fetch_classic_league_standings(int(league_id_input))
+        if league_data and "standings" in league_data:
+            l_info = league_data.get("league", {})
+            results = league_data["standings"].get("results", [])
+
+            st.markdown(f"#### 🏅 טבלת ליגה: **{l_info.get('name', 'Classic League')}**")
 
             if results:
-                leader_score = results[0]["total"]
-                rows = []
-                for r in results[:30]:
-                    gap = r["total"] - leader_score
-                    gap_str = f"{gap}" if gap != 0 else "מוביל 🥇"
+                leader = results[0]
+                my_entry = next((r for r in results if str(r["entry"]) == str(team_id)), None)
+
+                c_lg1, c_lg2, c_lg3 = st.columns(3)
+                with c_lg1:
+                    st.metric("מוביל הליגה", f"{leader['entry_name']}", f"{leader['total']} נק׳")
+                with c_lg2:
+                    if my_entry:
+                        gap = leader["total"] - my_entry["total"]
+                        st.metric("המיקום שלך בליגה", f"מקום {my_entry['rank']}", f"פער מהפסגה: -{gap} נק׳")
+                    else:
+                        st.metric("הקבוצה שלך", "לא משתתפת בליגה זו")
+                with c_lg3:
+                    st.metric("סך משתתפים בליגה", f"{len(results)}")
+
+                # טבלת תוצאות מעוצבת
+                table_rows = []
+                for r in results[:20]:
                     is_me = (str(r["entry"]) == str(team_id))
-                    rows.append({
-                        "מקום": f"{'👉 ' if is_me else ''}{r['rank']}",
-                        "קבוצה": r["entry_name"],
+                    prefix = "👉 " if is_me else ""
+                    table_rows.append({
+                        "מיקום": r["rank"],
+                        "שם קבוצה": f"{prefix}{r['entry_name']}",
                         "מאמן": r["player_name"],
-                        "GW אחרון": r["event_total"],
+                        "מחזור אחרון": r["event_total"],
                         "סך נקודות": r["total"],
-                        "פער מהפסגה": gap_str,
-                        "Team ID": r["entry"],
+                        "ID קבוצה": r["entry"],
                     })
+                st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
 
-                df_standings = pd.DataFrame(rows)
-                st.dataframe(df_standings.drop(columns=["Team ID"]), use_container_width=True, hide_index=True)
-
+                # כלי ריגול ראש בראש מול יריב
                 st.write("---")
-                st.markdown("#### 🕵️ כלי ריגול ראש-בראש מול יריב (Head-to-Head Spy)")
-                rival_choices = {r["entry"]: f"{r['player_name']} ({r['entry_name']}) - מקום {r['rank']}" for r in results if str(r["entry"]) != str(team_id)}
-
-                if rival_choices:
-                    chosen_rival_id = st.selectbox(
-                        "בחר יריב לריגול והשוואת שחקנים:",
-                        options=list(rival_choices.keys()),
-                        format_func=lambda x: rival_choices[x],
-                    )
+                st.markdown("#### 🕵️ ריגול סגל מול יריב (Head-to-Head Spy)")
+                rival_opts = {r["entry"]: f"מקום {r['rank']} - {r['entry_name']} ({r['player_name']})" for r in results if str(r["entry"]) != str(team_id)}
+                if rival_opts:
+                    chosen_rival_id = st.selectbox("בחר יריב לריגול מעמיק:", list(rival_opts.keys()), format_func=lambda x: rival_opts[x])
                     
                     @st.cache_data(ttl=300)
                     def fetch_rival_picks(r_id, gw):
