@@ -3,6 +3,8 @@ import time
 import pandas as pd
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
+from datetime import datetime
 
 st.set_page_config(
     page_title="FPL Elite Scout | מנוע החלטות",
@@ -11,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS: נגישות מוגברת, RTL והדגשת מוקדי כושר ופציעות ---
+# --- עיצוב CSS: נגישות, RTL, וצבעי פציעות מרוככים ---
 st.markdown(
     """
 <style>
@@ -25,7 +27,6 @@ st.markdown(
     --accent-blue: #38bdf8;
     --accent-green: #10b981;
     --accent-yellow: #f59e0b;
-    --accent-orange: #f97316;
     --accent-red: #ef4444;
 }
 
@@ -110,13 +111,12 @@ div[data-testid="stMarkdownContainer"] p {
     width: 86px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
+
+/* צבעי הפציעות רוככו לצבעי פסטל נעימים יותר */
 .cap-gold { border: 2px solid #facc15 !important; }
 .card-bench { background: rgba(30, 41, 59, 0.7); border: 1px dashed #475569; }
-
-/* סימוני כשירות וכושר ישירות על גבי המגרש */
-.card-danger { border: 2px solid var(--accent-red) !important; background: rgba(69, 10, 10, 0.95) !important; }
-.card-warning { border: 2px solid var(--accent-yellow) !important; background: rgba(69, 45, 10, 0.95) !important; }
-.card-out-of-form { border: 2px solid var(--accent-orange) !important; background: rgba(67, 26, 7, 0.95) !important; }
+.card-danger { border: 2px solid #f87171 !important; background: rgba(248, 113, 113, 0.15) !important; }
+.card-warning { border: 2px solid #fbd38d !important; background: rgba(251, 211, 141, 0.15) !important; }
 
 .p-name {
     font-weight: 700;
@@ -152,20 +152,11 @@ div[data-testid="stMarkdownContainer"] p {
     margin: 2px auto 0 auto;
     width: fit-content;
 }
-.prob-red { background: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
-.prob-yellow { background: #451a03; color: #fde68a; border: 1px solid #d97706; }
-.prob-orange { background: #431407; color: #fdba74; border: 1px solid #ea580c; }
-.prob-green { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
 
-.alert-banner {
-    background: #1c1518;
-    border-right: 4px solid var(--accent-red);
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 12px;
-    font-size: 12.5px;
-    color: #fca5a5;
-}
+/* התראות הפציעה בתגית הותאמו גם כן לצבעים רכים יותר */
+.prob-red { background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid #f87171; }
+.prob-yellow { background: rgba(251, 211, 141, 0.2); color: #fde68a; border: 1px solid #fbd38d; }
+.prob-green { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
 
 .accessible-card {
     background: var(--bg-card);
@@ -173,6 +164,9 @@ div[data-testid="stMarkdownContainer"] p {
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 12px;
+}
+.accessible-card:hover {
+    background: var(--bg-card-hover);
 }
 .split-box {
     display: flex;
@@ -215,7 +209,7 @@ div[data-testid="stMarkdownContainer"] p {
 )
 
 
-# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי ---
+# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי (מעודכן ל-4 מחזורים) ---
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -225,9 +219,11 @@ def fetch_league_data():
     elements = {el["id"]: el for el in bootstrap["elements"]}
 
     next_gw = 4
+    next_deadline = ""
     for ev in bootstrap["events"]:
         if ev.get("is_next"):
             next_gw = ev["id"]
+            next_deadline = ev["deadline_time"]
             break
 
     pos_map = {1: "שוער", 2: "הגנה", 3: "קישור", 4: "חלוץ"}
@@ -241,8 +237,9 @@ def fetch_league_data():
         team_short = teams[el["team"]]["short_name"]
         upcoming = []
         fdr_list = []
+        # תכנון ל-4 מחזורים בשביל ה-Planner
         for f in fixtures:
-            if f["event"] in [next_gw, next_gw + 1, next_gw + 2]:
+            if f["event"] in [next_gw, next_gw + 1, next_gw + 2, next_gw + 3]:
                 if f["team_h"] == el["team"]:
                     opp = teams[f["team_a"]]["short_name"]
                     upcoming.append(f"{opp} (H)")
@@ -256,17 +253,15 @@ def fetch_league_data():
         weighted_fdr = sum(
             (5.3 - fdr) * weights[i] for i, fdr in enumerate(fdr_list[:3])
         )
-        avg_fdr = sum(fdr_list) / len(fdr_list) if fdr_list else 3.0
+        avg_fdr = sum(fdr_list[:3]) / min(3, len(fdr_list)) if fdr_list else 3.0
 
         mins = el.get("minutes", 0)
-        starts = el.get("starts", 0)
         actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
         expected_gi = float(el.get("expected_goal_involvements", 0.0))
         form = float(el.get("form", 0.0))
         cost = el["now_cost"] / 10
         threat = float(el.get("threat", 0.0))
 
-        # בדיקת כשירות רפואית
         status = el.get("status", "a")
         chance_raw = el.get("chance_of_playing_next_round")
         if chance_raw is not None:
@@ -278,21 +273,21 @@ def fetch_league_data():
         else:
             chance = 100
 
-        # כיול מדויק של סבירות לפתוח:
-        # עוגנים וכוכבים מקבלים 99% אם הם כשירים רפואית!
-        if chance == 0:
-            start_prob = 0
-        elif chance < 100:
-            start_prob = chance
+        mins_per_gw = mins / max(1, (next_gw - 1))
+        
+        # תיקון 100% שחקני עוגן (הולאנד, ברונו)
+        if mins_per_gw >= 75 or cost >= 8.0:
+            tactical_rate = 100
+        elif mins_per_gw >= 55:
+            tactical_rate = 85
+        elif mins_per_gw >= 35:
+            tactical_rate = 65
         else:
-            if cost >= 7.5 or starts >= 2 or mins >= 140 or el["web_name"] in ["Haaland", "B.Fernandes", "Salah", "Saka", "Palmer"]:
-                start_prob = 99
-            elif starts >= 1 or mins >= 70:
-                start_prob = 94
-            elif mins > 0:
-                start_prob = 70
-            else:
-                start_prob = 35
+            tactical_rate = 40 if mins_per_gw > 0 else 20
+            
+        start_prob = (
+            int(round(tactical_rate * (chance / 100.0))) if chance > 0 else 0
+        )
 
         xgi_p90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
 
@@ -305,7 +300,7 @@ def fetch_league_data():
             tag_status = "OVERPERFORMING_TRAP"
             buy_low_bonus = -0.8
 
-        nailed_mult = 1.15 if start_prob >= 90 else 0.85
+        nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
         score = (
             (xgi_p90 * 3.2)
             + (form * 1.3)
@@ -379,13 +374,15 @@ def fetch_league_data():
             "next_match": upcoming[0] if upcoming else "—",
             "next_fdr": next_fdr,
             "avg_fdr": round(avg_fdr, 2),
-            "fixtures": " | ".join(upcoming),
+            "fixtures": " | ".join(upcoming[:3]),
+            "upcoming_list": upcoming,
+            "fdr_list_full": fdr_list,
         }
 
-    return processed, next_gw
+    return processed, next_gw, next_deadline
 
 
-all_players, next_gw = fetch_league_data()
+all_players, next_gw, next_deadline = fetch_league_data()
 
 # --- 2. שער כניסה ומסך נחיתה ---
 query_params = st.query_params
@@ -431,8 +428,8 @@ if not st.session_state.user_team_id:
                     st.error("נא להזין ספרות בלבד.")
         with b2:
             if st.button("👀 סגל דמו לדוגמה", use_container_width=True):
-                st.session_state.user_team_id = "139103"
-                st.query_params["team"] = "139103"
+                st.session_state.user_team_id = "1"
+                st.query_params["team"] = "1"
                 st.rerun()
 
         with st.expander("❓ איפה מוצאים את ה-Team ID?"):
@@ -580,10 +577,10 @@ for p in starters:
         pen = 2.0
         total_penalty += pen
         squad_flaws.append({
-            "type": "כושר התקפי ירוד",
+            "type": "כושר התקפי דל",
             "penalty": f"-{pen:.1f}",
             "text": (
-                f"<b>{p['name']}</b> בבצורת כיבוש (כושר {p['form']}) במחזורים האחרונים."
+                f"<b>{p['name']}</b> בבצורת (כושר {p['form']}) במחזורים האחרונים."
             ),
         })
 
@@ -661,13 +658,45 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- 5. טאבים מרכזיים (קטגוריית הכשירות בוטלה והוטמעה במגרש) ---
-t_squad, t_transfers, t_analysis, t_scout, t_scenarios = st.tabs([
+# --- שעון דד-ליין חי ב-HTML/JS ---
+clock_html = f"""
+<div style="background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px; text-align:center; direction:rtl; margin-bottom:15px; color:#f8fafc;">
+    <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;">⏳ זמן נותר עד נעילת חילופים (GW {next_gw})</div>
+    <div id="fpl-clock" style="font-size:22px; font-weight:bold; color:#10b981; direction:ltr;">טוען שעון...</div>
+</div>
+<script>
+    var deadline = new Date("{next_deadline}").getTime();
+    var x = setInterval(function() {{
+        var now = new Date().getTime();
+        var distance = deadline - now;
+        
+        if (distance < 0) {{
+            clearInterval(x);
+            document.getElementById("fpl-clock").innerHTML = "הדד-ליין עבר!";
+            document.getElementById("fpl-clock").style.color = "#ef4444";
+            return;
+        }}
+        
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById("fpl-clock").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+    }}, 1000);
+</script>
+"""
+components.html(clock_html, height=85)
+
+
+# --- 5. טאבים מרכזיים ---
+t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner = st.tabs([
     "🟢 הסגל על המגרש",
     "🔄 מעבדת חילופים",
     "📊 ניתוח וחסרונות",
     "🌟 רדאר רכש עילית",
     "🎯 3 תרחישי תקציב",
+    "🗓️ מתכנן מחזורים",
 ])
 
 
@@ -675,19 +704,21 @@ def render_pitch_card(p, is_bench=False):
     cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
     bench_class = "card-bench" if is_bench else ""
 
-    # זיהוי שחקנים שלא בכושר משחק או לא כשירים
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
-        status_pill = f'<div class="prob-badge prob-red">🔴 מושבת {p["start_prob"]}%</div>'
+        status_pill = (
+            f'<div class="prob-badge prob-red">🔴 פצוע {p["start_prob"]}%</div>'
+        )
     elif p["chance"] <= 75 or p["status"] == "d":
         status_class = "card-warning"
-        status_pill = f'<div class="prob-badge prob-yellow">🟡 בספק {p["start_prob"]}%</div>'
-    elif p["form"] < 2.0 and p["pos_code"] in [3, 4]:
-        status_class = "card-out-of-form"
-        status_pill = f'<div class="prob-badge prob-orange">🟠 כושר ירוד ({p["form"]})</div>'
+        status_pill = (
+            f'<div class="prob-badge prob-yellow">🟡 בספק {p["start_prob"]}%</div>'
+        )
     else:
         status_class = "cap-gold" if p.get("is_cap") else ""
-        status_pill = f'<div class="prob-badge prob-green">🟢 {p["start_prob"]}% פותח</div>'
+        status_pill = (
+            f'<div class="prob-badge prob-green">🟢 {p["start_prob"]}% פותח</div>'
+        )
 
     return (
         f'<div class="p-card {status_class} {bench_class}">'
@@ -703,28 +734,22 @@ def render_pitch_card(p, is_bench=False):
     )
 
 
-# טאב 1: מגרש חי עם איתור מוקדי כושר ופציעה
+# טאב 1: מגרש חי
 with t_squad:
-    # פס התראה ישיר על המגרש למי שלא בכושר מלא
-    unfit_starters = [
-        p for p in starters 
-        if p["status"] != "a" or p["chance"] < 100 or (p["form"] < 2.0 and p["pos_code"] in [3, 4])
-    ]
-    if unfit_starters:
-        unfit_names = ", ".join([f"<b>{p['name']}</b> ({'בספק/פצוע' if p['chance'] < 100 else 'כושר ירוד'})" for p in unfit_starters])
-        st.markdown(
-            f'<div class="alert-banner">⚠️ <b>שים לב בהרכב הפותח:</b> אותרו שחקנים שלא בכושר משחק מלא: {unfit_names}</div>',
-            unsafe_allow_html=True,
-        )
-
     st.caption(
-        f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | סך תוחלת נקודות: **{starting_xp_total:.1f}** "
-        f"[🔴 מושבת | 🟡 בספק | 🟠 כושר ירוד | 🟢 כשיר ופותח]"
+        f"מערך: **{pos_counts[2]}-{pos_counts[3]}-{pos_counts[4]}** | סך תוחלת"
+        f" נקודות: **{starting_xp_total:.1f}**"
     )
 
-    fwd_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 4)
-    mid_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 3)
-    def_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 2)
+    fwd_h = "".join(
+        render_pitch_card(p) for p in starters if p["pos_code"] == 4
+    )
+    mid_h = "".join(
+        render_pitch_card(p) for p in starters if p["pos_code"] == 3
+    )
+    def_h = "".join(
+        render_pitch_card(p) for p in starters if p["pos_code"] == 2
+    )
     gk_h = "".join(render_pitch_card(p) for p in starters if p["pos_code"] == 1)
 
     st.markdown(
@@ -740,20 +765,21 @@ with t_squad:
     st.caption("🪑 שחקני הספסל:")
     bench_h = "".join(render_pitch_card(p, is_bench=True) for p in bench)
     st.markdown(
-        f'<div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">{bench_h}</div>',
+        f'<div style="display:flex; justify-content:center; gap:8px;'
+        f' margin-bottom:12px;">{bench_h}</div>',
         unsafe_allow_html=True,
     )
 
     with st.expander("🔄 חילוף מהיר בין שחקן הרכב לשחקן ספסל"):
         starters_opts = {
             p["id"]: (
-                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | כושר: {p['form']}"
+                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | xP: {p['xp']}"
             )
             for p in starters
         }
         bench_opts = {
             p["id"]: (
-                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | כושר: {p['form']}"
+                f"{p['name']} ({p['pos']}) — {p['start_prob']}% פותח | xP: {p['xp']}"
             )
             for p in bench
         }
@@ -761,13 +787,13 @@ with t_squad:
         sc1, sc2, sc3 = st.columns([1.5, 1.5, 1])
         with sc1:
             sub_out_id = st.selectbox(
-                "שחקן הרכב שיורד לספסל:",
+                "שחקן הרכב שיורד:",
                 list(starters_opts.keys()),
                 format_func=lambda x: starters_opts[x],
             )
         with sc2:
             sub_in_id = st.selectbox(
-                "שחקן ספסל שעולה להרכב:",
+                "שחקן ספסל שעולה:",
                 list(bench_opts.keys()),
                 format_func=lambda x: bench_opts[x],
             )
@@ -977,7 +1003,6 @@ with t_analysis:
             "משחק קרוב": p["next_match"],
             "FDR": p["next_fdr"],
             "סבירות לפתוח": f"{p['start_prob']}%",
-            "כושר": p["form"],
             "נקודות עונה": p["total_points"],
             "xP": round(p["xp"] * (2 if p.get("is_cap") else 1), 1),
         })
@@ -1009,7 +1034,8 @@ with t_scout:
                 '<span class="meta-chip" style="color:#6ee7b7;">🔥 קנייה בשפל</span>'
                 if p["tag"] == "BUY_LOW"
                 else (
-                    '<span class="meta-chip" style="color:#fca5a5;">⚠️ מעל המצופה</span>'
+                    '<span class="meta-chip" style="color:#fca5a5;">⚠️ מעל'
+                    " המצופה</span>"
                     if p["tag"] == "OVERPERFORMING_TRAP"
                     else ""
                 )
@@ -1184,3 +1210,84 @@ with t_scenarios:
             """,
             unsafe_allow_html=True,
         )
+
+# טאב 6: מתכנן מחזורים אסטרטגי (Planner)
+with t_planner:
+    st.subheader("🗓️ מתכנן מחזורים אסטרטגי (4 Gameweeks)")
+    
+    # 1. מנגנון צבירת חילופים (Transfer Bank)
+    st.markdown("#### 🔄 צבירת חילופים (Transfer Bank Inventory)")
+    st.caption("חוק ברזל ל-Top 100K: תכנון לשמירת חילופים (Roll) מאפשר גמישות ומונע מינוסים עתידיים.")
+    
+    col_t1, col_t2 = st.columns([1, 2])
+    with col_t1:
+        available_fts = st.number_input("כמה חילופים חינמיים זמינים לך כרגע?", min_value=1, max_value=5, value=1)
+        planned_transfers_this_gw = st.number_input("כמה חילופים אתה מתכנן לבצע השבוע?", min_value=0, max_value=5, value=0)
+    
+    with col_t2:
+        rolled = min(5, max(0, available_fts - planned_transfers_this_gw))
+        next_week_fts = min(5, rolled + 1)
+        
+        status_color = "#10b981" if next_week_fts >= 2 else "#ef4444"
+        st.markdown(f"""
+        <div style="background:#111a28; border:1px solid #1e2e46; border-radius:10px; padding:15px; margin-top:28px;">
+            <div style="font-size:13px; color:#94a3b8;">צפי מלאי חילופים לשבוע הבא:</div>
+            <div style="font-size:14px; margin-top:5px;">
+                • למחזור הנוכחי (GW {next_gw}): <b>{available_fts} חילופים</b><br>
+                • למחזור הבא (GW {next_gw + 1}): <b style="color:{status_color};">{next_week_fts} חילופים זמינים</b> (לאחר צבירה)
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if next_week_fts < 2:
+            st.warning("⚠️ לא יישארו לך 2 חילופים לשבוע הבא. שקול לגלגל חילוף (Roll) אלא אם יש פציעת הרכב דחופה.")
+
+    st.write("---")
+    st.markdown("#### 📅 לוח משחקים צפוי להרכב שלך (FDR Tracker)")
+    
+    # 2. טבלת FDR ויזואלית ב-HTML
+    table_html = """
+    <style>
+    .planner-table { width: 100%; border-collapse: collapse; text-align: center; color: white; direction: ltr; margin-top:10px; font-family: sans-serif; }
+    .planner-table th { background-color: #1e293b; padding: 10px; border: 1px solid #334155; font-size: 13px; color: #94a3b8; }
+    .planner-table td { padding: 8px; border: 1px solid #334155; font-size: 12px; font-weight: 500; }
+    .planner-name { text-align: left; padding-left: 10px !important; }
+    .fdr-cell { border-radius: 4px; padding: 4px 6px; display: inline-block; width: 100%; box-sizing: border-box; }
+    .bg-fdr-2 { background-color: #15803d; color: white; }
+    .bg-fdr-3 { background-color: #475569; color: white; }
+    .bg-fdr-4 { background-color: #b91c1c; color: white; }
+    .bg-fdr-5 { background-color: #7f1d1d; color: white; }
+    .bg-blank { background-color: #0f172a; color: #64748b; }
+    </style>
+    <table class="planner-table">
+        <tr>
+            <th class="planner-name">Player (Team)</th>
+            <th>Pos</th>
+            <th>GW {gw1}</th>
+            <th>GW {gw2}</th>
+            <th>GW {gw3}</th>
+            <th>GW {gw4}</th>
+        </tr>
+    """.format(gw1=next_gw, gw2=next_gw+1, gw3=next_gw+2, gw4=next_gw+3)
+
+    all_my_players_for_planner = starters + bench
+    for p in all_my_players_for_planner:
+        row_html = f"<tr><td class='planner-name'><b>{p['name']}</b> <span style='font-size:10px;color:#94a3b8;'>({p['team']})</span></td>"
+        row_html += f"<td>{p['pos']}</td>"
+        
+        upcoming_list = p.get("upcoming_list", [])
+        fdr_list_full = p.get("fdr_list_full", [])
+        
+        for i in range(4):
+            if i < len(upcoming_list):
+                match_str = upcoming_list[i]
+                fdr = fdr_list_full[i] if i < len(fdr_list_full) else 3
+                row_html += f"<td><div class='fdr-cell bg-fdr-{fdr}'>{match_str}</div></td>"
+            else:
+                row_html += "<td><div class='fdr-cell bg-blank'>BLANK</div></td>"
+                
+        row_html += "</tr>"
+        table_html += row_html
+        
+    table_html += "</table>"
+    st.markdown(table_html, unsafe_allow_html=True)
