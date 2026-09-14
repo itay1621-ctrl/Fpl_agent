@@ -68,7 +68,7 @@ def render_styled_table(headers, rows, is_rtl=False):
         tr_rows.append(f'<tr style="transition:background 0.15s ease;">{td_cells}</tr>')
     table_body = "".join(tr_rows)
     table_html = f"""
-    <div style="width:100%; overflow-x:auto; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,0.03); direction:{dir_attr};">
+    <div style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,0.03); direction:{dir_attr};">
         <table style="width:100%; border-collapse:collapse; font-size:13px; font-family:inherit;">
             <thead>
                 <tr>{th_cells}</tr>
@@ -460,6 +460,8 @@ TRANSLATIONS = {
         "theme_light": "מצב בהיר",
         "rb_rebuilt_success": "סגל נבנה מחדש מאפס למחזור זה",
         "you_indicator": "(אתה)",
+        "from_the_bench": "מהספסל",
+        "from_the_xi": "מההרכב",
     },
     "en": {
         "page_title": "FPL Elite Scout | Decision Engine & Squad Intelligence",
@@ -688,6 +690,8 @@ TRANSLATIONS = {
         "theme_light": "Light Mode",
         "rb_rebuilt_success": "Squad rebuilt from scratch for this GW",
         "you_indicator": "(You)",
+        "from_the_bench": "from the Bench",
+        "from_the_xi": "from the Starting XI",
     },
 }
 
@@ -2168,6 +2172,22 @@ div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
         font-size: 9.5px !important;
         padding: 1px 4px !important;
     }
+    [data-testid="stMetric"] {
+        padding: 6px 8px !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 11px !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 16px !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 11px !important;
+    }
+    div:has(> .comparison-panel-out) {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
 }
 </style>
 """
@@ -2236,10 +2256,7 @@ def fetch_league_data():
     target_gws = [next_gw + i for i in range(35)]
 
     for el_id, el in elements.items():
-        if el["status"] == "u":
-            continue
-
-        team_short = teams[el["team"]]["short_name"]
+        team_short = teams.get(el["team"], {}).get("short_name", "FPL")
         gw_fixtures_map = {}
         upcoming = []
         fdr_list = []
@@ -2247,13 +2264,13 @@ def fetch_league_data():
         for f in fixtures:
             ev = f.get("event")
             if ev in target_gws:
-                if f["team_h"] == el["team"]:
-                    opp = teams[f["team_a"]]["short_name"]
-                    diff = f["team_h_difficulty"]
+                if f.get("team_h") == el["team"]:
+                    opp = teams.get(f.get("team_a"), {}).get("short_name", "A")
+                    diff = f.get("team_h_difficulty", 3)
                     gw_fixtures_map[ev] = (f"{opp} (H)", diff)
-                elif f["team_a"] == el["team"]:
-                    opp = teams[f["team_h"]]["short_name"]
-                    diff = f["team_a_difficulty"]
+                elif f.get("team_a") == el["team"]:
+                    opp = teams.get(f.get("team_h"), {}).get("short_name", "H")
+                    diff = f.get("team_a_difficulty", 3)
                     gw_fixtures_map[ev] = (f"{opp} (A)", diff)
 
         for g in target_gws:
@@ -2550,11 +2567,11 @@ def fetch_user_team(t_id, gw):
             base_url = f"{base}entry/{t_id}/event/{base_gw}/picks/"
             picks_res = requests.get(base_url, headers=API_HEADERS, timeout=12).json()
 
-        bank = picks_res.get("entry_history", {}).get("bank", 0) / 10
-        picks = picks_res.get("picks", [])
-        team_name = entry_res.get("name", f"Team {t_id}")
-        rank = entry_res.get("summary_overall_rank", "—")
-        leagues = entry_res.get("leagues", {}).get("classic", [])
+        bank = (picks_res.get("entry_history") or {}).get("bank", 0) / 10
+        picks = picks_res.get("picks", []) or []
+        team_name = entry_res.get("name", f"Team {t_id}") if entry_res else f"Team {t_id}"
+        rank = entry_res.get("summary_overall_rank", "—") if entry_res else "—"
+        leagues = (entry_res.get("leagues") or {}).get("classic", []) if entry_res else []
         return picks, bank, team_name, rank, leagues
     except Exception:
         return None, 0.0, None, None, []
@@ -2634,18 +2651,34 @@ bench = []
 for p in st.session_state.user_squad:
     pid = p["element"]
     p_info = all_players.get(pid)
-    if p_info:
-        item = {
-            **p_info,
-            "element": pid,
-            "is_cap": p.get("is_captain", False),
-            "is_vc": p.get("is_vice_captain", False),
-            "position": p["position"],
+    if not p_info:
+        p_info = {
+            "id": pid,
+            "name": f"Player {pid}",
+            "team": "FPL",
+            "pos_code": 2,
+            "cost": 4.0,
+            "xp": 0.0,
+            "status": "u",
+            "chance": 0,
+            "start_prob": 0,
+            "next_match": "-",
+            "next_fdr": 3,
+            "total_points": 0,
+            "tag": "",
+            "form": 0.0,
         }
-        if p["position"] <= 11:
-            starters.append(item)
-        else:
-            bench.append(item)
+    item = {
+        **p_info,
+        "element": pid,
+        "is_cap": p.get("is_captain", False),
+        "is_vc": p.get("is_vice_captain", False),
+        "position": p["position"],
+    }
+    if p["position"] <= 11:
+        starters.append(item)
+    else:
+        bench.append(item)
 
 pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}
 for p in starters:
@@ -3138,7 +3171,7 @@ with t_squad:
         p_sw_from = all_players.get(st.session_state.squad_selected_id)
         if p_sw_from:
             is_from_starter = any(p["id"] == p_sw_from["id"] for p in starters)
-            target_area_text = ("from the Bench" if is_from_starter else "from Starting XI") if st.session_state.app_lang == "en" else ("מהספסל" if is_from_starter else "מההרכב")
+            target_area_text = t("from_the_bench") if is_from_starter else t("from_the_xi")
             p_pos_txt = get_player_pos(p_sw_from)
             c_sw_info, c_sw_canc = st.columns([4, 1])
             with c_sw_info:
@@ -3931,20 +3964,36 @@ with t_planner:
         for p in current_sim_squad:
             pid = p["element"]
             p_data = all_players.get(pid)
-            if p_data:
-                is_c = (pid == custom_cap_id) if custom_cap_id else p.get("is_captain", False)
-                is_v = (pid == custom_vc_id) if custom_vc_id else p.get("is_vice_captain", False)
-                item = {
-                    **p_data,
-                    "element": pid,
-                    "position": p["position"],
-                    "is_cap": is_c,
-                    "is_vc": is_v,
+            if not p_data:
+                p_data = {
+                    "id": pid,
+                    "name": f"Player {pid}",
+                    "team": "FPL",
+                    "pos_code": 2,
+                    "cost": 4.0,
+                    "xp": 0.0,
+                    "status": "u",
+                    "chance": 0,
+                    "start_prob": 0,
+                    "next_match": "-",
+                    "next_fdr": 3,
+                    "total_points": 0,
+                    "tag": "",
+                    "form": 0.0,
                 }
-                if p["position"] <= 11:
-                    gw_starters.append(item)
-                else:
-                    gw_bench.append(item)
+            is_c = (pid == custom_cap_id) if custom_cap_id else p.get("is_captain", False)
+            is_v = (pid == custom_vc_id) if custom_vc_id else p.get("is_vice_captain", False)
+            item = {
+                **p_data,
+                "element": pid,
+                "position": p["position"],
+                "is_cap": is_c,
+                "is_vc": is_v,
+            }
+            if p["position"] <= 11:
+                gw_starters.append(item)
+            else:
+                gw_bench.append(item)
 
         cap_mult = 3 if active_chip == "Triple Captain" else 2
         gw_xp = sum(p["xp"] * (cap_mult if p.get("is_cap") else 1) for p in gw_starters)
