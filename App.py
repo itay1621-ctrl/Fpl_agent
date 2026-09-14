@@ -2083,10 +2083,11 @@ def is_swap_legal(player1_id, player2_id, current_squad_list):
 query_params = st.query_params
 url_id = query_params.get("team", None)
 
-if "user_team_id" not in st.session_state:
-    st.session_state.user_team_id = (
-        url_id.strip() if url_id and url_id.strip().isdigit() else None
-    )
+if url_id and url_id.strip().isdigit():
+    if st.session_state.get("user_team_id") != url_id.strip():
+        st.session_state.user_team_id = url_id.strip()
+elif "user_team_id" not in st.session_state:
+    st.session_state.user_team_id = None
 
 if not st.session_state.user_team_id:
     c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([4, 1.2, 1])
@@ -2197,6 +2198,19 @@ if (
     st.session_state.user_bank = initial_bank
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
+    st.session_state.squad_selected_id = None
+    st.session_state.squad_swap_active = False
+    st.session_state.squad_transfer_active = False
+    st.session_state.planner_plan = {
+        g: {"chip": "no_chip", "transfers": []} for g in range(next_gw, 39)
+    }
+    st.session_state.planner_captains = {}
+    st.session_state.planner_selected_id = None
+    st.session_state.planner_swap_active = False
+    st.session_state.planner_transfer_out = None
+    st.session_state.planner_rebuild_active = None
+    st.session_state.planner_rebuild_picks = []
+    st.session_state.planner_rebuild_target_pos = None
 
 # ניהול מצבי בחירה, חילוף והעברות
 if "squad_selected_id" not in st.session_state:
@@ -2670,6 +2684,20 @@ with t_squad:
         p_i = next((x for x in st.session_state.user_squad if x["element"] == p_in_id), None)
         if p_o and p_i:
             p_o["position"], p_i["position"] = p_i["position"], p_o["position"]
+            if p_o.get("is_captain") and p_o["position"] > 11:
+                p_o["is_captain"] = False
+                p_i["is_captain"] = True
+            elif p_i.get("is_captain") and p_i["position"] > 11:
+                p_i["is_captain"] = False
+                p_o["is_captain"] = True
+
+            if p_o.get("is_vice_captain") and p_o["position"] > 11:
+                p_o["is_vice_captain"] = False
+                p_i["is_vice_captain"] = True
+            elif p_i.get("is_vice_captain") and p_i["position"] > 11:
+                p_i["is_vice_captain"] = False
+                p_o["is_vice_captain"] = True
+
             st.session_state.squad_selected_id = None
             st.session_state.squad_swap_active = False
             st.toast(f"{all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
@@ -2805,12 +2833,21 @@ with t_squad:
         st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({pos_name} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_budget:.1f}m** | {t('in_bank')}: **£{st.session_state.user_bank:.1f}m**")
 
         tr_search_q = st.text_input(t("search_placeholder"), key="sq_tr_search_inp").strip().lower()
+        t1_rem_teams = {}
+        for sp in st.session_state.user_squad:
+            if sp["element"] != sel_tr_out_id:
+                p_item = all_players.get(sp["element"])
+                if p_item:
+                    t_code = p_item["team"]
+                    t1_rem_teams[t_code] = t1_rem_teams.get(t_code, 0) + 1
+
         cands = [
             p for p in all_players.values()
             if p["pos_code"] == p_tr_out["pos_code"]
             and p["id"] not in cur_pids
             and p["cost"] <= max_budget
             and p["status"] == "a"
+            and t1_rem_teams.get(p["team"], 0) < 3
         ]
         if tr_search_q:
             cands = [p for p in cands if tr_search_q in p["name"].lower() or tr_search_q in p["team"].lower()]
@@ -2931,6 +2968,11 @@ with t_transfers:
             .lower()
         )
 
+        t2_rem_teams = {}
+        for sp in current_all:
+            if sp["id"] != sel_out_id:
+                t2_rem_teams[sp["team"]] = t2_rem_teams.get(sp["team"], 0) + 1
+
         eligible = [
             p
             for p in all_players.values()
@@ -2938,6 +2980,7 @@ with t_transfers:
             and p["id"] not in current_pids
             and p["status"] == "a"
             and p["cost"] <= budget_cap
+            and t2_rem_teams.get(p["team"], 0) < 3
         ]
         if search_str:
             eligible = [
@@ -3194,7 +3237,11 @@ with t_scenarios:
     my_full_squad = starters + bench
     my_ids_set = {x["id"] for x in my_full_squad}
 
-    def get_optimal_in(pos_code, budget_limit):
+    def get_optimal_in(pos_code, budget_limit, p_out_id=None):
+        sc_rem_teams = {}
+        for sp in my_full_squad:
+            if sp["id"] != p_out_id:
+                sc_rem_teams[sp["team"]] = sc_rem_teams.get(sp["team"], 0) + 1
         cands = [
             p
             for p in all_players.values()
@@ -3202,6 +3249,7 @@ with t_scenarios:
             and p["pos_code"] == pos_code
             and p["cost"] <= budget_limit
             and p["status"] == "a"
+            and sc_rem_teams.get(p["team"], 0) < 3
         ]
         return max(cands, key=lambda x: x["score"]) if cands else None
 
@@ -3234,7 +3282,7 @@ with t_scenarios:
             "tag": t("t5_op1_tag"),
             "out": cand_def,
             "in": get_optimal_in(
-                2, cand_def["cost"] + st.session_state.user_bank
+                2, cand_def["cost"] + st.session_state.user_bank, cand_def["id"]
             ),
         },
         {
@@ -3242,7 +3290,7 @@ with t_scenarios:
             "tag": t("t5_op2_tag"),
             "out": cand_mid,
             "in": get_optimal_in(
-                3, cand_mid["cost"] + st.session_state.user_bank
+                3, cand_mid["cost"] + st.session_state.user_bank, cand_mid["id"]
             ),
         },
         {
@@ -3250,7 +3298,7 @@ with t_scenarios:
             "tag": t("t5_op3_tag"),
             "out": cand_fwd,
             "in": get_optimal_in(
-                4, cand_fwd["cost"] + st.session_state.user_bank
+                4, cand_fwd["cost"] + st.session_state.user_bank, cand_fwd["id"]
             ),
         },
     ]
@@ -3583,11 +3631,42 @@ with t_planner:
             for sp in snap:
                 st.session_state.planner_plan[selected_gw]["lineup_positions"][sp["element"]] = sp["position"]
 
+            # אם שחקן שקיבל סרט קפטן/סגן במחזור זה יורד לספסל, הסרט עובר למחליף
+            if selected_gw not in st.session_state.planner_captains:
+                st.session_state.planner_captains[selected_gw] = {}
+            cur_cap = st.session_state.planner_captains[selected_gw].get("cap")
+            cur_vc = st.session_state.planner_captains[selected_gw].get("vc")
+
+            if p_o["position"] > 11:
+                if cur_cap == p_out_id:
+                    st.session_state.planner_captains[selected_gw]["cap"] = p_in_id
+                if cur_vc == p_out_id:
+                    st.session_state.planner_captains[selected_gw]["vc"] = p_in_id
+            elif p_i["position"] > 11:
+                if cur_cap == p_in_id:
+                    st.session_state.planner_captains[selected_gw]["cap"] = p_out_id
+                if cur_vc == p_in_id:
+                    st.session_state.planner_captains[selected_gw]["vc"] = p_out_id
+
             if selected_gw == next_gw:
                 orig_o = next((x for x in st.session_state.user_squad if x["element"] == p_out_id), None)
                 orig_i = next((x for x in st.session_state.user_squad if x["element"] == p_in_id), None)
                 if orig_o and orig_i:
                     orig_o["position"], orig_i["position"] = orig_i["position"], orig_o["position"]
+                    if orig_o.get("is_captain") and orig_o["position"] > 11:
+                        orig_o["is_captain"] = False
+                        orig_i["is_captain"] = True
+                    elif orig_i.get("is_captain") and orig_i["position"] > 11:
+                        orig_i["is_captain"] = False
+                        orig_o["is_captain"] = True
+
+                    if orig_o.get("is_vice_captain") and orig_o["position"] > 11:
+                        orig_o["is_vice_captain"] = False
+                        orig_i["is_vice_captain"] = True
+                    elif orig_i.get("is_vice_captain") and orig_i["position"] > 11:
+                        orig_i["is_vice_captain"] = False
+                        orig_o["is_vice_captain"] = True
+
             st.session_state.planner_selected_id = None
             st.session_state.planner_swap_active = False
             st.toast(f"{all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
@@ -4053,12 +4132,18 @@ with t_planner:
             st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({pos_name} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_tr_budget:.1f}m** | {t('bank_bal')}: **£{cur_gw_sim['bank']:.1f}m**")
 
             tr_search = st.text_input(t("search_placeholder"), key=f"tr_search_{selected_gw}").strip().lower()
+            pl_rem_teams = {}
+            for sp in all_sim_players:
+                if sp["id"] != p_tr_out["id"]:
+                    pl_rem_teams[sp["team"]] = pl_rem_teams.get(sp["team"], 0) + 1
+
             eligible_pool = [
                 p for p in all_players.values()
                 if p["pos_code"] == p_tr_out["pos_code"]
                 and p["id"] not in cur_squad_ids
                 and p["cost"] <= max_tr_budget
                 and p["status"] == "a"
+                and pl_rem_teams.get(p["team"], 0) < 3
             ]
             if tr_search:
                 eligible_pool = [p for p in eligible_pool if tr_search in p["name"].lower() or tr_search in p["team"].lower()]
