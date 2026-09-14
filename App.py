@@ -57,6 +57,124 @@ def render_html(html_str):
     compact = "".join(line.strip() for line in html_str.splitlines())
     st.markdown(compact, unsafe_allow_html=True)
 
+def render_styled_table(headers, rows, is_rtl=False):
+    """רינדור טבלה רספונסיבית מודרנית עם תמיכה מלאה בערכת נושא (Light/Dark) ללא קנבס שחור"""
+    align = "right" if is_rtl else "left"
+    dir_attr = "rtl" if is_rtl else "ltr"
+    th_cells = "".join(f'<th style="padding:10px 12px; text-align:{align}; font-weight:800; font-size:12px; border-bottom:2px solid var(--border-color); color:var(--text-secondary); background:var(--fxt-row-bg); white-space:nowrap;">{h}</th>' for h in headers)
+    tr_rows = []
+    for row in rows:
+        td_cells = "".join(f'<td style="padding:10px 12px; text-align:{align}; border-bottom:1px solid var(--border-color); color:var(--text-primary); vertical-align:middle;">{cell}</td>' for cell in row)
+        tr_rows.append(f'<tr style="transition:background 0.15s ease;">{td_cells}</tr>')
+    table_body = "".join(tr_rows)
+    table_html = f"""
+    <div style="width:100%; overflow-x:auto; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,0.03); direction:{dir_attr};">
+        <table style="width:100%; border-collapse:collapse; font-size:13px; font-family:inherit;">
+            <thead>
+                <tr>{th_cells}</tr>
+            </thead>
+            <tbody>
+                {table_body}
+            </tbody>
+        </table>
+    </div>
+    """
+    compact = "".join(line.strip() for line in table_html.splitlines())
+    st.markdown(compact, unsafe_allow_html=True)
+
+FPL_TEN_COMMANDMENTS = [
+    {
+        "num": 1,
+        "title_he": "שמירת חילופים (Roll Transfers)",
+        "title_en": "Roll Your Free Transfers",
+        "desc_he": "אל תבצע חילוף אוטומטי בכל מחזור רק כי יש לך חילוף פנוי. צבירת 2 עד 5 חילופים חינמיים מעניקה גמישות אסטרטגית אדירה למהפכות סגל קטנות ללא קנס נקודות.",
+        "desc_en": "Never burn a free transfer just because you have one. Stacking 2 to 5 free transfers provides massive strategic leverage to overhaul multiple positions without taking point hits.",
+        "tag_he": "סבלנות",
+        "tag_en": "Patience",
+    },
+    {
+        "num": 2,
+        "title_he": "הימנעות ממינוסים מיותרים (Avoid -4 Hits)",
+        "title_en": "Avoid Unnecessary -4 Point Hits",
+        "desc_he": "שחקן שנרכש בקנס 4- נקודות נדרש להבקיע או לבשל רק כדי לאפס את העלות שלו. קח מינוס רק במקרה חירום של חוסר 11 שחקנים כשירים או עבור קפטן מובהק לטווח ארוך.",
+        "desc_en": "A player bought on a -4 hit must effectively return a goal or assist just to break even. Take hits strictly for injury crises or long-term high-ceiling captains.",
+        "tag_he": "חיסכון",
+        "tag_en": "Discipline",
+    },
+    {
+        "num": 3,
+        "title_he": "משמעת קפטן - כבוד לבעלות האפקטיבית (Captaincy)",
+        "title_en": "Captaincy Discipline & Effective Ownership",
+        "desc_he": "אל תנסה להמציא את הגלגל עם קפטנים מוזרים בחיפוש אחר דיפרנציאל. 60%-70% מהניקוד מגיע מהקפטן; בחר בשחקן המוביל עם ה-xP והבעלות הגבוהים ביותר (כמו האלנד או סלאח).",
+        "desc_en": "Don't gamble on wild differential captains. Over 60% of your rank progress relies on the armband; trust high-xP, high-ownership talismans with favorable fixtures.",
+        "tag_he": "קפטן",
+        "tag_en": "Captaincy",
+    },
+    {
+        "num": 4,
+        "title_he": "תכנון בטווחי 3-5 מחזורים (3-5 GW Blocks)",
+        "title_en": "Plan in 3-5 Gameweek Horizons",
+        "desc_he": "לעולם אל תקנה שחקן בשביל משחק אחד בלבד. בחן תמיד את לוח המשחקים (FDR) של 3 עד 5 המחזורים הבאים כדי להימנע מחילופי 'כיבוי שריפות' שבוע לאחר מכן.",
+        "desc_en": "Never buy a player for a single fixture. Always evaluate the upcoming 3 to 5 gameweek run (FDR) to avoid burning future transfers fixing short-term punts.",
+        "tag_he": "תכנון",
+        "tag_en": "Long-Term",
+    },
+    {
+        "num": 5,
+        "title_he": "החלטות סמוך לדדליין (Wait for Press Conferences)",
+        "title_en": "Wait for Press Conferences & News",
+        "desc_he": "המתן למסיבות העיתונאים של ימי שישי ולעדכוני פציעות אחרונים לפני ביצוע חילוף. העברות מוקדמות באמצע השבוע מסתכנות בפציעות באימונים או בגביעים אירופיים.",
+        "desc_en": "Delay transfers until Friday press conferences and verified deadline team news. Mid-week transfers risk training knocks and European rotation surprises.",
+        "tag_he": "תזמון",
+        "tag_en": "Timing",
+    },
+    {
+        "num": 6,
+        "title_he": "ספסל חסכוני ויעיל (Smart Bench Enablers)",
+        "title_en": "Smart Bench & Budget Enablers",
+        "desc_he": "אל תקבור מיליונים יקרים בספסל. דאג לשחקן ספסל אחד או שניים בטוחים לפתוח במחיר רצפה (£4.0m-£4.5m) שייכנסו אוטומטית בעת הצורך, והשקע את הכסף ב-11 הפותחים.",
+        "desc_en": "Do not trap valuable team value on your bench. Keep 1-2 cheap, guaranteed starters (£4.0m-£4.5m) as auto-sub safety nets while maximizing funds on your Starting XI.",
+        "tag_he": "תקציב",
+        "tag_en": "Value",
+    },
+    {
+        "num": 7,
+        "title_he": "ללא פאניקה - בלי Knee-Jerking (Trust Underlying Data)",
+        "title_en": "Avoid Knee-Jerking & Trust Analytics",
+        "desc_he": "אל תמכור שחקן איכותי רק כי סיים עם 2 נקודות במחזור בודד, ואל תרוץ לקנות שחקן שהבקיע שער מקרי. סמוך על מדדי ה-xG/xA והנתונים הסטטיסטיים לאורך זמן.",
+        "desc_en": "Do not rage-sell premium assets after a single blank, nor chase random defensive flukes. Trust underlying expected metrics (xG, xA, xP) over past variance.",
+        "tag_he": "חוסן מנטלי",
+        "tag_en": "Analytics",
+    },
+    {
+        "num": 8,
+        "title_he": "שמירה על רזרבה בבנק (£0.5m-£1.0m ITB)",
+        "title_en": "Keep Liquidity In The Bank (£0.5m-£1.0m ITB)",
+        "desc_he": "השארת סכום צנוע של 0.5-1.0 מיליון ליש\"ט בבנק מעניקה גמישות אדירה לעבור מיד לשחקן פורץ או כוכב בכושר בלי צורך לפרק חצי סגל או לקחת מינוסים.",
+        "desc_en": "Maintaining £0.5m-£1.0m in the bank allows you to instantly jump onto emerging breakout stars without requiring multi-transfer squad surgery.",
+        "tag_he": "גמישות",
+        "tag_en": "Liquidity",
+    },
+    {
+        "num": 9,
+        "title_he": "תזמון צ'יפים במחזורים מיוחדים (DGW & BGW)",
+        "title_en": "Strategic Chip Timing (DGW & BGW)",
+        "desc_he": "שמור את הצ'יפים החזקים (Wildcard, Free Hit, Bench Boost, Triple Captain) למחזורים הכפולים (DGW) והריקים (BGW) בחצי השני של העונה לקצירת עשרות נקודות יתרון.",
+        "desc_en": "Preserve high-impact chips (Wildcard, Free Hit, Bench Boost, Triple Captain) for late-season Double (DGW) and Blank (BGW) weeks to exploit massive point swings.",
+        "tag_he": "צ'יפים",
+        "tag_en": "Chips",
+    },
+    {
+        "num": 10,
+        "title_he": "דיפרנציאלים לטיפוס בליגה (Target Differentials)",
+        "title_en": "Target High-Upside Differentials",
+        "desc_he": "שחקנים בבעלות של מעל 60% מגנים על הדירוג שלך; אבל כדי לסגור פערים בליגה הפרטית שלך כשאתה רודף מאחור, שחקני מפתח איכותיים בבעלות מתחת ל-10% הם המנוע לניצחון.",
+        "desc_en": "High-ownership players protect rank; but to bridge deficits in private mini-leagues, high-upside low-ownership differentials (<10%) are the true accelerators.",
+        "tag_he": "ריגול H2H",
+        "tag_en": "Rank Climb",
+    },
+]
+
 def get_jersey_svg(team_code, is_gk=False):
     if is_gk:
         c1, c2 = "#10b981", "#059669"
@@ -209,6 +327,8 @@ TRANSLATIONS = {
         "t2_reset_btn": "אפס סגל למקור",
         "t2_saved_transfers": "חילופים שנשמרו:",
         "t3_title": "ניתוח עומק, חסרונות הרכב ודירוג כשירות",
+        "commandments_title": "עשרת הדיברות של מנג'ר העילית",
+        "commandments_subtitle": "עשרה עקרונות זהב של טופ 10k עולמי להצלחה ארוכת טווח",
         "t3_squad_score": "ציון סגל מכויל",
         "t3_forecast": "תחזית הרכב:",
         "t3_flaws_title": "מוקדי סיכון שהורידו ניקוד:",
@@ -426,6 +546,8 @@ TRANSLATIONS = {
         "t2_reset_btn": "Reset Squad to Original",
         "t2_saved_transfers": "Saved transfers:",
         "t3_title": "Squad Strength & Flaw Analysis",
+        "commandments_title": "The 10 Commandments of FPL",
+        "commandments_subtitle": "Top 10k Golden Strategic Rules for Long-Term Success",
         "t3_squad_score": "Squad Rating",
         "t3_forecast": "Lineup Forecast:",
         "t3_flaws_title": "Risk factors reducing squad rating:",
@@ -585,8 +707,9 @@ if is_light:
     --p-card-border: #cbd5e1;
     --p-card-border-bottom: #e2e8f0;
     --p-card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    --p-name-plate-bg: #0f172a;
-    --p-name-plate-text: #ffffff;
+    --p-name-plate-bg: #f1f5f9;
+    --p-name-plate-border: #cbd5e1;
+    --p-name-plate-text: #0f172a;
     --p-card-btn-bg: #f8fafc;
     --p-card-btn-border: #cbd5e1;
     --p-card-btn-text: #0f172a;
@@ -670,7 +793,8 @@ else:
     --p-card-border: rgba(168, 85, 247, 0.3);
     --p-card-border-bottom: rgba(168, 85, 247, 0.35);
     --p-card-shadow: 0 6px 20px rgba(0,0,0,0.6);
-    --p-name-plate-bg: #07030e;
+    --p-name-plate-bg: #1c0f33;
+    --p-name-plate-border: rgba(168, 85, 247, 0.35);
     --p-name-plate-text: #ffffff;
     --p-card-btn-bg: rgba(26, 15, 46, 0.95);
     --p-card-btn-border: rgba(168, 85, 247, 0.3);
@@ -791,13 +915,15 @@ div[data-testid="stHorizontalBlock"] > div {
 }
 [data-testid="stMarkdownContainer"] .p-name-plate,
 [data-testid="stMarkdownContainer"] .p-card-fpl .p-name-plate {
-    background: #0f172a !important;
-    color: #ffffff !important;
+    background: var(--p-name-plate-bg) !important;
+    border: 1px solid var(--p-name-plate-border) !important;
+    border-radius: 6px !important;
+    color: var(--p-name-plate-text) !important;
 }
 [data-testid="stMarkdownContainer"] .p-name-txt,
 [data-testid="stMarkdownContainer"] .p-card-fpl .p-name-txt,
 [data-testid="stMarkdownContainer"] .p-name-plate span {
-    color: #ffffff !important;
+    color: var(--p-name-plate-text) !important;
     font-weight: 800 !important;
     font-size: 12.5px !important;
     text-align: center !important;
@@ -853,16 +979,55 @@ div[data-testid="stRadio"] label {
 }
 
 div[data-baseweb="select"],
+div[data-baseweb="select"] > div,
+div[data-baseweb="select"] > div > div,
+div[data-baseweb="select"] [role="combobox"],
 div[data-baseweb="input"],
+div[data-baseweb="input"] > div,
 div[data-baseweb="input"] input,
 div[data-testid="stTextInput"] input,
 div[data-testid="stNumberInput"] input {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     background-color: var(--input-bg) !important;
+    background: var(--input-bg) !important;
     border: 1px solid var(--input-border) !important;
+    border-color: var(--input-border) !important;
     color: var(--input-text) !important;
     border-radius: 8px !important;
+}
+
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] p,
+div[data-baseweb="select"] div {
+    color: var(--input-text) !important;
+}
+
+div[data-baseweb="select"] svg {
+    fill: var(--input-text) !important;
+    color: var(--input-text) !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+div[data-baseweb="menu"],
+ul[role="listbox"] {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+li[role="option"] {
+    background-color: var(--bg-card) !important;
+    background: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+}
+
+li[role="option"]:hover,
+li[aria-selected="true"] {
+    background-color: var(--bg-card-hover) !important;
+    background: var(--bg-card-hover) !important;
+    color: var(--accent-mint) !important;
 }
 
 div[data-baseweb="select"]:focus-within,
@@ -1355,10 +1520,11 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     vertical-align: middle;
 }
 
-/* לוחית שם שחקן - LiveFPL High Contrast */
+/* לוחית שם שחקן - מותאמת ערכת נושא */
 .p-name-plate,
 [data-testid="stMarkdownContainer"] .p-name-plate {
-    background: #0f172a !important;
+    background: var(--p-name-plate-bg) !important;
+    border: 1px solid var(--p-name-plate-border) !important;
     border-radius: 6px !important;
     padding: 3px 6px !important;
     margin: 3px 0 2px 0 !important;
@@ -1376,7 +1542,7 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 .p-card-fpl .p-name-txt {
     font-weight: 800 !important;
     font-size: 12.5px !important;
-    color: #ffffff !important;
+    color: var(--p-name-plate-text) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -1735,11 +1901,12 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     }
     .p-name-plate {
         padding: 2px 3px !important;
-        background: #0f172a !important;
+        background: var(--p-name-plate-bg) !important;
+        border: 1px solid var(--p-name-plate-border) !important;
     }
     .p-name-txt {
         font-size: 9.5px !important;
-        color: #ffffff !important;
+        color: var(--p-name-plate-text) !important;
     }
     .p-sub, .badge-fdr, .mini-fxt {
         font-size: 7.5px !important;
@@ -2294,7 +2461,7 @@ for p in starters:
     if p["status"] != "a" or p["chance"] < 100:
         pen = 6.5 if p["chance"] <= 25 else 4.0
         total_penalty += pen
-        f_type = "Starting Fitness" if is_en else "כשירות בהרכב"
+        f_type = "🚑 Starting Fitness" if is_en else "🚑 כשירות בהרכב"
         f_txt = (
             f"<b>{p['name']}</b> doubtful/injured ({p['chance']}% fitness | {p['start_prob']}% start probability)."
             if is_en
@@ -2306,7 +2473,7 @@ for bp in bench:
     if bp["status"] != "a" or bp["chance"] < 100:
         pen = 3.0
         total_penalty += pen
-        f_type = "Bench Disabled" if is_en else "ספסל מושבת"
+        f_type = "🚑 Bench Disabled" if is_en else "🚑 ספסל מושבת"
         f_txt = (
             f"<b>{bp['name']}</b> injured/disabled ({bp['chance']}%) - no auto-sub cover."
             if is_en
@@ -2318,7 +2485,7 @@ for p in starters:
     if p["pos_code"] in [1, 2] and p["next_fdr"] >= 4:
         pen = 4.0
         total_penalty += pen
-        f_type = "Defense Conceding Risk" if is_en else "הגנה בסיכון ספיגה"
+        f_type = "⚠️ Defense Conceding Risk" if is_en else "⚠️ הגנה בסיכון ספיגה"
         f_txt = (
             f"<b>{p['name']}</b> facing tough fixture (<span class='ltr-tag'>{p['next_match']}</span>, FDR {p['next_fdr']})."
             if is_en
@@ -2330,7 +2497,7 @@ for p in starters:
     if p["status"] == "a" and p["form"] < 2.5 and p["pos_code"] in [3, 4]:
         pen = 2.0
         total_penalty += pen
-        f_type = "Cold Attacking Form" if is_en else "כושר התקפי דל"
+        f_type = "⚠️ Cold Attacking Form" if is_en else "⚠️ כושר התקפי דל"
         f_txt = (
             f"<b>{p['name']}</b> in goal drought (form {p['form']}) in recent GWs."
             if is_en
@@ -2342,7 +2509,7 @@ for p in starters:
     if p["tag"] == "OVERPERFORMING_TRAP":
         pen = 1.5
         total_penalty += pen
-        f_type = "Regression Risk" if is_en else "סכנת דעיכה (מלכודת)"
+        f_type = "⚠️ Regression Risk" if is_en else "⚠️ סכנת דעיכה (מלכודת)"
         f_txt = (
             f"<b>{p['name']}</b> scored beyond expected goal involvements (low xGI)."
             if is_en
@@ -2353,7 +2520,7 @@ for p in starters:
 if not formation_valid:
     pen = 8.0
     total_penalty += pen
-    f_type = "Illegal Formation" if is_en else "מערך לא חוקי"
+    f_type = "⚠️ Illegal Formation" if is_en else "⚠️ מערך לא חוקי"
     f_txt = (
         "Current formation is illegal (must have 1 GK, 3-5 DEFs, 2-5 MIDs, 1-3 FWDs)."
         if is_en
@@ -2602,10 +2769,10 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
 
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
-        status_pill = f'<div class="prob-badge prob-red">{lbl_inj} {p["start_prob"]}%</div>'
+        status_pill = f'<div class="prob-badge prob-red">🚑 {lbl_inj} {p["start_prob"]}%</div>'
     elif p["chance"] <= 75 or p["status"] == "d":
         status_class = "card-warning"
-        status_pill = f'<div class="prob-badge prob-yellow">{lbl_dbt} {p["start_prob"]}%</div>'
+        status_pill = f'<div class="prob-badge prob-yellow">🩹 {lbl_dbt} {p["start_prob"]}%</div>'
     else:
         status_class = "cap-gold" if is_c else ("vc-silver" if is_v else "")
         status_pill = ""
@@ -2643,7 +2810,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
         f'{top_color_bar}'
         f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:2px 0;">{jersey_svg}</div>'
-        f'<div class="p-name-plate" style="background:#0f172a !important; color:#ffffff !important;">{cap_badge}<span class="p-name-txt" style="color:#ffffff !important; font-size:12.5px !important; font-weight:800 !important; text-align:center !important;">{p["name"]}</span></div>'
+        f'<div class="p-name-plate" style="background:var(--p-name-plate-bg) !important; border:1px solid var(--p-name-plate-border) !important;">{cap_badge}<span class="p-name-txt" style="color:var(--p-name-plate-text) !important; font-size:12.5px !important; font-weight:800 !important; text-align:center !important;">{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:2px 0;">{fixture_html}</div>'
         f'{status_pill}'
         f'<div class="p-card-footer">'
@@ -2942,7 +3109,7 @@ with t_transfers:
     def format_transfer_out(pid):
         p = all_players[pid]
         pos_str = get_player_pos(p)
-        flag = "[!] " if mark_priority(p) else ""
+        flag = "🚑 " if (p["status"] != "a" or p["chance"] < 100) else ("⚠️ " if mark_priority(p) else "")
         return f"{flag}{p['name']} ({pos_str} - {p['team']}) | £{p['cost']}m | xP: {p['xp']}"
 
     col_out, col_in = st.columns(2)
@@ -3100,25 +3267,99 @@ with t_analysis:
             st.success(t("t3_no_flaws"))
 
     st.write("")
+    with st.expander(f"💡 {t('commandments_title')} — {t('commandments_subtitle')}", expanded=False):
+        c_cmd1, c_cmd2 = st.columns(2)
+        half = len(FPL_TEN_COMMANDMENTS) // 2
+        with c_cmd1:
+            for item in FPL_TEN_COMMANDMENTS[:half]:
+                c_title = item["title_en"] if is_en else item["title_he"]
+                c_desc = item["desc_en"] if is_en else item["desc_he"]
+                c_tag = item["tag_en"] if is_en else item["tag_he"]
+                st.markdown(
+                    f"""
+                    <div class="accessible-card" style="margin-bottom:10px; padding:12px;">
+                        <div class="split-box">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:12px; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{item['num']}</span>
+                                <b style="color:var(--text-primary); font-size:13.5px;">💡 {c_title}</b>
+                            </div>
+                            <span class="meta-chip" style="color:var(--accent-cyan);">{c_tag}</span>
+                        </div>
+                        <div style="font-size:12.5px; color:var(--text-secondary); margin-top:6px; line-height:1.6;">
+                            {c_desc}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+        with c_cmd2:
+            for item in FPL_TEN_COMMANDMENTS[half:]:
+                c_title = item["title_en"] if is_en else item["title_he"]
+                c_desc = item["desc_en"] if is_en else item["desc_he"]
+                c_tag = item["tag_en"] if is_en else item["tag_he"]
+                st.markdown(
+                    f"""
+                    <div class="accessible-card" style="margin-bottom:10px; padding:12px;">
+                        <div class="split-box">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:12px; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{item['num']}</span>
+                                <b style="color:var(--text-primary); font-size:13.5px;">💡 {c_title}</b>
+                            </div>
+                            <span class="meta-chip" style="color:var(--accent-cyan);">{c_tag}</span>
+                        </div>
+                        <div style="font-size:12.5px; color:var(--text-secondary); margin-top:6px; line-height:1.6;">
+                            {c_desc}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+    st.write("")
     st.markdown(f"#### {t('starting_11_title')}")
-    starters_table = []
-    for p in starters:
-        cap_role = " (C)" if p.get("is_cap") else (" (VC)" if p.get("is_vc") else "")
-        starters_table.append({
-            t("th_player"): f"{p['name']}{cap_role}",
-            t("th_pos"): t(f"pos_{p['pos_code']}"),
-            t("th_team"): p["team"],
-            t("th_next_match"): p["next_match"],
-            t("th_fdr"): p["next_fdr"],
-            t("th_start_prob"): f"{p['start_prob']}%",
-            t("th_season_pts"): p["total_points"],
-            t("th_xp"): round(p["xp"] * (2 if p.get("is_cap") else 1), 1),
-        })
-    st.dataframe(
-        pd.DataFrame(starters_table).sort_values(by=t("th_xp"), ascending=False),
-        use_container_width=True,
-        hide_index=True,
-    )
+    headers_s11 = [
+        t("th_player"),
+        t("th_pos"),
+        t("th_team"),
+        t("th_next_match"),
+        t("th_fdr"),
+        t("th_start_prob"),
+        t("th_season_pts"),
+        t("th_xp"),
+    ]
+    sorted_starters = sorted(starters, key=lambda x: round(x["xp"] * (2 if x.get("is_cap") else 1), 1), reverse=True)
+    rows_s11 = []
+    for p in sorted_starters:
+        if p.get("is_cap"):
+            role_badge = '<span class="badge-c" style="margin-right:4px;">C</span>'
+        elif p.get("is_vc"):
+            role_badge = '<span class="badge-vc" style="margin-right:4px;">VC</span>'
+        else:
+            role_badge = ""
+
+        if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
+            health_icon = '<span style="color:#ef4444; font-weight:700;">🚑 </span>'
+        elif p["chance"] <= 75 or p["status"] == "d":
+            health_icon = '<span style="color:#f59e0b; font-weight:700;">🩹 </span>'
+        else:
+            health_icon = ""
+
+        pos_str = t(f"pos_{p['pos_code']}")
+        prob_color = "#10b981" if p["start_prob"] == 100 else "#f59e0b"
+        xp_calc = round(p["xp"] * (2 if p.get("is_cap") else 1), 1)
+
+        rows_s11.append([
+            f"{health_icon}{role_badge}<b>{p['name']}</b>",
+            f'<span style="font-weight:700; font-size:12px;">{pos_str}</span>',
+            f'<span class="ltr-tag" style="font-weight:700;">{p["team"]}</span>',
+            f'<span class="badge-fdr fdr-{p["next_fdr"]}"><span class="ltr-tag">{p["next_match"]}</span></span>',
+            f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
+            f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
+            f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
+            f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
+        ])
+    
+    render_styled_table(headers_s11, rows_s11, is_rtl=(st.session_state.app_lang == "he"))
 
 # ---------------------------------------------------------------------
 # טאב 4: רדאר רכש עילית (Scout Radar)
@@ -4262,19 +4503,28 @@ with t_leagues:
                 st.caption(t("t7_showing_top_50"))
 
                 # טבלת תוצאות מעוצבת
-                table_rows = []
+                headers_lg = [
+                    t("t7_th_rank"),
+                    t("t7_th_team_name"),
+                    t("t7_th_manager"),
+                    t("t7_th_last_gw"),
+                    t("t7_th_total_pts"),
+                    t("t7_th_team_id"),
+                ]
+                rows_lg = []
                 for r in results[:20]:
                     is_me = (str(r["entry"]) == str(team_id))
                     prefix = f"{t('you_indicator')} " if is_me else ""
-                    table_rows.append({
-                        t("t7_th_rank"): r["rank"],
-                        t("t7_th_team_name"): f"{prefix}{r['entry_name']}",
-                        t("t7_th_manager"): r["player_name"],
-                        t("t7_th_last_gw"): r["event_total"],
-                        t("t7_th_total_pts"): r["total"],
-                        t("t7_th_team_id"): r["entry"],
-                    })
-                st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
+                    name_color = "var(--accent-mint)" if is_me else "inherit"
+                    rows_lg.append([
+                        f"<b>#{r['rank']}</b>",
+                        f'<span style="font-weight:700; color:{name_color};">{prefix}{r["entry_name"]}</span>',
+                        f"<span>{r['player_name']}</span>",
+                        f'<span class="ltr-tag">{r["event_total"]} {t("pts")}</span>',
+                        f'<span class="ltr-tag" style="font-weight:800; color:var(--accent-cyan);">{r["total"]} {t("pts")}</span>',
+                        f'<span class="ltr-tag" style="color:var(--text-muted); font-size:11px;">#{r["entry"]}</span>',
+                    ])
+                render_styled_table(headers_lg, rows_lg, is_rtl=(st.session_state.app_lang == "he"))
 
                 # כלי ריגול ראש בראש מול יריב
                 st.write("---")
