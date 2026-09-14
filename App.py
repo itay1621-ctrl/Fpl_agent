@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS: נגישות, RTL, וצבעי פציעות מרוככים ---
+# --- עיצוב CSS: נגישות, RTL, צבעי פציעות מרוככים ומיני-כרטיסים ל-Planner ---
 st.markdown(
     """
 <style>
@@ -203,13 +203,31 @@ div[data-testid="stMarkdownContainer"] p {
     font-weight: 700;
     font-size: 11px;
 }
+
+/* עיצוב 3 המשחקים הקרובים בכרטיס ה-Planner */
+.mini-fxt-container { 
+    display: flex; 
+    justify-content: center; 
+    gap: 3px; 
+    margin-top: 5px; 
+}
+.mini-fxt { 
+    font-size: 8.5px; 
+    font-weight: 800; 
+    text-transform: uppercase; 
+    padding: 2px 4px; 
+    border-radius: 3px; 
+    color: white; 
+    line-height: 1; 
+    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+}
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 
-# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי (מעודכן ל-4 מחזורים) ---
+# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי (מעודכן ל-4 מחזורים בשביל ה-Planner) ---
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -237,7 +255,7 @@ def fetch_league_data():
         team_short = teams[el["team"]]["short_name"]
         upcoming = []
         fdr_list = []
-        # תכנון ל-4 מחזורים בשביל ה-Planner
+        # תכנון ל-4 מחזורים קדימה בשביל ה-Planner
         for f in fixtures:
             if f["event"] in [next_gw, next_gw + 1, next_gw + 2, next_gw + 3]:
                 if f["team_h"] == el["team"]:
@@ -275,7 +293,7 @@ def fetch_league_data():
 
         mins_per_gw = mins / max(1, (next_gw - 1))
         
-        # תיקון 100% שחקני עוגן (הולאנד, ברונו)
+        # תיקון 100% שחקני עוגן
         if mins_per_gw >= 75 or cost >= 8.0:
             tactical_rate = 100
         elif mins_per_gw >= 55:
@@ -696,7 +714,7 @@ t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner = st.tabs([
     "📊 ניתוח וחסרונות",
     "🌟 רדאר רכש עילית",
     "🎯 3 תרחישי תקציב",
-    "🗓️ מתכנן מחזורים",
+    "🗓️ מתכנן מחזורים וצ'יפים",
 ])
 
 
@@ -731,6 +749,28 @@ def render_pitch_card(p, is_bench=False):
         f'<div style="font-size:9px; color:#38bdf8; margin-top:2px;">xP:'
         f" {p['xp']}</div>"
         "</div>"
+    )
+
+def render_planner_card(p, is_bench=False, bb_active=False):
+    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
+    bench_class = "card-bench" if is_bench and not bb_active else ""
+    
+    upcoming = p.get("upcoming_list", [])
+    fdrs = p.get("fdr_list_full", [])
+    fxt_html = '<div class="mini-fxt-container">'
+    
+    for i in range(min(3, len(upcoming))):
+        opp = upcoming[i].split(" ")[0][:3]
+        fdr = fdrs[i] if i < len(fdrs) else 3
+        fxt_html += f'<div class="mini-fxt fdr-{fdr}">{opp}</div>'
+    fxt_html += '</div>'
+
+    return (
+        f'<div class="p-card {bench_class}">'
+        f'<div class="p-name">{cap_badge}{p["name"]}</div>'
+        f'<div style="font-size:9.5px; color:#38bdf8; font-weight:bold;">£{p["cost"]}m | {p["start_prob"]}%</div>'
+        f'{fxt_html}'
+        f'</div>'
     )
 
 
@@ -1213,21 +1253,18 @@ with t_scenarios:
 
 # טאב 6: מתכנן מחזורים אסטרטגי (Planner)
 with t_planner:
-    st.subheader("🗓️ מתכנן מחזורים אסטרטגי (4 Gameweeks)")
+    st.subheader("🗓️ מתכנן מחזורים וסימולציית צ'יפים (3 Gameweeks)")
     
-    # 1. מנגנון צבירת חילופים (Transfer Bank)
+    # 1. צבירת חילופים
     st.markdown("#### 🔄 צבירת חילופים (Transfer Bank Inventory)")
     st.caption("חוק ברזל ל-Top 100K: תכנון לשמירת חילופים (Roll) מאפשר גמישות ומונע מינוסים עתידיים.")
-    
     col_t1, col_t2 = st.columns([1, 2])
     with col_t1:
         available_fts = st.number_input("כמה חילופים חינמיים זמינים לך כרגע?", min_value=1, max_value=5, value=1)
         planned_transfers_this_gw = st.number_input("כמה חילופים אתה מתכנן לבצע השבוע?", min_value=0, max_value=5, value=0)
-    
     with col_t2:
         rolled = min(5, max(0, available_fts - planned_transfers_this_gw))
         next_week_fts = min(5, rolled + 1)
-        
         status_color = "#10b981" if next_week_fts >= 2 else "#ef4444"
         st.markdown(f"""
         <div style="background:#111a28; border:1px solid #1e2e46; border-radius:10px; padding:15px; margin-top:28px;">
@@ -1238,56 +1275,48 @@ with t_planner:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
         if next_week_fts < 2:
             st.warning("⚠️ לא יישארו לך 2 חילופים לשבוע הבא. שקול לגלגל חילוף (Roll) אלא אם יש פציעת הרכב דחופה.")
 
     st.write("---")
-    st.markdown("#### 📅 לוח משחקים צפוי להרכב שלך (FDR Tracker)")
     
-    # 2. טבלת FDR ויזואלית ב-HTML
-    table_html = """
-    <style>
-    .planner-table { width: 100%; border-collapse: collapse; text-align: center; color: white; direction: ltr; margin-top:10px; font-family: sans-serif; }
-    .planner-table th { background-color: #1e293b; padding: 10px; border: 1px solid #334155; font-size: 13px; color: #94a3b8; }
-    .planner-table td { padding: 8px; border: 1px solid #334155; font-size: 12px; font-weight: 500; }
-    .planner-name { text-align: left; padding-left: 10px !important; }
-    .fdr-cell { border-radius: 4px; padding: 4px 6px; display: inline-block; width: 100%; box-sizing: border-box; }
-    .bg-fdr-2 { background-color: #15803d; color: white; }
-    .bg-fdr-3 { background-color: #475569; color: white; }
-    .bg-fdr-4 { background-color: #b91c1c; color: white; }
-    .bg-fdr-5 { background-color: #7f1d1d; color: white; }
-    .bg-blank { background-color: #0f172a; color: #64748b; }
-    </style>
-    <table class="planner-table">
-        <tr>
-            <th class="planner-name">Player (Team)</th>
-            <th>Pos</th>
-            <th>GW {gw1}</th>
-            <th>GW {gw2}</th>
-            <th>GW {gw3}</th>
-            <th>GW {gw4}</th>
-        </tr>
-    """.format(gw1=next_gw, gw2=next_gw+1, gw3=next_gw+2, gw4=next_gw+3)
+    # 2. סימולטור צ'יפים
+    st.markdown("#### 🎮 סימולטור צ'יפים למחזור הקרוב")
+    chip_sim = st.radio("בחר צ'יפ לסימולציה:", ["ללא צ'יפ", "Bench Boost", "Wildcard"], horizontal=True, label_visibility="collapsed")
+    bb_active = (chip_sim == "Bench Boost")
+    
+    if bb_active:
+        st.success("🟢 Bench Boost פעיל: שחקני הספסל מודגשים ומוסיפים ניקוד מלא לתחזית (תצוגת ספסל רגילה בוטלה).")
+        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters) + sum(p["xp"] for p in bench)
+    elif chip_sim == "Wildcard":
+        st.info("🃏 Wildcard פעיל: מלאי החילופים הוסר. היעזר בטאב 'מעבדת חילופים' כדי לתכנן את הסגל מחדש.")
+        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
+    else:
+        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
 
-    all_my_players_for_planner = starters + bench
-    for p in all_my_players_for_planner:
-        row_html = f"<tr><td class='planner-name'><b>{p['name']}</b> <span style='font-size:10px;color:#94a3b8;'>({p['team']})</span></td>"
-        row_html += f"<td>{p['pos']}</td>"
-        
-        upcoming_list = p.get("upcoming_list", [])
-        fdr_list_full = p.get("fdr_list_full", [])
-        
-        for i in range(4):
-            if i < len(upcoming_list):
-                match_str = upcoming_list[i]
-                fdr = fdr_list_full[i] if i < len(fdr_list_full) else 3
-                row_html += f"<td><div class='fdr-cell bg-fdr-{fdr}'>{match_str}</div></td>"
-            else:
-                row_html += "<td><div class='fdr-cell bg-blank'>BLANK</div></td>"
-                
-        row_html += "</tr>"
-        table_html += row_html
-        
-    table_html += "</table>"
-    st.markdown(table_html, unsafe_allow_html=True)
+    st.caption(f"תחזית נקודות צפויות בסגל הנוכחי (כולל סימולציה): **{planner_xp:.1f} xP**")
+    st.write("---")
+
+    # 3. מגרש עתידי
+    st.markdown("#### 📅 תצוגת מגרש עתידית (FDR)")
+    fwd_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 4)
+    mid_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 3)
+    def_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 2)
+    gk_p  = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 1)
+
+    st.markdown(
+        '<div class="pitch">'
+        f'<div class="pitch-row">{fwd_p}</div>'
+        f'<div class="pitch-row">{mid_p}</div>'
+        f'<div class="pitch-row">{def_p}</div>'
+        f'<div class="pitch-row">{gk_p}</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown("**🪑 ספסל (ישתתף בניקוד רק ב-Bench Boost):**")
+    bench_p = "".join(render_planner_card(p, is_bench=True, bb_active=bb_active) for p in bench)
+    st.markdown(
+        f'<div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">{bench_p}</div>',
+        unsafe_allow_html=True
+    )
