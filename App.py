@@ -82,98 +82,129 @@ def render_styled_table(headers, rows, is_rtl=False):
     compact = "".join(line.strip() for line in table_html.splitlines())
     st.markdown(compact, unsafe_allow_html=True)
 
-FPL_TEN_COMMANDMENTS = [
+FPL_SUCCESS_TIPS = [
     {
         "num": 1,
+        "icon": "⏳",
         "title_he": "שמירת חילופים (Roll Transfers)",
         "title_en": "Roll Your Free Transfers",
         "desc_he": "אל תבצע חילוף אוטומטי בכל מחזור רק כי יש לך חילוף פנוי. צבירת 2 עד 5 חילופים חינמיים מעניקה גמישות אסטרטגית אדירה למהפכות סגל קטנות ללא קנס נקודות.",
         "desc_en": "Never burn a free transfer just because you have one. Stacking 2 to 5 free transfers provides massive strategic leverage to overhaul multiple positions without taking point hits.",
+        "rule_he": "אין מהלך בוער? שמור את החילוף ותהנה מכוח תמרון כפול במחזור הבא.",
+        "rule_en": "No urgent move? Roll the transfer and gain double flexibility next week.",
         "tag_he": "סבלנות",
         "tag_en": "Patience",
     },
     {
         "num": 2,
+        "icon": "🛡️",
         "title_he": "הימנעות ממינוסים מיותרים (Avoid -4 Hits)",
         "title_en": "Avoid Unnecessary -4 Point Hits",
         "desc_he": "שחקן שנרכש בקנס 4- נקודות נדרש להבקיע או לבשל רק כדי לאפס את העלות שלו. קח מינוס רק במקרה חירום של חוסר 11 שחקנים כשירים או עבור קפטן מובהק לטווח ארוך.",
         "desc_en": "A player bought on a -4 hit must effectively return a goal or assist just to break even. Take hits strictly for injury crises or long-term high-ceiling captains.",
-        "tag_he": "חיסכון",
+        "rule_he": "מינוסים מצטברים שוחקים את הדירוג: הימנע מהם ככל האפשר.",
+        "rule_en": "Point hits erode long-term rank. Take them only for emergencies or long-term holds.",
+        "tag_he": "משמעת",
         "tag_en": "Discipline",
     },
     {
         "num": 3,
-        "title_he": "משמעת קפטן - כבוד לבעלות האפקטיבית (Captaincy)",
+        "icon": "👑",
+        "title_he": "משמעת קפטן ובעלות אפקטיבית (Captaincy)",
         "title_en": "Captaincy Discipline & Effective Ownership",
-        "desc_he": "אל תנסה להמציא את הגלגל עם קפטנים מוזרים בחיפוש אחר דיפרנציאל. 60%-70% מהניקוד מגיע מהקפטן; בחר בשחקן המוביל עם ה-xP והבעלות הגבוהים ביותר (כמו האלנד או סלאח).",
+        "desc_he": "אל תהמר על קפטן הרפתקני רק כדי 'להתחכם'. מעל 60% מהניקוד מגיע מהקפטן; בחר בשחקן המוביל עם ה-xP והבעלות הגבוהים ביותר (כמו האלנד או סלאח).",
         "desc_en": "Don't gamble on wild differential captains. Over 60% of your rank progress relies on the armband; trust high-xP, high-ownership talismans with favorable fixtures.",
+        "rule_he": "הקפטן מגן על הדירוג - את הדיפרנציאלים מייצרים בשחקני השדה.",
+        "rule_en": "The armband protects your rank - let your outfield picks provide the differential edge.",
         "tag_he": "קפטן",
         "tag_en": "Captaincy",
     },
     {
         "num": 4,
+        "icon": "🗓️",
         "title_he": "תכנון בטווחי 3-5 מחזורים (3-5 GW Blocks)",
         "title_en": "Plan in 3-5 Gameweek Horizons",
         "desc_he": "לעולם אל תקנה שחקן בשביל משחק אחד בלבד. בחן תמיד את לוח המשחקים (FDR) של 3 עד 5 המחזורים הבאים כדי להימנע מחילופי 'כיבוי שריפות' שבוע לאחר מכן.",
         "desc_en": "Never buy a player for a single fixture. Always evaluate the upcoming 3 to 5 gameweek run (FDR) to avoid burning future transfers fixing short-term punts.",
+        "rule_he": "חשוב תמיד שבועיים-שלושה קדימה לפני כל לחיצה על כפתור הרכש.",
+        "rule_en": "Always review the next 3-5 fixtures before confirming any market transfer.",
         "tag_he": "תכנון",
-        "tag_en": "Long-Term",
+        "tag_en": "Planning",
     },
     {
         "num": 5,
+        "icon": "⏱️",
         "title_he": "החלטות סמוך לדדליין (Wait for Press Conferences)",
         "title_en": "Wait for Press Conferences & News",
         "desc_he": "המתן למסיבות העיתונאים של ימי שישי ולעדכוני פציעות אחרונים לפני ביצוע חילוף. העברות מוקדמות באמצע השבוע מסתכנות בפציעות באימונים או בגביעים אירופיים.",
         "desc_en": "Delay transfers until Friday press conferences and verified deadline team news. Mid-week transfers risk training knocks and European rotation surprises.",
+        "rule_he": "סבלנות מונעת אסונות: המתן לעדכוני המאמנים הרשמיים לפני חילופים.",
+        "rule_en": "Patience prevents blunders: hold transfers until verified press conferences.",
         "tag_he": "תזמון",
         "tag_en": "Timing",
     },
     {
         "num": 6,
-        "title_he": "ספסל חסכוני ויעיל (Smart Bench Enablers)",
+        "icon": "🪑",
+        "title_he": "ספסל חסכוני ובטוח דקות (Smart Bench Enablers)",
         "title_en": "Smart Bench & Budget Enablers",
         "desc_he": "אל תקבור מיליונים יקרים בספסל. דאג לשחקן ספסל אחד או שניים בטוחים לפתוח במחיר רצפה (£4.0m-£4.5m) שייכנסו אוטומטית בעת הצורך, והשקע את הכסף ב-11 הפותחים.",
         "desc_en": "Do not trap valuable team value on your bench. Keep 1-2 cheap, guaranteed starters (£4.0m-£4.5m) as auto-sub safety nets while maximizing funds on your Starting XI.",
+        "rule_he": "ספסל זול עם דקות קבועות מאפשר הרכב פותח עתיר כוכבים.",
+        "rule_en": "A cheap bench with secure minutes funds premium heavy hitters in your starting XI.",
         "tag_he": "תקציב",
-        "tag_en": "Value",
+        "tag_en": "Budget",
     },
     {
         "num": 7,
-        "title_he": "ללא פאניקה - בלי Knee-Jerking (Trust Underlying Data)",
+        "icon": "📊",
+        "title_he": "ללא פאניקה - אמון בנתונים (Trust Underlying Data)",
         "title_en": "Avoid Knee-Jerking & Trust Analytics",
         "desc_he": "אל תמכור שחקן איכותי רק כי סיים עם 2 נקודות במחזור בודד, ואל תרוץ לקנות שחקן שהבקיע שער מקרי. סמוך על מדדי ה-xG/xA והנתונים הסטטיסטיים לאורך זמן.",
         "desc_en": "Do not rage-sell premium assets after a single blank, nor chase random defensive flukes. Trust underlying expected metrics (xG, xA, xP) over past variance.",
-        "tag_he": "חוסן מנטלי",
+        "rule_he": "מזל חולף, תוחלת מנצחת: שחקן שמייצר מצבים טובים יחזיר נקודות לאורך זמן.",
+        "rule_en": "Variance is temporary, underlying process is permanent: trust high-xG/xA stars.",
+        "tag_he": "אנליטיקה",
         "tag_en": "Analytics",
     },
     {
         "num": 8,
+        "icon": "🏦",
         "title_he": "שמירה על רזרבה בבנק (£0.5m-£1.0m ITB)",
         "title_en": "Keep Liquidity In The Bank (£0.5m-£1.0m ITB)",
         "desc_he": "השארת סכום צנוע של 0.5-1.0 מיליון ליש\"ט בבנק מעניקה גמישות אדירה לעבור מיד לשחקן פורץ או כוכב בכושר בלי צורך לפרק חצי סגל או לקחת מינוסים.",
         "desc_en": "Maintaining £0.5m-£1.0m in the bank allows you to instantly jump onto emerging breakout stars without requiring multi-transfer squad surgery.",
+        "rule_he": "כסף בבנק הוא חופש תמרון שמגן עליך משינויי מחירים מהירים.",
+        "rule_en": "Cash in the bank equals agility: it shields you from rapid market price rises.",
         "tag_he": "גמישות",
-        "tag_en": "Liquidity",
+        "tag_en": "Flexibility",
     },
     {
         "num": 9,
+        "icon": "⚡",
         "title_he": "תזמון צ'יפים במחזורים מיוחדים (DGW & BGW)",
         "title_en": "Strategic Chip Timing (DGW & BGW)",
         "desc_he": "שמור את הצ'יפים החזקים (Wildcard, Free Hit, Bench Boost, Triple Captain) למחזורים הכפולים (DGW) והריקים (BGW) בחצי השני של העונה לקצירת עשרות נקודות יתרון.",
         "desc_en": "Preserve high-impact chips (Wildcard, Free Hit, Bench Boost, Triple Captain) for late-season Double (DGW) and Blank (BGW) weeks to exploit massive point swings.",
+        "rule_he": "צ'יפ במחזור כפול שווה פי שניים או שלושה לעומת מחזור רגיל.",
+        "rule_en": "A chip played in a Double Gameweek yields massively higher returns.",
         "tag_he": "צ'יפים",
         "tag_en": "Chips",
     },
     {
         "num": 10,
-        "title_he": "דיפרנציאלים לטיפוס בליגה (Target Differentials)",
+        "icon": "🎯",
+        "title_he": "דיפרנציאלים מחושבים לטיפוס בליגה (Target Differentials)",
         "title_en": "Target High-Upside Differentials",
         "desc_he": "שחקנים בבעלות של מעל 60% מגנים על הדירוג שלך; אבל כדי לסגור פערים בליגה הפרטית שלך כשאתה רודף מאחור, שחקני מפתח איכותיים בבעלות מתחת ל-10% הם המנוע לניצחון.",
         "desc_en": "High-ownership players protect rank; but to bridge deficits in private mini-leagues, high-upside low-ownership differentials (<10%) are the true accelerators.",
-        "tag_he": "ריגול H2H",
-        "tag_en": "Rank Climb",
+        "rule_he": "שמור על שלד בטוח להגנה על הדירוג, והוסף 1-2 דיפרנציאלים לעקיפה.",
+        "rule_en": "Anchor with essential template players, and hunt differentials to bridge gaps.",
+        "tag_he": "מיני-ליגות",
+        "tag_en": "Mini-Leagues",
     },
 ]
+FPL_TEN_COMMANDMENTS = FPL_SUCCESS_TIPS  # תאימות לאחור
 
 def get_jersey_svg(team_code, is_gk=False):
     if is_gk:
@@ -230,6 +261,7 @@ TRANSLATIONS = {
         "tab_scenarios": "תרחישי תקציב",
         "tab_planner": "מתכנן מחזורים",
         "tab_leagues": "מיני-ליגות וראש בראש",
+        "tab_tips": "💡 טיפים להצלחה",
         "pos_1": "שוער",
         "pos_2": "הגנה",
         "pos_3": "קישור",
@@ -327,8 +359,16 @@ TRANSLATIONS = {
         "t2_reset_btn": "אפס סגל למקור",
         "t2_saved_transfers": "חילופים שנשמרו:",
         "t3_title": "ניתוח עומק, חסרונות הרכב ודירוג כשירות",
-        "commandments_title": "עשרת הדיברות של מנג'ר העילית",
-        "commandments_subtitle": "עשרה עקרונות זהב של טופ 10k עולמי להצלחה ארוכת טווח",
+        "tips_main_title": "10 טיפים להצלחה ב-FPL",
+        "tips_main_subtitle": "עקרונות זהב אסטרטגיים של שחקני טופ 10k עולמי לניהול סגל מנצח לאורך העונה",
+        "tips_checklist_title": "צ'ק-ליסט 60 שניות לפני דדליין המחזור:",
+        "tips_chk_1": "אימות קפטן (C) וסגן (VC) מאובטח למקרה של אי-פתיחה מפתיעה",
+        "tips_chk_2": "בדיקת סדר המחליפים בספסל (1-3) לפי סבירות דקות ופוטנציאל",
+        "tips_chk_3": "וידוא מסיבות עיתונאים ועדכוני פציעות של הרגע האחרון",
+        "tips_chk_4": "שמירת חילוף (Roll FT) אם אין צורך דחוף ומובהק בחילוף",
+        "tips_golden_rule": "כלל מפתח:",
+        "commandments_title": "10 טיפים להצלחה ב-FPL",
+        "commandments_subtitle": "עקרונות זהב אסטרטגיים של שחקני טופ 10k עולמי להצלחה ארוכת טווח",
         "t3_squad_score": "ציון סגל מכויל",
         "t3_forecast": "תחזית הרכב:",
         "t3_flaws_title": "מוקדי סיכון שהורידו ניקוד:",
@@ -449,6 +489,7 @@ TRANSLATIONS = {
         "tab_scenarios": "Transfer Scenarios",
         "tab_planner": "Gameweek Planner",
         "tab_leagues": "Leagues & Head-to-Head",
+        "tab_tips": "💡 Success Tips",
         "pos_1": "Goalkeeper",
         "pos_2": "Defender",
         "pos_3": "Midfielder",
@@ -546,8 +587,16 @@ TRANSLATIONS = {
         "t2_reset_btn": "Reset Squad to Original",
         "t2_saved_transfers": "Saved transfers:",
         "t3_title": "Squad Strength & Flaw Analysis",
-        "commandments_title": "The 10 Commandments of FPL",
-        "commandments_subtitle": "Top 10k Golden Strategic Rules for Long-Term Success",
+        "tips_main_title": "10 Pro Tips for FPL Success",
+        "tips_main_subtitle": "Top 10k Strategic Golden Rules for Long-Term FPL Mastery",
+        "tips_checklist_title": "60-Second Pre-Deadline Checklist:",
+        "tips_chk_1": "Confirm Captain (C) and Vice-Captain (VC) safeguards",
+        "tips_chk_2": "Check bench order (1-3) prioritized by return upside and minutes",
+        "tips_chk_3": "Verify late-breaking press conference injury updates",
+        "tips_chk_4": "Roll your free transfer if no critical surgery is required",
+        "tips_golden_rule": "Golden Rule:",
+        "commandments_title": "10 Pro Tips for FPL Success",
+        "commandments_subtitle": "Top 10k Strategic Golden Rules for Long-Term FPL Mastery",
         "t3_squad_score": "Squad Rating",
         "t3_forecast": "Lineup Forecast:",
         "t3_flaws_title": "Risk factors reducing squad rating:",
@@ -664,13 +713,13 @@ is_light = (st.session_state.get("app_theme", "light") == "light")
 
 if is_light:
     root_vars = """
-    --bg-main: #f8fafc;
-    --bg-body-grad: none;
+    --bg-main: #f1f5f9;
+    --bg-body-grad: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     --bg-card: #ffffff;
-    --bg-card-hover: #f1f5f9;
-    --border-color: #e2e8f0;
-    --text-primary: #0f172a;
-    --text-secondary: #334155;
+    --bg-card-hover: #f8fafc;
+    --border-color: #cbd5e1;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
     --text-muted: #64748b;
     --accent-mint: #059669;
     --accent-cyan: #0284c7;
@@ -679,74 +728,74 @@ if is_light:
     --accent-gold: #d97706;
     --input-bg: #ffffff;
     --input-border: #cbd5e1;
-    --input-text: #0f172a;
+    --input-text: #1e293b;
     --input-focus-border: #059669;
     --input-focus-shadow: rgba(5, 150, 105, 0.2);
     --tab-bg: #ffffff;
-    --tab-border: #e2e8f0;
+    --tab-border: #cbd5e1;
     --tab-text: #64748b;
     --tab-hover-bg: #f1f5f9;
-    --tab-hover-text: #0f172a;
-    --tab-active-bg: #15803d;
+    --tab-hover-text: #1e293b;
+    --tab-active-bg: #059669;
     --tab-active-text: #ffffff;
-    --tab-active-border: #15803d;
-    --tab-active-shadow: rgba(21, 128, 61, 0.2);
+    --tab-active-border: #059669;
+    --tab-active-shadow: rgba(5, 150, 105, 0.25);
     --gate-bg: #ffffff;
     --gate-border: #10b981;
-    --gate-shadow: 0 16px 36px rgba(0,0,0,0.06), 0 0 24px rgba(16, 185, 129, 0.1);
-    --pitch-border: #16a34a;
-    --pitch-bg: radial-gradient(ellipse at 50% 50%, #16a34a 0%, #15803d 100%), repeating-linear-gradient(0deg, #15803d 0px, #15803d 48px, #166534 48px, #166534 96px);
-    --pitch-shadow: 0 12px 36px rgba(22, 101, 52, 0.18);
-    --pitch-line: rgba(255, 255, 255, 0.55);
+    --gate-shadow: 0 12px 28px rgba(0,0,0,0.06), 0 0 16px rgba(16, 185, 129, 0.08);
+    --pitch-border: #15803d;
+    --pitch-bg: radial-gradient(ellipse at 50% 50%, #15803d 0%, #166534 100%), repeating-linear-gradient(0deg, #166534 0px, #166534 48px, #14532d 48px, #14532d 96px);
+    --pitch-shadow: 0 10px 28px rgba(22, 101, 52, 0.16);
+    --pitch-line: rgba(255, 255, 255, 0.45);
     --bench-bg: #ffffff;
     --bench-border: #10b981;
-    --bench-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    --bench-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
     --bench-dugout-badge-bg: #f0fdf4;
     --bench-dugout-badge-border: #10b981;
     --p-card-bg: #ffffff;
     --p-card-border: #cbd5e1;
-    --p-card-border-bottom: #e2e8f0;
-    --p-card-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    --p-name-plate-bg: #f1f5f9;
+    --p-card-border-bottom: #cbd5e1;
+    --p-card-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    --p-name-plate-bg: #f8fafc;
     --p-name-plate-border: #cbd5e1;
-    --p-name-plate-text: #0f172a;
-    --p-card-btn-bg: #f8fafc;
+    --p-name-plate-text: #1e293b;
+    --p-card-btn-bg: #f1f5f9;
     --p-card-btn-border: #cbd5e1;
-    --p-card-btn-text: #0f172a;
-    --p-card-btn-hover-bg: #f1f5f9;
+    --p-card-btn-text: #1e293b;
+    --p-card-btn-hover-bg: #e2e8f0;
     --p-card-btn-hover-text: #059669;
-    --card-bench-bg: #f8fafc;
+    --card-bench-bg: #ffffff;
     --card-bench-border: #10b981;
-    --card-bench-btn-bg: #ffffff;
+    --card-bench-btn-bg: #f8fafc;
     --card-bench-btn-border: #10b981;
     --card-bench-btn-text: #059669;
     --btn-general-bg: #ffffff;
-    --btn-general-border: #10b981;
-    --btn-general-text: #0f172a;
+    --btn-general-border: #cbd5e1;
+    --btn-general-text: #1e293b;
     --btn-general-hover-bg: #f0fdf4;
     --btn-general-hover-text: #059669;
-    --fxt-row-bg: #f8fafc;
+    --fxt-row-bg: #ffffff;
     --fxt-row-border: #e2e8f0;
     --fxt-row-hover: #f1f5f9;
     --fxt-card-bg: #ffffff;
-    --fxt-card-border: #e2e8f0;
+    --fxt-card-border: #cbd5e1;
     --badge-ko-bg: #f1f5f9;
-    --badge-mint-bg: rgba(16, 185, 129, 0.12);
+    --badge-mint-bg: rgba(16, 185, 129, 0.1);
     --badge-mint-border: #10b981;
     --metric-bg: #ffffff;
-    --metric-border: #e2e8f0;
+    --metric-border: #cbd5e1;
     --kpi-score-bg: #ffffff;
     --kpi-score-border: #10b981;
-    --kpi-score-shadow: rgba(16, 185, 129, 0.12);
+    --kpi-score-shadow: rgba(16, 185, 129, 0.1);
     --kpi-xp-bg: #ffffff;
     --kpi-xp-border: #0284c7;
-    --kpi-xp-shadow: rgba(2, 132, 199, 0.12);
+    --kpi-xp-shadow: rgba(2, 132, 199, 0.1);
     --kpi-bank-bg: #ffffff;
-    --kpi-bank-border: #eab308;
-    --kpi-bank-shadow: rgba(234, 179, 8, 0.12);
+    --kpi-bank-border: #d97706;
+    --kpi-bank-shadow: rgba(217, 119, 6, 0.1);
     --kpi-rank-bg: #ffffff;
-    --kpi-rank-border: #f43f5e;
-    --kpi-rank-shadow: rgba(244, 63, 94, 0.12);
+    --kpi-rank-border: #e11d48;
+    --kpi-rank-shadow: rgba(225, 29, 72, 0.1);
     """
 else:
     root_vars = """
@@ -2822,9 +2871,9 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     return "".join(line.strip() for line in card_html.splitlines())
 
 # =====================================================================
-# 9. שבעת הטאבים המרכזיים
+# 9. שמונת הטאבים המרכזיים
 # =====================================================================
-t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner, t_leagues = st.tabs([
+t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner, t_leagues, t_tips = st.tabs([
     t("tab_squad"),
     t("tab_transfers"),
     t("tab_analysis"),
@@ -2832,6 +2881,7 @@ t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner, t_leagues = s
     t("tab_scenarios"),
     t("tab_planner"),
     t("tab_leagues"),
+    t("tab_tips"),
 ])
 
 # ---------------------------------------------------------------------
@@ -3267,21 +3317,22 @@ with t_analysis:
             st.success(t("t3_no_flaws"))
 
     st.write("")
-    with st.expander(f"💡 {t('commandments_title')} — {t('commandments_subtitle')}", expanded=False):
+    with st.expander(f"💡 {t('tips_main_title')} — {t('tips_main_subtitle')}", expanded=False):
         c_cmd1, c_cmd2 = st.columns(2)
-        half = len(FPL_TEN_COMMANDMENTS) // 2
+        half = len(FPL_SUCCESS_TIPS) // 2
         with c_cmd1:
-            for item in FPL_TEN_COMMANDMENTS[:half]:
+            for item in FPL_SUCCESS_TIPS[:half]:
                 c_title = item["title_en"] if is_en else item["title_he"]
                 c_desc = item["desc_en"] if is_en else item["desc_he"]
                 c_tag = item["tag_en"] if is_en else item["tag_he"]
+                c_icon = item.get("icon", "💡")
                 st.markdown(
                     f"""
                     <div class="accessible-card" style="margin-bottom:10px; padding:12px;">
                         <div class="split-box">
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:12px; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{item['num']}</span>
-                                <b style="color:var(--text-primary); font-size:13.5px;">💡 {c_title}</b>
+                                <b style="color:var(--text-primary); font-size:13.5px;">{c_icon} {c_title}</b>
                             </div>
                             <span class="meta-chip" style="color:var(--accent-cyan);">{c_tag}</span>
                         </div>
@@ -3293,17 +3344,18 @@ with t_analysis:
                     unsafe_allow_html=True,
                 )
         with c_cmd2:
-            for item in FPL_TEN_COMMANDMENTS[half:]:
+            for item in FPL_SUCCESS_TIPS[half:]:
                 c_title = item["title_en"] if is_en else item["title_he"]
                 c_desc = item["desc_en"] if is_en else item["desc_he"]
                 c_tag = item["tag_en"] if is_en else item["tag_he"]
+                c_icon = item.get("icon", "💡")
                 st.markdown(
                     f"""
                     <div class="accessible-card" style="margin-bottom:10px; padding:12px;">
                         <div class="split-box">
                             <div style="display:flex; align-items:center; gap:8px;">
                                 <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:12px; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{item['num']}</span>
-                                <b style="color:var(--text-primary); font-size:13.5px;">💡 {c_title}</b>
+                                <b style="color:var(--text-primary); font-size:13.5px;">{c_icon} {c_title}</b>
                             </div>
                             <span class="meta-chip" style="color:var(--accent-cyan);">{c_tag}</span>
                         </div>
@@ -4594,3 +4646,136 @@ with t_leagues:
             st.error(t("t7_err_fetch"))
     else:
         st.info(t("t7_prompt_enter"))
+
+# ---------------------------------------------------------------------
+# טאב 8: טיפים להצלחה ב-FPL (10 עקרונות זהב וצ'ק-ליסט דדליין)
+# ---------------------------------------------------------------------
+with t_tips:
+    is_en_tips = (st.session_state.app_lang == "en")
+
+    # כרטיס ראשי (Hero Card)
+    tips_title_txt = t("tips_main_title")
+    tips_sub_txt = t("tips_main_subtitle")
+    st.markdown(
+        f"""
+        <div style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:14px; padding:20px 22px; margin-bottom:18px; box-shadow:0 4px 16px rgba(0,0,0,0.04);">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                <div>
+                    <h3 style="margin:0 0 6px 0; color:var(--text-primary); font-size:22px; font-weight:800; display:flex; align-items:center; gap:10px;">
+                        <span>💡</span> <span>{tips_title_txt}</span>
+                    </h3>
+                    <div style="color:var(--text-secondary); font-size:13.5px; line-height:1.5;">
+                        {tips_sub_txt}
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="meta-chip" style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:800; padding:6px 12px; font-size:12px;">🏆 Top 10k Mindset</span>
+                    <span class="meta-chip" style="background:rgba(2, 132, 199, 0.1); color:var(--accent-cyan); border:1px solid rgba(2, 132, 199, 0.25); font-weight:800; padding:6px 12px; font-size:12px;">📊 Data-Driven Strategy</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # צ'ק-ליסט 60 שניות לפני הדדליין
+    chk_title = t("tips_checklist_title")
+    chk_1 = t("tips_chk_1")
+    chk_2 = t("tips_chk_2")
+    chk_3 = t("tips_chk_3")
+    chk_4 = t("tips_chk_4")
+    st.markdown(
+        f"""
+        <div class="accessible-card" style="border-right: 4px solid var(--accent-mint); border-left: 4px solid var(--accent-mint); margin-bottom: 20px;">
+            <div class="split-box" style="margin-bottom: 12px;">
+                <b style="color:var(--text-primary); font-size:14.5px; display:flex; align-items:center; gap:8px;">
+                    <span>⏱️</span> {chk_title}
+                </b>
+                <span class="meta-chip" style="color:var(--accent-mint); background:var(--badge-mint-bg); border:1px solid var(--badge-mint-border);">Pre-Deadline</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-primary); background:var(--fxt-row-bg); padding:10px 12px; border-radius:8px; border:1px solid var(--border-color);">
+                    <span style="color:#10b981; font-weight:900;">✓</span>
+                    <span>{chk_1}</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-primary); background:var(--fxt-row-bg); padding:10px 12px; border-radius:8px; border:1px solid var(--border-color);">
+                    <span style="color:#10b981; font-weight:900;">✓</span>
+                    <span>{chk_2}</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-primary); background:var(--fxt-row-bg); padding:10px 12px; border-radius:8px; border:1px solid var(--border-color);">
+                    <span style="color:#10b981; font-weight:900;">✓</span>
+                    <span>{chk_3}</span>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:8px; font-size:13px; color:var(--text-primary); background:var(--fxt-row-bg); padding:10px 12px; border-radius:8px; border:1px solid var(--border-color);">
+                    <span style="color:#10b981; font-weight:900;">✓</span>
+                    <span>{chk_4}</span>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 10 כרטיסי טיפים מסודרים בשתי עמודות
+    c_tip_col1, c_tip_col2 = st.columns(2)
+    half_tips = len(FPL_SUCCESS_TIPS) // 2
+    rule_label = t("tips_golden_rule")
+
+    with c_tip_col1:
+        for tip in FPL_SUCCESS_TIPS[:half_tips]:
+            tip_title = tip["title_en"] if is_en_tips else tip["title_he"]
+            tip_desc = tip["desc_en"] if is_en_tips else tip["desc_he"]
+            tip_tag = tip["tag_en"] if is_en_tips else tip["tag_he"]
+            tip_rule = tip.get("rule_en", "") if is_en_tips else tip.get("rule_he", "")
+            tip_icon = tip.get("icon", "💡")
+            num_val = tip["num"]
+            st.markdown(
+                f"""
+                <div class="accessible-card" style="margin-bottom:14px; padding:16px;">
+                    <div class="split-box">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:13px; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{num_val}</span>
+                            <b style="color:var(--text-primary); font-size:14.5px;">{tip_icon} {tip_title}</b>
+                        </div>
+                        <span class="meta-chip" style="color:var(--accent-cyan);">{tip_tag}</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-secondary); margin-top:8px; line-height:1.65;">
+                        {tip_desc}
+                    </div>
+                    <div style="margin-top:10px; background:var(--fxt-row-bg); border:1px solid var(--border-color); border-radius:8px; padding:8px 10px; font-size:12px; color:var(--text-primary);">
+                        <b style="color:var(--accent-mint);">{rule_label}</b> {tip_rule}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+    with c_tip_col2:
+        for tip in FPL_SUCCESS_TIPS[half_tips:]:
+            tip_title = tip["title_en"] if is_en_tips else tip["title_he"]
+            tip_desc = tip["desc_en"] if is_en_tips else tip["desc_he"]
+            tip_tag = tip["tag_en"] if is_en_tips else tip["tag_he"]
+            tip_rule = tip.get("rule_en", "") if is_en_tips else tip.get("rule_he", "")
+            tip_icon = tip.get("icon", "💡")
+            num_val = tip["num"]
+            st.markdown(
+                f"""
+                <div class="accessible-card" style="margin-bottom:14px; padding:16px;">
+                    <div class="split-box">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:900; font-size:13px; width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">{num_val}</span>
+                            <b style="color:var(--text-primary); font-size:14.5px;">{tip_icon} {tip_title}</b>
+                        </div>
+                        <span class="meta-chip" style="color:var(--accent-cyan);">{tip_tag}</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-secondary); margin-top:8px; line-height:1.65;">
+                        {tip_desc}
+                    </div>
+                    <div style="margin-top:10px; background:var(--fxt-row-bg); border:1px solid var(--border-color); border-radius:8px; padding:8px 10px; font-size:12px; color:var(--text-primary);">
+                        <b style="color:var(--accent-mint);">{rule_label}</b> {tip_rule}
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
