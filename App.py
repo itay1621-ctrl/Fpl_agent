@@ -86,17 +86,17 @@ if "app_theme" not in st.session_state:
 TRANSLATIONS = {
     "he": {
         "page_title": "FPL Elite Scout | מנוע החלטות ומרגל סגלים",
-        "app_title": "⚽ FPL Elite Scout",
-        "app_subtitle": "סוכן בינה, אסטרטגיית הרכב ומרגל מיני-ליגות המכוון ל-Top 50K",
+        "app_title": "FPL Elite Scout",
+        "app_subtitle": "מנוע קבלת החלטות, אופטימיזציית הרכב ומודיעין מיני-ליגות",
         "gate_desc": "הזן את מספר הקבוצה שלך כדי לטעון ניתוח כשירות, ציון סגל מכויל, חסרונות הרכב, מתכנן מחזורים ומרגל ליגות.",
         "team_id_label": "מספר קבוצה (Team ID):",
         "team_id_placeholder": "למשל: 139103",
         "team_id_help": "המספר שמופיע בכתובת הדפדפן בלשונית Points",
-        "login_btn": "🚀 כניסה לסגל שלי",
-        "demo_btn": "👀 סגל דמו לדוגמה",
-        "where_find_id": "❓ איפה מוצאים את ה-Team ID?",
+        "login_btn": "כניסה לסגל",
+        "demo_btn": "סגל לדוגמה",
+        "where_find_id": "איפה מוצאים את ה-Team ID?",
         "digits_only": "נא להזין ספרות בלבד.",
-        "change_team": "🔄 החלף קבוצה",
+        "change_team": "החלף קבוצה",
         "engine_for_gw": "מנוע החלטות למחזור",
         "team_label": "קבוצה:",
         "squad_score": "ציון סגל מכויל",
@@ -105,13 +105,13 @@ TRANSLATIONS = {
         "overall_rank": "דירוג כללי",
         "formation": "מערך",
         "total_xp": "תוחלת נקודות להרכב",
-        "tab_squad": "🟢 הסגל על המגרש",
-        "tab_transfers": "🔄 מעבדת חילופים",
-        "tab_analysis": "📊 ניתוח וחסרונות",
-        "tab_scout": "🌟 רדאר רכש עילית",
-        "tab_scenarios": "🎯 3 תרחישי תקציב",
-        "tab_planner": "🗓️ מתכנן מחזורים",
-        "tab_leagues": "🏆 מרגל מיני-ליגות",
+        "tab_squad": "הסגל על המגרש",
+        "tab_transfers": "מעבדת חילופים",
+        "tab_analysis": "ניתוח סגל וחסרונות",
+        "tab_scout": "רדאר רכש עילית",
+        "tab_scenarios": "תרחישי תקציב",
+        "tab_planner": "מתכנן מחזורים",
+        "tab_leagues": "מיני-ליגות וראש בראש",
         "pos_1": "שוער",
         "pos_2": "הגנה",
         "pos_3": "קישור",
@@ -121,64 +121,64 @@ TRANSLATIONS = {
         "pos_3_pl": "קשרים",
         "pos_4_pl": "חלוצים",
         "btn_select": "בחר",
-        "btn_selected": "✓ נבחר",
+        "btn_selected": "נבחר",
         "btn_captain": "קפטן (C)",
         "btn_vc": "סגן (VC)",
-        "btn_sub": "חילוף ספסל ⇄",
+        "btn_sub": "חילוף",
         "btn_sub_single": "חילוף",
-        "cap_select_label": "בחר קפטן (C):",
-        "vc_select_label": "בחר סגן קפטן (VC):",
-        "swap_active_hint_prefix": "לחץ בכפתור אחד על שחקן",
-        "swap_active_hint_suffix": "להשלמת החילוף מיד",
+        "cap_select_label": "קפטן (C):",
+        "vc_select_label": "סגן קפטן (VC):",
+        "swap_active_hint_prefix": "לחץ על שחקן יעד",
+        "swap_active_hint_suffix": "להשלמת החילוף",
         "transfer_market_expander": "ביצוע העברה מהשוק",
         "planner_tr_expander": "תכנון העברה מהשוק למחזור זה",
-        "btn_transfer": "העברה מהשוק 🔄",
+        "btn_transfer": "העברה מהשוק",
         "btn_cancel": "ביטול",
-        "btn_swap_here": "⇄ החלף לכאן",
+        "btn_swap_here": "החלף לכאן",
         "swap_banner_title": "מצב חילוף פעיל:",
         "swap_banner_desc": "לחץ על שחקן יעד להשלמת החילוף מיד עם",
-        "cancel_swap": "✕ ביטול חילוף",
-        "action_bar_title": "⚙️ פעולות עבור שחקן:",
+        "cancel_swap": "ביטול חילוף",
+        "action_bar_title": "פעולות עבור שחקן:",
         "action_bar_hint": "בחר פעולה:",
-        "transfer_drawer_title": "🛒 חלון העברות שוק",
+        "transfer_drawer_title": "חלון העברות שוק",
         "selling_player": "מכירת שחקן:",
         "max_budget": "תקציב מקסימלי לרכש:",
-        "close_drawer": "✕ סגור חלון",
+        "close_drawer": "סגור חלון",
         "search_placeholder": "חיפוש שחקן (שם או קבוצה באנגלית)...",
-        "rec_header": "⭐ שחקנים מומלצים לרכש:",
-        "buy_player_btn": "➕ קנה שחקן זה",
+        "rec_header": "שחקנים מומלצים לרכש:",
+        "buy_player_btn": "קנה שחקן",
         "all_cands_label": "או בחר שחקן לרכש מהרשימה המלאה:",
-        "confirm_transfer_btn": "➕ אשר העברה",
+        "confirm_transfer_btn": "אשר העברה",
         "bench_title": "שחקני ספסל",
         "bench_sub_order": "סדר עדיפות 1-4",
-        "rebuild_btn": "🃏 בנה סגל מאפס (WC / FH)",
-        "close_rebuild_btn": "✕ סגור מצב בנייה מחדש",
-        "rebuild_title": "🛠️ לוח בניית סגל מאפס",
+        "rebuild_btn": "בניית סגל מאפס (WC / FH)",
+        "close_rebuild_btn": "סגור מצב בנייה מחדש",
+        "rebuild_title": "לוח בניית סגל מאפס",
         "rebuild_subtitle": "בחר 15 שחקנים (2 שוערים, 5 מגנים, 5 קשרים, 3 חלוצים) במסגרת התקציב",
         "total_squad_val": "שווי סגל כולל",
         "rem_budget": "תקציב פנוי נותר",
         "players_picked": "שחקנים שנבחרו",
         "avg_per_player": "ממוצע לשחקן",
-        "clear_15_btn": "🗑️ רוקן את כל 15 השחקנים",
-        "load_existing_btn": "📋 טען שחקנים מסגל קיים",
-        "save_rebuild_btn": "💾 אשר ושמור סגל חדש!",
+        "clear_15_btn": "נקה את כל 15 השחקנים",
+        "load_existing_btn": "טען שחקנים מסגל קיים",
+        "save_rebuild_btn": "שמור סגל חדש",
         "empty_slot": "משבצת פנויה",
-        "add_slot": "➕ הוסף",
-        "remove_btn": "✕ הסר",
+        "add_slot": "הוסף",
+        "remove_btn": "הסר",
         "ft_available": "חילופים זמינים",
         "ft_planned": "חילופים שתוכננו",
-        "hit_penalty": "קנס מינוס (Hits)",
+        "hit_penalty": "קנס נקודות (Hits)",
         "bank_bal": "יתרה בבנק",
         "xp_pred": "תחזית נקודות (xP)",
         "chip_for_gw": "צ'יפ למחזור",
         "no_chip": "ללא צ'יפ",
-        "clear_all_transfers": "🗑️ נקה הכל",
+        "clear_all_transfers": "נקה הכל",
         "planned_transfers_gw": "העברות שתוכננו למחזור",
-        "cancel_single_transfer": "✕ בטל",
+        "cancel_single_transfer": "בטל",
         "pts": "נק׳",
         "against": "מול:",
         "starters_only_cap": "קפטן להרכב בלבד",
-        "back_to_id": "🔄 חזרה להזנת ID",
+        "back_to_id": "חזרה להזנת ID",
         "deadline_time_left": "זמן נותר עד נעילת חילופים",
         "h2h_comp": "השוואת שחקנים ראש-בראש:",
         "expected_add": "תוספת צפויה:",
@@ -187,7 +187,7 @@ TRANSLATIONS = {
         "season_pts_lbl": "נקודות העונה:",
         "next_match_lbl": "משחק קרוב:",
         "left_in_bank": "נשאר בבנק:",
-        "starting_11_title": "📋 11 שחקני ההרכב הפותח",
+        "starting_11_title": "11 שחקני ההרכב הפותח",
         "th_player": "שחקן",
         "th_pos": "עמדה",
         "th_team": "קבוצה",
@@ -196,38 +196,38 @@ TRANSLATIONS = {
         "th_start_prob": "סבירות לפתוח",
         "th_season_pts": "נקודות עונה",
         "th_xp": "xP",
-        "t2_title": "🔄 מעבדת חילופים מותאמת עמדה ותקציב",
+        "t2_title": "מעבדת חילופים מותאמת עמדה ותקציב",
         "t2_out_header": "1. שחקן למכירה (OUT)",
         "t2_out_label": "בחר שחקן להוצאה:",
         "t2_in_header": "2. שחקן לרכש בעמדת",
         "t2_quick_search": "חיפוש מהיר:",
         "t2_search_placeholder": "הקלד שם או קבוצה באנגלית...",
-        "t2_rec_replacements": "⭐ חלופות מומלצות לפי בינה מלאכותית:",
+        "t2_rec_replacements": "חלופות מומלצות לפי מודל נתונים:",
         "t2_all_pool_label": "או בחר מתוך כל שחקני העמדה העומדים בתקציב:",
         "t2_no_players": "לא נמצאו שחקנים מתאימים במסגרת התקציב בעמדה זו.",
-        "t2_confirm_btn": "אשר חילוף בסגל 🔁",
-        "t2_reset_btn": "אפס סגל למקור ↩️",
+        "t2_confirm_btn": "אשר חילוף בסגל",
+        "t2_reset_btn": "אפס סגל למקור",
         "t2_saved_transfers": "חילופים שנשמרו:",
-        "t3_title": "📊 ניתוח עומק, חסרונות הרכב ודירוג כשירות",
+        "t3_title": "ניתוח עומק, חסרונות הרכב ודירוג כשירות",
         "t3_squad_score": "ציון סגל מכויל",
         "t3_forecast": "תחזית הרכב:",
         "t3_flaws_title": "מוקדי סיכון שהורידו ניקוד:",
         "t3_no_flaws": "לא אותרו חסרונות בולטים בהרכב!",
-        "t4_title": "🌟 רדאר רכש מוביל למחזור",
+        "t4_title": "רדאר רכש מוביל למחזור",
         "t4_tab_fwd": "חלוצים",
         "t4_tab_mid": "קשרים",
         "t4_tab_def": "מגנים",
         "t4_tab_gk": "שוערים",
-        "t4_tab_cap": "קפטן מגן מול חרב",
-        "t4_buy_low": "🔥 קנייה בשפל",
-        "t4_overperforming": "⚠️ מעל המצופה",
-        "t4_cap_shield": "🛡️ קפטן מגן (Shield)",
-        "t4_cap_sword": "⚔️ קפטן דיפרנשיאל (Sword)",
+        "t4_tab_cap": "קפטן סולידי מול דיפרנשיאל",
+        "t4_buy_low": "קנייה בשפל",
+        "t4_overperforming": "סכנת דעיכה",
+        "t4_cap_shield": "קפטן סולידי (Shield)",
+        "t4_cap_sword": "קפטן דיפרנשיאל (Sword)",
         "t4_ownership": "בעלות:",
         "t4_only": "בלבד",
         "t4_start_prob": "סבירות פתיחה:",
         "t4_tot_pts": "סך נקודות:",
-        "t5_title": "🎯 3 תרחישי חילוף אופטימליים לתקציב הסגל",
+        "t5_title": "3 תרחישי חילוף אופטימליים לתקציב הסגל",
         "t5_op1_title": "אופציה 1: ייצוב הגנתי / החלפת מוקד פציעה",
         "t5_op1_tag": "הגנה",
         "t5_op2_title": "אופציה 2: שדרוג מנוע הקישור וייצור מצבים",
@@ -235,20 +235,20 @@ TRANSLATIONS = {
         "t5_op3_title": "אופציה 3: רענון חוד ההתקפה",
         "t5_op3_tag": "התקפה",
         "t5_diff_xp": "תוספת:",
-        "t6_title": "🗓️ מתכנן מחזורים וסימולטור צ'יפים (Gameweek Planner)",
-        "t6_caption": "בצע חילופי ספסל והרכב עם ⇄, מכור ורכוש שחקן עם 🔄, ובחר קפטן פר מחזור. האלגוריתם מחשב צבירת חילופים חינמיים (עד 5), השפעת צ'יפים וקנסות נקודות.",
+        "t6_title": "מתכנן מחזורים וסימולטור צ'יפים",
+        "t6_caption": "בצע חילופי ספסל והרכב, העברות שחקנים ובחירת קפטן פר מחזור. המערכת מחשבת צבירת חילופים חינמיים (עד 5), השפעת צ'יפים וקנסות.",
         "t6_init_fts": "מלאי חילופים התחלתי:",
         "t6_horizon_label": "טווח מחזורים לתכנון:",
         "t6_horizon_5": "5 מחזורים קרובים",
         "t6_horizon_8": "8 מחזורים קרובים",
         "t6_horizon_all": "כל העונה (עד מחזור 38)",
-        "t6_reset_plan": "🗑️ איפוס תוכנית",
-        "t6_export_plan": "💾 ייצוא תוכנית",
+        "t6_reset_plan": "איפוס תוכנית",
+        "t6_export_plan": "ייצוא תוכנית",
         "t6_select_gw": "בחר מחזור לתכנון ועריכה:",
         "t6_chip_active": "צ'יפ פעיל למחזור:",
-        "t6_clr_transfers": "🗑️ נקה העברות מחזור זה",
-        "t6_reset_rebuild": "↩️ אפס וחזור לסגל המקורי",
-        "t7_title": "🏆 מרגל מיני-ליגות פרטיות (Mini-League Spy)",
+        "t6_clr_transfers": "נקה העברות מחזור זה",
+        "t6_reset_rebuild": "אפס וחזור לסגל המקורי",
+        "t7_title": "מודיעין מיני-ליגות וראש בראש",
         "t7_caption": "עקוב אחרי יריביך במיני-ליגה: זהה באילו שחקנים הם מחזיקים, מי בחר איזה קפטן, ואתר דיפרנשיאלים שיקפיצו אותך בדירוג.",
         "t7_choose_league": "בחר מתוך המיני-ליגות של הקבוצה שלך:",
         "t7_enter_id": "הזן קוד מיני-ליגה קלאסית (League ID):",
@@ -266,7 +266,7 @@ TRANSLATIONS = {
         "t7_th_last_gw": "מחזור אחרון",
         "t7_th_total_pts": "סך נקודות",
         "t7_th_team_id": "ID קבוצה",
-        "t7_h2h_title": "🕵️ ריגול סגל מול יריב (Head-to-Head Spy)",
+        "t7_h2h_title": "ריגול סגל ראש בראש (H2H)",
         "t7_choose_rival": "בחר יריב לריגול מעמיק:",
         "t7_rival_details": "פרטי יריב (מחזור אחרון):",
         "t7_rival_cap": "קפטן יריב:",
@@ -281,35 +281,37 @@ TRANSLATIONS = {
         "t7_no_chip": "ללא",
         "t2_in_label": "בחר שחקן לקנייה (מסונן לפי עמדה ותקציב):",
         "t2_no_players_budget": "אין שחקנים מתאימים בתקציב זה.",
-        "rb_err_limit": "⚠️ חריגת מכסה! חוק ה-FPL אוסר יותר מ-3 שחקנים ממועדון אחד:",
-        "rb_err_budget": "⚠️ חריגת תקציב של £{val}m! עליך לפנות שחקן או לבחור שחקנים זולים יותר.",
-        "rb_saved_toast": "🎉 סגל חדש נשמר בהצלחה למחזור",
-        "rb_picker_title": "🛒 בחירת {pos} לסגל (תקציב פנוי: £{budget}m)",
+        "rb_err_limit": "חריגת מכסה: חוק ה-FPL אוסר יותר מ-3 שחקנים ממועדון אחד:",
+        "rb_err_budget": "חריגת תקציב של £{val}m: עליך לפנות שחקן או לבחור שחקנים זולים יותר.",
+        "rb_saved_toast": "סגל חדש נשמר בהצלחה למחזור",
+        "rb_picker_title": "בחירת {pos} לסגל (תקציב פנוי: £{budget}m)",
         "rb_picker_max_price": "מחיר מקסימלי אפשרי לעמדה זו (משריין £4.0m ליתר המשבצות):",
-        "rb_recommended": "⭐ {pos}ים מומלצים (Recommended):",
+        "rb_recommended": "{pos}ים מומלצים:",
         "rb_all_cands": "או בחר מתוך כל ה{pos}ים הזמינים בתקציב:",
         "rb_no_cands": "לא נמצאו שחקנים מתאימים בעמדת {pos} במסגרת התקציב של £{budget}m.",
-        "rb_add_cand": "➕ הוסף שחקן זה",
-        "rb_btn_chosen": "✓ נבחרה",
+        "rb_add_cand": "הוסף שחקן זה",
+        "rb_btn_chosen": "נבחר",
         "gw_fixtures_title": "משחקי מחזור {gw}",
         "no_fixtures_gw": "אין משחקים מתוזמנים למחזור זה",
         "matches": "משחקים",
-        "theme_dark": "🌙 מצב כהה",
-        "theme_light": "☀️ מצב בהיר",
+        "theme_dark": "מצב כהה",
+        "theme_light": "מצב בהיר",
+        "rb_rebuilt_success": "סגל נבנה מחדש מאפס למחזור זה",
+        "you_indicator": "(אתה)",
     },
     "en": {
-        "page_title": "FPL Elite Scout | Decision Engine & Squad Spy",
-        "app_title": "⚽ FPL Elite Scout",
-        "app_subtitle": "AI Agent, Lineup Optimizer & Mini-League Spy aimed at Top 50K",
-        "gate_desc": "Enter your Team ID to load injury analysis, calibrated squad rating, lineup flaws, gameweek planner, and league spy.",
+        "page_title": "FPL Elite Scout | Decision Engine & Squad Intelligence",
+        "app_title": "FPL Elite Scout",
+        "app_subtitle": "Decision Engine, Lineup Optimization & Mini-League Intelligence",
+        "gate_desc": "Enter your Team ID to load injury analysis, calibrated squad rating, lineup flaws, gameweek planner, and league intelligence.",
         "team_id_label": "Team ID:",
         "team_id_placeholder": "e.g., 139103",
         "team_id_help": "The number from your browser URL under the Points tab",
-        "login_btn": "🚀 Load My Squad",
-        "demo_btn": "👀 Demo Squad",
-        "where_find_id": "❓ Where to find your Team ID?",
+        "login_btn": "Enter Squad",
+        "demo_btn": "Demo Squad",
+        "where_find_id": "Where to find your Team ID?",
         "digits_only": "Please enter digits only.",
-        "change_team": "🔄 Change Team",
+        "change_team": "Change Team",
         "engine_for_gw": "Decision Engine for Gameweek",
         "team_label": "Team:",
         "squad_score": "Squad Rating",
@@ -318,13 +320,13 @@ TRANSLATIONS = {
         "overall_rank": "Overall Rank",
         "formation": "Formation",
         "total_xp": "Lineup Expected Points",
-        "tab_squad": "🟢 Squad on Pitch",
-        "tab_transfers": "🔄 Transfers Lab",
-        "tab_analysis": "📊 Analysis & Flaws",
-        "tab_scout": "🌟 Elite Scout Radar",
-        "tab_scenarios": "🎯 3 Budget Scenarios",
-        "tab_planner": "🗓️ Gameweek Planner",
-        "tab_leagues": "🏆 Mini-League Spy",
+        "tab_squad": "Pitch Squad",
+        "tab_transfers": "Transfers Lab",
+        "tab_analysis": "Team Analysis",
+        "tab_scout": "Scout Radar",
+        "tab_scenarios": "Transfer Scenarios",
+        "tab_planner": "Gameweek Planner",
+        "tab_leagues": "Leagues & Head-to-Head",
         "pos_1": "Goalkeeper",
         "pos_2": "Defender",
         "pos_3": "Midfielder",
@@ -334,50 +336,50 @@ TRANSLATIONS = {
         "pos_3_pl": "Midfielders",
         "pos_4_pl": "Forwards",
         "btn_select": "Select",
-        "btn_selected": "✓ Selected",
+        "btn_selected": "Selected",
         "btn_captain": "Captain (C)",
         "btn_vc": "Vice (VC)",
-        "btn_sub": "Substitute ⇄",
+        "btn_sub": "Sub",
         "btn_sub_single": "Sub",
-        "cap_select_label": "Select Captain (C):",
-        "vc_select_label": "Select Vice-Captain (VC):",
-        "swap_active_hint_prefix": "Click one button on any player",
-        "swap_active_hint_suffix": "to complete swap instantly",
+        "cap_select_label": "Captain (C):",
+        "vc_select_label": "Vice-Captain (VC):",
+        "swap_active_hint_prefix": "Click target player",
+        "swap_active_hint_suffix": "to complete substitution",
         "transfer_market_expander": "Transfer Player from Market",
         "planner_tr_expander": "Plan Market Transfer for this Gameweek",
-        "btn_transfer": "Transfer Out 🔄",
+        "btn_transfer": "Transfer Out",
         "btn_cancel": "Cancel",
-        "btn_swap_here": "⇄ Swap Here",
+        "btn_swap_here": "Swap Here",
         "swap_banner_title": "Substitution Mode Active:",
         "swap_banner_desc": "Click target player to complete swap with",
-        "cancel_swap": "✕ Cancel Swap",
-        "action_bar_title": "⚙️ Player Actions:",
+        "cancel_swap": "Cancel Swap",
+        "action_bar_title": "Player Actions:",
         "action_bar_hint": "Select action:",
-        "transfer_drawer_title": "🛒 Transfer Market Drawer",
+        "transfer_drawer_title": "Transfer Market Drawer",
         "selling_player": "Selling Player:",
         "max_budget": "Max Budget Available:",
-        "close_drawer": "✕ Close Drawer",
+        "close_drawer": "Close Drawer",
         "search_placeholder": "Search player (name or team)...",
-        "rec_header": "⭐ Recommended Replacements:",
-        "buy_player_btn": "➕ Buy This Player",
+        "rec_header": "Recommended Replacements:",
+        "buy_player_btn": "Buy Player",
         "all_cands_label": "Or choose from all available players in budget:",
-        "confirm_transfer_btn": "➕ Confirm Transfer",
+        "confirm_transfer_btn": "Confirm Transfer",
         "bench_title": "Bench Players",
         "bench_sub_order": "Sub Priority 1-4",
-        "rebuild_btn": "🃏 Rebuild from Scratch (WC / FH)",
-        "close_rebuild_btn": "✕ Close Rebuild Mode",
-        "rebuild_title": "🛠️ Rebuild Squad from Scratch",
+        "rebuild_btn": "Rebuild Squad (WC / FH)",
+        "close_rebuild_btn": "Close Rebuild Mode",
+        "rebuild_title": "Rebuild Squad from Scratch",
         "rebuild_subtitle": "Select 15 players (2 GKs, 5 DEFs, 5 MIDs, 3 FWDs) within your budget",
         "total_squad_val": "Total Squad Value",
         "rem_budget": "Remaining Budget",
         "players_picked": "Players Picked",
         "avg_per_player": "Avg per Player",
-        "clear_15_btn": "🗑️ Clear All 15 Players",
-        "load_existing_btn": "📋 Load Existing Squad",
-        "save_rebuild_btn": "💾 Save & Apply New Squad!",
+        "clear_15_btn": "Clear All 15 Players",
+        "load_existing_btn": "Load Existing Squad",
+        "save_rebuild_btn": "Save New Squad",
         "empty_slot": "Empty Slot",
-        "add_slot": "➕ Add",
-        "remove_btn": "✕ Remove",
+        "add_slot": "Add",
+        "remove_btn": "Remove",
         "ft_available": "Available FTs",
         "ft_planned": "Planned Transfers",
         "hit_penalty": "Hit Penalty",
@@ -385,13 +387,13 @@ TRANSLATIONS = {
         "xp_pred": "Points Forecast (xP)",
         "chip_for_gw": "Chip for GW",
         "no_chip": "No Chip",
-        "clear_all_transfers": "🗑️ Clear All",
+        "clear_all_transfers": "Clear All",
         "planned_transfers_gw": "Planned Transfers for GW",
-        "cancel_single_transfer": "✕ Cancel",
+        "cancel_single_transfer": "Cancel",
         "pts": "pts",
         "against": "vs:",
         "starters_only_cap": "Starters only for Captain",
-        "back_to_id": "🔄 Back to ID entry",
+        "back_to_id": "Back to ID entry",
         "deadline_time_left": "Time left until deadline",
         "h2h_comp": "Head-to-Head Comparison:",
         "expected_add": "Expected Gain:",
@@ -400,7 +402,7 @@ TRANSLATIONS = {
         "season_pts_lbl": "Season Points:",
         "next_match_lbl": "Next Match:",
         "left_in_bank": "In the Bank:",
-        "starting_11_title": "📋 Starting XI Players",
+        "starting_11_title": "Starting XI Players",
         "th_player": "Player",
         "th_pos": "Pos",
         "th_team": "Team",
@@ -409,38 +411,38 @@ TRANSLATIONS = {
         "th_start_prob": "Start Prob",
         "th_season_pts": "Season Pts",
         "th_xp": "xP",
-        "t2_title": "🔄 Position & Budget Transfers Lab",
+        "t2_title": "Position & Budget Transfers Lab",
         "t2_out_header": "1. Player to Sell (OUT)",
         "t2_out_label": "Select player to transfer out:",
         "t2_in_header": "2. Replacement Player (IN) in position",
         "t2_quick_search": "Quick Search:",
         "t2_search_placeholder": "Type name or team in English...",
-        "t2_rec_replacements": "⭐ AI-Recommended Replacements:",
+        "t2_rec_replacements": "Data-Model Recommended Replacements:",
         "t2_all_pool_label": "Or choose from all available players in budget:",
         "t2_no_players": "No eligible players found within budget for this position.",
-        "t2_confirm_btn": "Confirm Squad Transfer 🔁",
-        "t2_reset_btn": "Reset Squad to Original ↩️",
+        "t2_confirm_btn": "Confirm Squad Transfer",
+        "t2_reset_btn": "Reset Squad to Original",
         "t2_saved_transfers": "Saved transfers:",
-        "t3_title": "📊 Squad Strength & Flaw Analysis",
+        "t3_title": "Squad Strength & Flaw Analysis",
         "t3_squad_score": "Squad Rating",
         "t3_forecast": "Lineup Forecast:",
         "t3_flaws_title": "Risk factors reducing squad rating:",
         "t3_no_flaws": "No significant squad flaws detected!",
-        "t4_title": "🌟 Elite Scout Radar for Gameweek",
+        "t4_title": "Elite Scout Radar for Gameweek",
         "t4_tab_fwd": "Forwards",
         "t4_tab_mid": "Midfielders",
         "t4_tab_def": "Defenders",
         "t4_tab_gk": "Goalkeepers",
-        "t4_tab_cap": "Captain Shield vs Sword",
-        "t4_buy_low": "🔥 Buy Low",
-        "t4_overperforming": "⚠️ Overperforming Trap",
-        "t4_cap_shield": "🛡️ Shield Captain",
-        "t4_cap_sword": "⚔️ Differential Captain (Sword)",
+        "t4_tab_cap": "Captain Shield vs Differential",
+        "t4_buy_low": "Buy Low",
+        "t4_overperforming": "Regression Risk",
+        "t4_cap_shield": "Shield Captain",
+        "t4_cap_sword": "Differential Captain (Sword)",
         "t4_ownership": "Ownership:",
         "t4_only": "only",
         "t4_start_prob": "Start Probability:",
         "t4_tot_pts": "Total Points:",
-        "t5_title": "🎯 3 Optimal Transfer Scenarios for Squad Budget",
+        "t5_title": "3 Optimal Transfer Scenarios for Squad Budget",
         "t5_op1_title": "Option 1: Defensive Stability / Replace Injury Risk",
         "t5_op1_tag": "Defense",
         "t5_op2_title": "Option 2: Upgrade Midfield Engine & Chance Creation",
@@ -448,20 +450,20 @@ TRANSLATIONS = {
         "t5_op3_title": "Option 3: Refresh Frontline Attack",
         "t5_op3_tag": "Attack",
         "t5_diff_xp": "Gain:",
-        "t6_title": "🗓️ Gameweek Planner & Chip Simulator (up to GW 38)",
-        "t6_caption": "Perform bench swaps with ⇄, transfer players with 🔄, and set captain per GW. The engine tracks free transfer accumulation (up to 5), chip effects, and hit point penalties.",
+        "t6_title": "Gameweek Planner & Chip Simulator",
+        "t6_caption": "Perform bench swaps, player transfers, and captain selection per GW. Tracks free transfer accumulation (up to 5), chips, and penalties.",
         "t6_init_fts": "Initial Free Transfers:",
         "t6_horizon_label": "Planning Horizon:",
         "t6_horizon_5": "Next 5 Gameweeks",
         "t6_horizon_8": "Next 8 Gameweeks",
         "t6_horizon_all": "Rest of Season (up to GW 38)",
-        "t6_reset_plan": "🗑️ Reset Plan",
-        "t6_export_plan": "💾 Export Plan",
+        "t6_reset_plan": "Reset Plan",
+        "t6_export_plan": "Export Plan",
         "t6_select_gw": "Select Gameweek to plan and edit:",
         "t6_chip_active": "Active Chip for GW:",
-        "t6_clr_transfers": "🗑️ Clear Transfers for this GW",
-        "t6_reset_rebuild": "↩️ Reset to Original Squad",
-        "t7_title": "🏆 Classic Mini-League Spy",
+        "t6_clr_transfers": "Clear Transfers for this GW",
+        "t6_reset_rebuild": "Reset to Original Squad",
+        "t7_title": "Mini-League Intelligence & Head-to-Head",
         "t7_caption": "Spy on mini-league rivals: see their squad, captain picks, and find differentials to climb ranks.",
         "t7_choose_league": "Select from your team's mini-leagues:",
         "t7_enter_id": "Enter Classic League ID:",
@@ -479,11 +481,12 @@ TRANSLATIONS = {
         "t7_th_last_gw": "Last GW",
         "t7_th_total_pts": "Total Pts",
         "t7_th_team_id": "Team ID",
-        "t7_h2h_title": "🕵️ Head-to-Head Squad Spy",
+        "t7_h2h_title": "Head-to-Head Squad Spy",
         "t7_choose_rival": "Select rival for in-depth spy:",
         "t7_rival_details": "Rival Details (Last GW):",
         "t7_rival_cap": "Rival Captain:",
         "t7_rival_chip": "Active Chip:",
+        "t7_differentials": "Differentials:",
         "t7_you_have": "Your differentials (players you own that rival doesn't):",
         "t7_rival_has": "Rival differentials (players rival owns that you don't):",
         "t7_no_results": "No results found in this mini-league.",
@@ -493,21 +496,23 @@ TRANSLATIONS = {
         "t7_no_chip": "None",
         "t2_in_label": "Select player to buy (filtered by pos & budget):",
         "t2_no_players_budget": "No eligible players found within this budget.",
-        "rb_err_limit": "⚠️ Quota exceeded! FPL rules allow a maximum of 3 players from one club:",
-        "rb_err_budget": "⚠️ Budget exceeded by £{val}m! Please remove a player or pick cheaper options.",
-        "rb_saved_toast": "🎉 New squad successfully saved for Gameweek",
-        "rb_picker_title": "🛒 Selecting {pos} for Squad (Available budget: £{budget}m)",
+        "rb_err_limit": "Quota exceeded: FPL rules allow a maximum of 3 players from one club:",
+        "rb_err_budget": "Budget exceeded by £{val}m: Please remove a player or pick cheaper options.",
+        "rb_saved_toast": "New squad successfully saved for Gameweek",
+        "rb_picker_title": "Selecting {pos} for Squad (Available budget: £{budget}m)",
         "rb_picker_max_price": "Max allowed price for this position (reserves £4.0m for other empty slots):",
-        "rb_recommended": "⭐ Recommended {pos}s:",
+        "rb_recommended": "Recommended {pos}s:",
         "rb_all_cands": "Or choose from all available {pos}s within budget:",
         "rb_no_cands": "No eligible players found in position {pos} within £{budget}m budget.",
-        "rb_add_cand": "➕ Add this player",
-        "rb_btn_chosen": "✓ Selected",
+        "rb_add_cand": "Add this player",
+        "rb_btn_chosen": "Selected",
         "gw_fixtures_title": "Gameweek {gw} Fixtures",
         "no_fixtures_gw": "No fixtures scheduled for this GW",
         "matches": "matches",
-        "theme_dark": "🌙 Dark Mode",
-        "theme_light": "☀️ Light Mode",
+        "theme_dark": "Dark Mode",
+        "theme_light": "Light Mode",
+        "rb_rebuilt_success": "Squad rebuilt from scratch for this GW",
+        "you_indicator": "(You)",
     },
 }
 
@@ -521,6 +526,10 @@ def get_player_reason(p):
         return p.get("reason_en", p.get("reason", ""))
     return p.get("reason_he", p.get("reason", ""))
 
+def get_player_pos(p):
+    code = p.get("pos_code", 1)
+    return t(f"pos_{code}")
+
 # =====================================================================
 # =====================================================================
 # 4. עיצוב CSS מלא: נגישות, RTL / LTR דינמי, רספונסיביות מובייל
@@ -529,11 +538,11 @@ is_light = (st.session_state.get("app_theme", "light") == "light")
 
 if is_light:
     root_vars = """
-    --bg-main: #f1f5f9;
-    --bg-body-grad: radial-gradient(circle at 50% 0%, #e2e8f0 0%, #f1f5f9 100%);
+    --bg-main: #f8fafc;
+    --bg-body-grad: none;
     --bg-card: #ffffff;
-    --bg-card-hover: #f8fafc;
-    --border-color: #cbd5e1;
+    --bg-card-hover: #f1f5f9;
+    --border-color: #e2e8f0;
     --text-primary: #0f172a;
     --text-secondary: #334155;
     --text-muted: #64748b;
@@ -548,30 +557,30 @@ if is_light:
     --input-focus-border: #059669;
     --input-focus-shadow: rgba(5, 150, 105, 0.2);
     --tab-bg: #ffffff;
-    --tab-border: #cbd5e1;
+    --tab-border: #e2e8f0;
     --tab-text: #64748b;
     --tab-hover-bg: #f1f5f9;
     --tab-hover-text: #0f172a;
     --tab-active-bg: #15803d;
     --tab-active-text: #ffffff;
     --tab-active-border: #15803d;
-    --tab-active-shadow: rgba(21, 128, 61, 0.25);
+    --tab-active-shadow: rgba(21, 128, 61, 0.2);
     --gate-bg: #ffffff;
     --gate-border: #10b981;
-    --gate-shadow: 0 16px 36px rgba(0,0,0,0.08), 0 0 24px rgba(16, 185, 129, 0.12);
+    --gate-shadow: 0 16px 36px rgba(0,0,0,0.06), 0 0 24px rgba(16, 185, 129, 0.1);
     --pitch-border: #16a34a;
     --pitch-bg: radial-gradient(ellipse at 50% 50%, #16a34a 0%, #15803d 100%), repeating-linear-gradient(0deg, #15803d 0px, #15803d 48px, #166534 48px, #166534 96px);
-    --pitch-shadow: 0 12px 36px rgba(22, 101, 52, 0.2);
-    --pitch-line: rgba(255, 255, 255, 0.5);
+    --pitch-shadow: 0 12px 36px rgba(22, 101, 52, 0.18);
+    --pitch-line: rgba(255, 255, 255, 0.55);
     --bench-bg: #ffffff;
     --bench-border: #10b981;
-    --bench-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    --bench-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     --bench-dugout-badge-bg: #f0fdf4;
     --bench-dugout-badge-border: #10b981;
     --p-card-bg: #ffffff;
     --p-card-border: #cbd5e1;
     --p-card-border-bottom: #e2e8f0;
-    --p-card-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    --p-card-shadow: 0 4px 12px rgba(0,0,0,0.08);
     --p-name-plate-bg: #0f172a;
     --p-name-plate-text: #ffffff;
     --p-card-btn-bg: #f8fafc;
@@ -593,24 +602,24 @@ if is_light:
     --fxt-row-border: #e2e8f0;
     --fxt-row-hover: #f1f5f9;
     --fxt-card-bg: #ffffff;
-    --fxt-card-border: #cbd5e1;
+    --fxt-card-border: #e2e8f0;
     --badge-ko-bg: #f1f5f9;
     --badge-mint-bg: rgba(16, 185, 129, 0.12);
     --badge-mint-border: #10b981;
     --metric-bg: #ffffff;
-    --metric-border: #cbd5e1;
+    --metric-border: #e2e8f0;
     --kpi-score-bg: #ffffff;
     --kpi-score-border: #10b981;
-    --kpi-score-shadow: rgba(16, 185, 129, 0.15);
+    --kpi-score-shadow: rgba(16, 185, 129, 0.12);
     --kpi-xp-bg: #ffffff;
     --kpi-xp-border: #0284c7;
-    --kpi-xp-shadow: rgba(2, 132, 199, 0.15);
+    --kpi-xp-shadow: rgba(2, 132, 199, 0.12);
     --kpi-bank-bg: #ffffff;
     --kpi-bank-border: #eab308;
-    --kpi-bank-shadow: rgba(234, 179, 8, 0.15);
+    --kpi-bank-shadow: rgba(234, 179, 8, 0.12);
     --kpi-rank-bg: #ffffff;
     --kpi-rank-border: #f43f5e;
-    --kpi-rank-shadow: rgba(244, 63, 94, 0.15);
+    --kpi-rank-shadow: rgba(244, 63, 94, 0.12);
     """
 else:
     root_vars = """
@@ -648,35 +657,35 @@ else:
     --pitch-bg: radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.9) 0%, rgba(6, 44, 20, 0.98) 100%), repeating-linear-gradient(0deg, #104822 0px, #104822 48px, #0c3b1b 48px, #0c3b1b 96px);
     --pitch-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12);
     --pitch-line: rgba(255, 255, 255, 0.22);
-    --bench-bg: linear-gradient(145deg, #1c0c36 0%, #2e1256 45%, #16092b 100%);
-    --bench-border: #00ff87;
-    --bench-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 135, 0.35);
-    --bench-dugout-badge-bg: linear-gradient(90deg, rgba(55, 0, 60, 0.85) 0%, rgba(0, 255, 135, 0.2) 100%);
-    --bench-dugout-badge-border: #00ff87;
-    --p-card-bg: rgba(20, 11, 38, 0.95);
-    --p-card-border: rgba(255, 255, 255, 0.14);
-    --p-card-border-bottom: rgba(255, 255, 255, 0.06);
-    --p-card-shadow: 0 4px 14px rgba(0,0,0,0.5);
-    --p-name-plate-bg: rgba(0, 0, 0, 0.6);
+    --bench-bg: rgba(20, 10, 36, 0.92);
+    --bench-border: rgba(0, 255, 135, 0.35);
+    --bench-shadow: 0 16px 36px rgba(0,0,0,0.7);
+    --bench-dugout-badge-bg: rgba(0, 255, 135, 0.08);
+    --bench-dugout-badge-border: rgba(0, 255, 135, 0.3);
+    --p-card-bg: rgba(20, 10, 36, 0.92);
+    --p-card-border: rgba(168, 85, 247, 0.3);
+    --p-card-border-bottom: rgba(168, 85, 247, 0.35);
+    --p-card-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    --p-name-plate-bg: #07030e;
     --p-name-plate-text: #ffffff;
-    --p-card-btn-bg: rgba(14, 7, 28, 0.98);
-    --p-card-btn-border: rgba(255, 255, 255, 0.14);
+    --p-card-btn-bg: rgba(26, 15, 46, 0.95);
+    --p-card-btn-border: rgba(168, 85, 247, 0.3);
     --p-card-btn-text: #ffffff;
-    --p-card-btn-hover-bg: #251046;
-    --p-card-btn-hover-text: #00ff87;
-    --card-bench-bg: linear-gradient(145deg, #28124c 0%, #190a30 100%);
-    --card-bench-border: #00ff87;
-    --card-bench-btn-bg: #190a30;
-    --card-bench-btn-border: #00ff87;
+    --p-card-btn-hover-bg: #00ff87;
+    --p-card-btn-hover-text: #05140b;
+    --card-bench-bg: rgba(24, 12, 42, 0.88);
+    --card-bench-border: rgba(0, 255, 135, 0.4);
+    --card-bench-btn-bg: rgba(24, 12, 42, 0.95);
+    --card-bench-btn-border: rgba(0, 255, 135, 0.4);
     --card-bench-btn-text: #00ff87;
     --btn-general-bg: rgba(26, 15, 46, 0.85);
     --btn-general-border: #00ff87;
     --btn-general-text: #ffffff;
-    --btn-general-hover-bg: rgba(45, 20, 75, 0.95);
+    --btn-general-hover-bg: rgba(0, 255, 135, 0.15);
     --btn-general-hover-text: #00ff87;
-    --fxt-row-bg: rgba(20, 11, 38, 0.7);
-    --fxt-row-border: rgba(168, 85, 247, 0.15);
-    --fxt-row-hover: rgba(35, 18, 65, 0.85);
+    --fxt-row-bg: rgba(20, 10, 36, 0.7);
+    --fxt-row-border: rgba(168, 85, 247, 0.2);
+    --fxt-row-hover: rgba(38, 22, 66, 0.85);
     --fxt-card-bg: rgba(26, 15, 46, 0.85);
     --fxt-card-border: rgba(168, 85, 247, 0.2);
     --badge-ko-bg: rgba(55, 0, 60, 0.6);
@@ -700,7 +709,7 @@ else:
 
 css_template = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Rubik:wght@400;500;600;700;800;900&display=swap');
 
 /* --- 1. הסתרת מיתוג Streamlit לחלוטין (White-Labeling) --- */
 #MainMenu {visibility: hidden !important; display: none !important;}
@@ -722,7 +731,7 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], .main, .
     background-color: var(--bg-main) !important;
     background-image: var(--bg-body-grad) !important;
     background-attachment: fixed !important;
-    font-family: 'Heebo', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Rubik', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     color: var(--text-primary) !important;
     -webkit-font-smoothing: antialiased;
 }
@@ -761,16 +770,48 @@ div[data-testid="stHorizontalBlock"] > div {
 [data-testid="stMarkdownContainer"] span, 
 [data-testid="stMarkdownContainer"] li,
 [data-testid="stMarkdownContainer"] label,
-[data-testid="stMarkdownContainer"] div {
+[data-testid="stMarkdownContainer"] div,
+[data-testid="stMarkdownContainer"] strong,
+[data-testid="stMarkdownContainer"] b {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     line-height: 1.5;
+    color: var(--text-primary) !important;
+}
+
+.stCaption, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
+    color: var(--text-secondary) !important;
+    direction: __DIR__ !important;
+    text-align: __ALIGN__ !important;
+}
+
+div[data-testid="stRadio"] label span,
+div[data-testid="stRadio"] label p,
+div[data-testid="stRadio"] div {
+    color: var(--text-primary) !important;
+}
+
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div {
+    color: var(--input-text) !important;
+}
+
+div[data-testid="stExpander"] details summary p,
+div[data-testid="stExpander"] details summary span {
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+}
+
+div[data-testid="stDataFrame"],
+div[data-testid="stDataFrame"] div,
+div[data-testid="stDataFrame"] span {
+    color: var(--text-primary) !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary) !important;
     font-weight: 800 !important;
-    letter-spacing: -0.3px !important;
+    letter-spacing: -0.02em !important;
 }
 
 div[data-testid="stWidgetLabel"] label,
@@ -1467,6 +1508,7 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     padding: 10px 12px !important;
     line-height: 1.5 !important;
     direction: __DIR__ !important;
+    color: var(--text-primary) !important;
 }
 .comparison-panel-in {
     background: rgba(16, 185, 129, 0.08) !important;
@@ -1475,6 +1517,7 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     padding: 10px 12px !important;
     line-height: 1.5 !important;
     direction: __DIR__ !important;
+    color: var(--text-primary) !important;
 }
 
 .transfer-drawer {
@@ -2022,15 +2065,14 @@ if not st.session_state.user_team_id:
             st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
             st.rerun()
     with c_gate_top2:
-        if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="gate_lang_btn", use_container_width=True):
+        if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="gate_lang_btn", use_container_width=True):
             st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
             st.rerun()
 
     st.markdown(
         f"""
     <div class="gate-card">
-        <div style="font-size:36px; margin-bottom:8px;">⚽</div>
-        <h1 style="color:var(--accent-mint); font-size:26px; font-weight:800; margin-bottom:6px; letter-spacing:-0.5px;">{t('app_title')}</h1>
+        <h1 style="color:var(--accent-mint); font-size:28px; font-weight:900; margin-bottom:6px; letter-spacing:-0.5px;">{t('app_title')}</h1>
         <div style="font-size:14px; color:var(--text-secondary); font-weight:500; margin-bottom:14px;">
             {t('app_subtitle')}
         </div>
@@ -2107,8 +2149,9 @@ def fetch_user_team(t_id, gw):
 
 raw_picks, initial_bank, my_team_name, my_rank, my_leagues = fetch_user_team(team_id, next_gw)
 if not raw_picks:
-    st.error(f"❌ לא ניתן למשוך נתונים עבור מזהה {team_id}. ודא שהמספר תקין.")
-    if st.button("🔄 חזרה להזנת ID"):
+    err_msg = f"Unable to fetch data for ID {team_id}. Please verify ID." if st.session_state.app_lang == "en" else f"לא ניתן למשוך נתונים עבור מזהה {team_id}. ודא שהמספר תקין."
+    st.error(err_msg)
+    if st.button(t("back_to_id")):
         st.session_state.user_team_id = None
         st.query_params.clear()
         st.rerun()
@@ -2134,7 +2177,7 @@ if "squad_transfer_active" not in st.session_state:
 
 if "planner_plan" not in st.session_state:
     st.session_state.planner_plan = {
-        g: {"chip": "ללא צ'יפ", "transfers": []} for g in range(next_gw, 39)
+        g: {"chip": "no_chip", "transfers": []} for g in range(next_gw, 39)
     }
 if "planner_captains" not in st.session_state:
     st.session_state.planner_captains = {}
@@ -2288,9 +2331,8 @@ with h_col1:
     render_html(
         f"""
         <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
-            <div style="font-size:28px;">⚽</div>
             <div>
-                <div style="font-size:22px; font-weight:800; color:var(--text-primary); letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
+                <div style="font-size:22px; font-weight:900; color:var(--text-primary); letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
                 <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
                     {t("engine_for_gw")} <b style="color:var(--accent-mint);">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
                 </div>
@@ -2304,7 +2346,7 @@ with h_col_theme:
         st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
         st.rerun()
 with h_col2:
-    if st.button("🌐 English" if st.session_state.app_lang == "he" else "🌐 עברית", key="hdr_lang_toggle", use_container_width=True):
+    if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="hdr_lang_toggle", use_container_width=True):
         st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
         st.rerun()
 with h_col3:
@@ -2344,20 +2386,20 @@ st.markdown(
 )
 
 # שעון דד-ליין חי ב-HTML/JS
-clock_title = f"⏳ זמן נותר עד נעילת חילופים (GW {next_gw})" if st.session_state.app_lang == "he" else f"⏳ Time left until deadline (GW {next_gw})"
+clock_title = f"{t('deadline_time_left')} (GW {next_gw})"
 clock_loading = "טוען שעון..." if st.session_state.app_lang == "he" else "Loading clock..."
 clock_expired = "הדד-ליין עבר!" if st.session_state.app_lang == "he" else "Deadline Passed!"
 clock_dir = "rtl" if st.session_state.app_lang == "he" else "ltr"
 
 is_lt = (st.session_state.get("app_theme", "light") == "light")
-clock_bg = "#ffffff" if is_lt else "linear-gradient(135deg, #180930 0%, #2a0f4d 100%)"
+clock_bg = "#ffffff" if is_lt else "rgba(26, 15, 46, 0.95)"
 clock_border = "#10b981" if is_lt else "#00ff87"
 clock_title_col = "#334155" if is_lt else "#e2d9f3"
 clock_num_col = "#059669" if is_lt else "#00ff87"
-clock_shadow = "rgba(16, 185, 129, 0.15)" if is_lt else "rgba(0, 255, 135, 0.25)"
+clock_shadow = "0 4px 14px rgba(0,0,0,0.06)" if is_lt else "0 4px 18px rgba(0, 255, 135, 0.25)"
 
 clock_html = f"""
-<div style="background:{clock_bg}; border:1.5px solid {clock_border}; border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:{clock_num_col}; box-shadow:0 4px 18px {clock_shadow};">
+<div style="background:{clock_bg}; border:1.5px solid {clock_border}; border-radius:12px; padding:10px 14px; text-align:center; direction:{clock_dir}; margin-bottom:15px; color:{clock_num_col}; box-shadow:{clock_shadow}; font-family:'Plus Jakarta Sans','Rubik',sans-serif;">
     <div style="font-size:12px; color:{clock_title_col}; font-weight:700; margin-bottom:4px;">{clock_title}</div>
     <div id="fpl-clock" style="font-size:20px; font-weight:900; color:{clock_num_col}; direction:ltr; letter-spacing:1.5px;">{clock_loading}</div>
 </div>
@@ -2490,7 +2532,6 @@ def render_gw_fixtures_panel(gw_num):
     <div class="gw-fixtures-card">
         <div class="gw-fixtures-header">
             <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-size:16px;">🗓️</span>
                 <span style="font-size:15px; font-weight:800; color:var(--text-primary);">{fxt_title}</span>
             </div>
             <span class="meta-chip">{len(fxts)} {t('matches')}</span>
@@ -2511,8 +2552,8 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     sel_class = "p-card-selected" if is_selected else ("p-card-transfer-selected" if is_transfer_selected else "")
 
     lang = st.session_state.get("app_lang", "he")
-    lbl_inj = "🔴 פצוע" if lang == "he" else "🔴 Injured"
-    lbl_dbt = "🟡 בספק" if lang == "he" else "🟡 Doubt"
+    lbl_inj = "פצוע" if lang == "he" else "Injured"
+    lbl_dbt = "בספק" if lang == "he" else "Doubt"
 
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
@@ -2592,7 +2633,7 @@ with t_squad:
     def execute_squad_swap(p_out_id, p_in_id):
         legal, err_msg = is_swap_legal(p_out_id, p_in_id, st.session_state.user_squad)
         if not legal:
-            st.error(f"⚠️ {err_msg}")
+            st.error(err_msg)
             return
         p_o = next((x for x in st.session_state.user_squad if x["element"] == p_out_id), None)
         p_i = next((x for x in st.session_state.user_squad if x["element"] == p_in_id), None)
@@ -2600,7 +2641,7 @@ with t_squad:
             p_o["position"], p_i["position"] = p_i["position"], p_o["position"]
             st.session_state.squad_selected_id = None
             st.session_state.squad_swap_active = False
-            st.toast(f"✅ {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
+            st.toast(f"{all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
             st.rerun()
 
     def set_squad_captain(target_id):
@@ -2609,7 +2650,7 @@ with t_squad:
             if sp["is_captain"]:
                 sp["is_vice_captain"] = False
         st.session_state.squad_selected_id = None
-        st.toast(f"👑 {all_players[target_id]['name']} (C)")
+        st.toast(f"{all_players[target_id]['name']} (C)")
         st.rerun()
 
     def set_squad_vice_captain(target_id):
@@ -2618,7 +2659,7 @@ with t_squad:
             if sp["is_vice_captain"]:
                 sp["is_captain"] = False
         st.session_state.squad_selected_id = None
-        st.toast(f"🥈 {all_players[target_id]['name']} (VC)")
+        st.toast(f"{all_players[target_id]['name']} (VC)")
         st.rerun()
 
     # -----------------------------------------------------------------
@@ -2632,7 +2673,7 @@ with t_squad:
         c_cap_col, c_vc_col = st.columns(2)
         with c_cap_col:
             new_cap_pick = st.selectbox(
-                f"👑 {t('cap_select_label')}",
+                t("cap_select_label"),
                 list(starter_dict.keys()),
                 index=list(starter_dict.keys()).index(current_cap_id) if current_cap_id in starter_dict else 0,
                 format_func=lambda x: starter_dict[x],
@@ -2643,7 +2684,7 @@ with t_squad:
         with c_vc_col:
             vc_candidates = {k: v for k, v in starter_dict.items() if k != current_cap_id}
             new_vc_pick = st.selectbox(
-                f"🥈 {t('vc_select_label')}",
+                t("vc_select_label"),
                 list(vc_candidates.keys()),
                 index=list(vc_candidates.keys()).index(current_vc_id) if current_vc_id in vc_candidates else 0,
                 format_func=lambda x: vc_candidates[x],
@@ -2657,10 +2698,11 @@ with t_squad:
         p_sw_from = all_players.get(st.session_state.squad_selected_id)
         if p_sw_from:
             is_from_starter = any(p["id"] == p_sw_from["id"] for p in starters)
-            target_area_text = "מהספסל" if is_from_starter else "מההרכב"
+            target_area_text = ("from the Bench" if is_from_starter else "from Starting XI") if st.session_state.app_lang == "en" else ("מהספסל" if is_from_starter else "מההרכב")
+            p_pos_txt = get_player_pos(p_sw_from)
             c_sw_info, c_sw_canc = st.columns([4, 1])
             with c_sw_info:
-                st.info(f"🔁 **{t('swap_banner_title')}** {p_sw_from['name']} ({p_sw_from['team']} | {p_sw_from['pos']}) — **{t('swap_active_hint_prefix')} {target_area_text} {t('swap_active_hint_suffix')}**")
+                st.info(f"**{t('swap_banner_title')}** {p_sw_from['name']} ({p_sw_from['team']} | {p_pos_txt}) — **{t('swap_active_hint_prefix')} {target_area_text} {t('swap_active_hint_suffix')}**")
             with c_sw_canc:
                 if st.button(t("cancel_swap"), key="sq_cancel_swap_top", use_container_width=True, type="primary"):
                     st.session_state.squad_swap_active = False
@@ -2689,7 +2731,7 @@ with t_squad:
                 
                 if st.session_state.squad_swap_active:
                     if is_this_selected:
-                        if st.button(f"✕ {t('btn_cancel')}", key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
+                        if st.button(t("btn_cancel"), key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
                             st.session_state.squad_swap_active = False
                             st.session_state.squad_selected_id = None
                             st.rerun()
@@ -2699,9 +2741,9 @@ with t_squad:
                             if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
                                 execute_squad_swap(st.session_state.squad_selected_id, p["id"])
                         else:
-                            st.button(f"✕ {reason}", key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
+                            st.button(reason, key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(f"⇄ {t('btn_sub_single')}", key=f"sq_b_{p['id']}", use_container_width=True):
+                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True):
                         st.session_state.squad_selected_id = p["id"]
                         st.session_state.squad_swap_active = True
                         st.session_state.squad_transfer_active = False
@@ -2721,14 +2763,15 @@ with t_squad:
             render_clean_squad_row(gks)
 
     # חלון העברות שוק במגרש (נפתח לפי דרישה)
-    with st.expander(f"🛒 {t('transfer_market_expander')}"):
+    with st.expander(t("transfer_market_expander")):
         all_cur_squad = starters + bench
-        p_tr_options = {p["id"]: f"{p['name']} ({p['pos']} | £{p['cost']}m | {p['team']})" for p in all_cur_squad}
+        p_tr_options = {p["id"]: f"{p['name']} ({get_player_pos(p)} | £{p['cost']}m | {p['team']})" for p in all_cur_squad}
         sel_tr_out_id = st.selectbox(t("selling_player"), list(p_tr_options.keys()), format_func=lambda x: p_tr_options[x], key="sq_tr_expander_sel")
         p_tr_out = all_players[sel_tr_out_id]
         max_budget = round(p_tr_out["cost"] + st.session_state.user_bank, 1)
         cur_pids = [x["element"] for x in st.session_state.user_squad]
-        st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({p_tr_out['pos']} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_budget:.1f}m** | {t('in_bank')}: **£{st.session_state.user_bank:.1f}m**")
+        pos_name = get_player_pos(p_tr_out)
+        st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({pos_name} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_budget:.1f}m** | {t('in_bank')}: **£{st.session_state.user_bank:.1f}m**")
 
         tr_search_q = st.text_input(t("search_placeholder"), key="sq_tr_search_inp").strip().lower()
         cands = [
@@ -2765,8 +2808,8 @@ with t_squad:
                                 sp["element"] = r_p["id"]
                                 break
                         st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - r_p["cost"], 1)
-                        st.session_state.transfers_log.append(f"{p_tr_out['name']} ⬅️ {r_p['name']}")
-                        st.toast(f"✅ {p_tr_out['name']} ⬅️ {r_p['name']}")
+                        st.session_state.transfers_log.append(f"{p_tr_out['name']} -> {r_p['name']}")
+                        st.toast(f"{p_tr_out['name']} -> {r_p['name']}")
                         st.rerun()
 
         st.write("")
@@ -2785,8 +2828,8 @@ with t_squad:
                             sp["element"] = chosen_p_id
                             break
                     st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - chosen_p["cost"], 1)
-                    st.session_state.transfers_log.append(f"{p_tr_out['name']} ⬅️ {chosen_p['name']}")
-                    st.toast(f"✅ {p_tr_out['name']} ⬅️ {chosen_p['name']}")
+                    st.session_state.transfers_log.append(f"{p_tr_out['name']} -> {chosen_p['name']}")
+                    st.toast(f"{p_tr_out['name']} -> {chosen_p['name']}")
                     st.rerun()
 
     # ספסל מואר ומובלט בעיצוב Dugout
@@ -2797,7 +2840,6 @@ with t_squad:
             <div class="bench-anchor"></div>
             <div class="bench-dugout-badge">
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:16px;">🪑</span>
                     <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
                 </div>
                 <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
@@ -2831,8 +2873,9 @@ with t_transfers:
 
     def format_transfer_out(pid):
         p = all_players[pid]
-        flag = "⚠️ " if mark_priority(p) else ""
-        return f"{flag}{p['name']} ({p['pos']} - {p['team']}) | £{p['cost']}m | xP: {p['xp']}"
+        pos_str = get_player_pos(p)
+        flag = "[!] " if mark_priority(p) else ""
+        return f"{flag}{p['name']} ({pos_str} - {p['team']}) | £{p['cost']}m | xP: {p['xp']}"
 
     col_out, col_in = st.columns(2)
     with col_out:
@@ -2884,7 +2927,7 @@ with t_transfers:
 
         def format_transfer_in(pid):
             p = all_players[pid]
-            rec = "⭐ " if pid in ranked_recs else ""
+            rec = "[Top] " if pid in ranked_recs else ""
             return f"{rec}{p['name']} ({p['team']}) | £{p['cost']}m | xP: {p['xp']}"
 
         if pool:
@@ -2907,19 +2950,19 @@ with t_transfers:
             f"""
             <div class="accessible-card">
                 <div class="split-box">
-                    <b style="color:#f8fafc; font-size:14px;">{t('h2h_comp')}</b>
+                    <b style="color:var(--text-primary); font-size:14px;">{t('h2h_comp')}</b>
                     <span style="color:#10b981; font-weight:800; font-size:13.5px;">{t('expected_add')} {delta:+} xP</span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
                     <div class="comparison-panel-out">
-                        <div style="color:#fca5a5; font-weight:800; margin-bottom:4px;">🔴 {t('out_label')} {p_out['name']} <span class="ltr-tag">({p_out['team']})</span></div>
-                        <div style="color:#cbd5e1; font-size:12px;">{t('season_pts_lbl')} <b>{p_out['total_points']}</b> | xP: <b style="color:#f87171;">{p_out['xp']}</b></div>
-                        <div style="color:#94a3b8; font-size:11px; margin-top:2px;">{t('next_match_lbl')} <span class="ltr-tag">{p_out['next_match']}</span></div>
+                        <div style="color:var(--accent-pink); font-weight:800; margin-bottom:4px;">{t('out_label')} {p_out['name']} <span class="ltr-tag">({p_out['team']})</span></div>
+                        <div style="color:var(--text-primary); font-size:12px;">{t('season_pts_lbl')} <b>{p_out['total_points']}</b> | xP: <b style="color:#ef4444;">{p_out['xp']}</b></div>
+                        <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">{t('next_match_lbl')} <span class="ltr-tag">{p_out['next_match']}</span></div>
                     </div>
                     <div class="comparison-panel-in">
-                        <div style="color:#6ee7b7; font-weight:800; margin-bottom:4px;">🟢 {t('in_label')} {p_in['name']} <span class="ltr-tag">({p_in['team']})</span></div>
-                        <div style="color:#cbd5e1; font-size:12px;">{t('season_pts_lbl')} <b>{p_in['total_points']}</b> | xP: <b style="color:#34d399;">{p_in['xp']}</b></div>
-                        <div style="color:#94a3b8; font-size:11px; margin-top:2px;">{t('next_match_lbl')} <span class="ltr-tag">{p_in['next_match']}</span></div>
+                        <div style="color:var(--accent-mint); font-weight:800; margin-bottom:4px;">{t('in_label')} {p_in['name']} <span class="ltr-tag">({p_in['team']})</span></div>
+                        <div style="color:var(--text-primary); font-size:12px;">{t('season_pts_lbl')} <b>{p_in['total_points']}</b> | xP: <b style="color:#10b981;">{p_in['xp']}</b></div>
+                        <div style="color:var(--text-secondary); font-size:11px; margin-top:2px;">{t('next_match_lbl')} <span class="ltr-tag">{p_in['next_match']}</span></div>
                     </div>
                 </div>
             </div>
@@ -2934,7 +2977,7 @@ with t_transfers:
                         p["element"] = p_in["id"]
                         break
                 st.session_state.user_bank = new_bank
-                st.session_state.transfers_log.append(f"{p_out['name']} ⬅️ {p_in['name']}")
+                st.session_state.transfers_log.append(f"{p_out['name']} -> {p_in['name']}")
                 st.rerun()
 
     if st.session_state.transfers_log:
@@ -2957,11 +3000,11 @@ with t_analysis:
         st.markdown(
             f"""
             <div class="accessible-card" style="text-align:center;">
-                <div style="font-size:13px; color:#94a3b8;">{t('t3_squad_score')}</div>
+                <div style="font-size:13px; color:var(--text-secondary);">{t('t3_squad_score')}</div>
                 <div style="font-size:38px; font-weight:800; color:{rating_color}; margin:6px 0;">
-                    {squad_rating} <span style="font-size:16px; color:#64748b;">/ 100</span>
+                    {squad_rating} <span style="font-size:16px; color:var(--text-muted);">/ 100</span>
                 </div>
-                <div style="font-size:12px; color:#cbd5e1;">{t('t3_forecast')} <b>{starting_xp_total:.1f}</b> {t('pts')}</div>
+                <div style="font-size:12px; color:var(--text-primary);">{t('t3_forecast')} <b>{starting_xp_total:.1f}</b> {t('pts')}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -2986,8 +3029,9 @@ with t_analysis:
     st.markdown(f"#### {t('starting_11_title')}")
     starters_table = []
     for p in starters:
+        cap_role = " (C)" if p.get("is_cap") else (" (VC)" if p.get("is_vc") else "")
         starters_table.append({
-            t("th_player"): f"{p['name']} {'👑' if p.get('is_cap') else ('🥈' if p.get('is_vc') else '')}",
+            t("th_player"): f"{p['name']}{cap_role}",
             t("th_pos"): t(f"pos_{p['pos_code']}"),
             t("th_team"): p["team"],
             t("th_next_match"): p["next_match"],
@@ -3036,12 +3080,12 @@ with t_scout:
                 <div class="accessible-card">
                     <div class="split-box">
                         <div>
-                            <b>{p['name']}</b> <span class="ltr-tag" style="color:#94a3b8;">({p['team']})</span> {tag}
+                            <b>{p['name']}</b> <span class="ltr-tag" style="color:var(--text-secondary);">({p['team']})</span> {tag}
                         </div>
-                        <span class="ltr-tag" style="color:#38bdf8;">£{p['cost']}m | xP: {p['xp']}</span>
+                        <span class="ltr-tag" style="color:var(--accent-cyan);">£{p['cost']}m | xP: {p['xp']}</span>
                     </div>
-                    <div style="font-size:12px; color:#cbd5e1; margin-bottom:6px;">💡 {get_player_reason(p)}</div>
-                    <div style="font-size:11px; color:#94a3b8;">
+                    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">{get_player_reason(p)}</div>
+                    <div style="font-size:11px; color:var(--text-muted);">
                         {t('next_match_lbl')} <span class="badge-fdr fdr-{p['next_fdr']}"><span class="ltr-tag">{p['next_match']}</span></span> |
                         {t('t4_start_prob')} <b>{p['start_prob']}%</b> | {t('t4_tot_pts')} <b>{p['total_points']}</b>
                     </div>
@@ -3077,16 +3121,16 @@ with t_scout:
         with col_s1:
             st.markdown(
                 f"""
-                <div class="accessible-card" style="border-inline-start: 4px solid #10b981; background: linear-gradient(145deg, rgba(16, 185, 129, 0.08) 0%, rgba(13, 21, 35, 0.9) 100%);">
+                <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #10b981; background: var(--bg-card);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span class="meta-chip" style="color:#34d399; background:rgba(16, 185, 129, 0.18); border-color:rgba(16, 185, 129, 0.35);">{t('t4_cap_shield')}</span>
-                        <span class="ltr-tag" style="color:#38bdf8; font-weight:800; font-size:13px;">xP: {c_shield['xp']}</span>
+                        <span class="meta-chip" style="color:#10b981; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.3);">{t('t4_cap_shield')}</span>
+                        <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_shield['xp']}</span>
                     </div>
-                    <h4 style="margin:4px 0 8px 0; color:#f8fafc;">{c_shield['name']} <span class="ltr-tag" style="color:#94a3b8; font-size:13px;">({c_shield['team']})</span></h4>
-                    <div style="font-size:12px; color:#cbd5e1; line-height:1.6;">
+                    <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_shield['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_shield['team']})</span></h4>
+                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
                         {t('t4_ownership')} <span class="ltr-tag"><b>{c_shield['selected_by']}%</b></span> | {t('t4_start_prob')} <b>{c_shield['start_prob']}%</b><br>
                         {t('next_match_lbl')} <span class="ltr-tag"><b>{c_shield['next_match']}</b></span><br>
-                        <div style="margin-top:6px; font-size:11.5px; color:#94a3b8;">💡 {get_player_reason(c_shield)}</div>
+                        <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_shield)}</div>
                     </div>
                 </div>
                 """,
@@ -3095,16 +3139,16 @@ with t_scout:
         with col_s2:
             st.markdown(
                 f"""
-                <div class="accessible-card" style="border-inline-start: 4px solid #f59e0b; background: linear-gradient(145deg, rgba(245, 158, 11, 0.08) 0%, rgba(13, 21, 35, 0.9) 100%);">
+                <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #f59e0b; background: var(--bg-card);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span class="meta-chip" style="color:#fbbf24; background:rgba(245, 158, 11, 0.18); border-color:rgba(245, 158, 11, 0.35);">{t('t4_cap_sword')}</span>
-                        <span class="ltr-tag" style="color:#38bdf8; font-weight:800; font-size:13px;">xP: {c_sword['xp']}</span>
+                        <span class="meta-chip" style="color:#d97706; background:rgba(245, 158, 11, 0.12); border-color:rgba(245, 158, 11, 0.3);">{t('t4_cap_sword')}</span>
+                        <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_sword['xp']}</span>
                     </div>
-                    <h4 style="margin:4px 0 8px 0; color:#f8fafc;">{c_sword['name']} <span class="ltr-tag" style="color:#94a3b8; font-size:13px;">({c_sword['team']})</span></h4>
-                    <div style="font-size:12px; color:#cbd5e1; line-height:1.6;">
+                    <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_sword['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_sword['team']})</span></h4>
+                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
                         {t('t4_ownership')} <span class="ltr-tag"><b>{c_sword['selected_by']}% {t('t4_only')}</b></span> | {t('t4_start_prob')} <b>{c_sword['start_prob']}%</b><br>
                         {t('next_match_lbl')} <span class="ltr-tag"><b>{c_sword['next_match']}</b></span><br>
-                        <div style="margin-top:6px; font-size:11.5px; color:#94a3b8;">💡 {get_player_reason(c_sword)}</div>
+                        <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_sword)}</div>
                     </div>
                 </div>
                 """,
@@ -3191,20 +3235,20 @@ with t_scenarios:
             f"""
             <div class="accessible-card">
                 <div class="split-box">
-                    <b style="color:#f8fafc; font-size:14px;">{item['title']}</b>
+                    <b style="color:var(--text-primary); font-size:14px;">{item['title']}</b>
                     <span style="color:#10b981; font-weight:800; font-size:13.5px;">{t('t5_diff_xp')} +{diff_xp} xP</span>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
                     <div class="comparison-panel-out">
-                        <div style="color:#fca5a5; font-weight:800; margin-bottom:4px;">🔴 {t('out_label')} <b>{p_o['name']}</b> <span class="ltr-tag">({p_o['team']})</span></div>
-                        <div style="color:#cbd5e1; font-size:12px;">{t('season_pts_lbl')} <b>{p_o['total_points']}</b> | xP: <b style="color:#f87171;">{p_o['xp']}</b></div>
+                        <div style="color:var(--accent-pink); font-weight:800; margin-bottom:4px;">{t('out_label')} <b>{p_o['name']}</b> <span class="ltr-tag">({p_o['team']})</span></div>
+                        <div style="color:var(--text-primary); font-size:12px;">{t('season_pts_lbl')} <b>{p_o['total_points']}</b> | xP: <b style="color:#ef4444;">{p_o['xp']}</b></div>
                     </div>
                     <div class="comparison-panel-in">
-                        <div style="color:#6ee7b7; font-weight:800; margin-bottom:4px;">🟢 {t('in_label')} <b>{p_i['name']}</b> <span class="ltr-tag">({p_i['team']})</span></div>
-                        <div style="color:#cbd5e1; font-size:12px;">{t('left_in_bank')} <span class="ltr-tag"><b>£{rem}m</b></span> | xP: <b style="color:#34d399;">{p_i['xp']}</b></div>
+                        <div style="color:var(--accent-mint); font-weight:800; margin-bottom:4px;">{t('in_label')} <b>{p_i['name']}</b> <span class="ltr-tag">({p_i['team']})</span></div>
+                        <div style="color:var(--text-primary); font-size:12px;">{t('left_in_bank')} <span class="ltr-tag"><b>£{rem}m</b></span> | xP: <b style="color:#10b981;">{p_i['xp']}</b></div>
                     </div>
                 </div>
-                <div style="font-size:11.5px; color:#94a3b8; margin-top:8px; line-height:1.4;">💡 {get_player_reason(p_i)}</div>
+                <div style="font-size:11.5px; color:var(--text-muted); margin-top:8px; line-height:1.4;">{get_player_reason(p_i)}</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -3252,7 +3296,7 @@ with t_planner:
         with col_res1:
             if st.button(t("t6_reset_plan"), use_container_width=True):
                 st.session_state.planner_plan = {
-                    g: {"chip": "ללא צ'יפ", "transfers": []}
+                    g: {"chip": "no_chip", "transfers": []}
                     for g in range(next_gw, 39)
                 }
                 st.session_state.planner_captains = {}
@@ -3282,7 +3326,7 @@ with t_planner:
     # וידוא שכל המחזורים בטווח קיימים בתוכנית
     for g in range(next_gw, max_sim_gw + 1):
         if g not in st.session_state.planner_plan:
-            st.session_state.planner_plan[g] = {"chip": "ללא צ'יפ", "transfers": []}
+            st.session_state.planner_plan[g] = {"chip": "no_chip", "transfers": []}
 
     # חישוב סימולציה משורשרת
     simulated_gw_data = {}
@@ -3439,13 +3483,13 @@ with t_planner:
         }
         norm_chip = "no_chip" if current_chip_val in ["ללא צ'יפ", "No Chip", "no_chip"] else current_chip_val
         chosen_chip_key = st.selectbox(
-            f"🎮 {t('chip_for_gw')} {selected_gw}:",
+            f"{t('chip_for_gw')} {selected_gw}:",
             chip_keys,
             index=chip_keys.index(norm_chip) if norm_chip in chip_keys else 0,
             format_func=lambda x: chip_map[x],
             key=f"chip_select_{selected_gw}",
         )
-        new_chip_val = "ללא צ'יפ" if chosen_chip_key == "no_chip" else chosen_chip_key
+        new_chip_val = "no_chip" if chosen_chip_key == "no_chip" else chosen_chip_key
         if new_chip_val != current_chip_val:
             st.session_state.planner_plan[selected_gw]["chip"] = new_chip_val
             st.rerun()
@@ -3456,7 +3500,7 @@ with t_planner:
             for tr_idx, (o_id, i_id) in enumerate(list(st.session_state.planner_plan[selected_gw]["transfers"])):
                 c_tr_t, c_tr_b = st.columns([3.5, 1.5])
                 with c_tr_t:
-                    st.caption(f"🔴 {all_players[o_id]['name']} ⬅️ 🟢 {all_players[i_id]['name']}")
+                    st.caption(f"{all_players[o_id]['name']} -> {all_players[i_id]['name']}")
                 with c_tr_b:
                     if st.button(f"✕ {t('cancel_single_transfer')}", key=f"del_tr_{selected_gw}_{tr_idx}", use_container_width=True):
                         st.session_state.planner_plan[selected_gw]["transfers"].pop(tr_idx)
@@ -3467,7 +3511,7 @@ with t_planner:
                 st.session_state.planner_transfer_out = None
                 st.rerun()
         elif st.session_state.planner_plan[selected_gw].get("rebuilt_squad"):
-            st.success("✅ סגל נבנה מחדש מאפס למחזור זה" if st.session_state.app_lang == "he" else "✅ Squad rebuilt from scratch for this GW")
+            st.success(t("rb_rebuilt_success"))
             if st.button(t("t6_reset_rebuild"), key=f"clr_rebuild_{selected_gw}"):
                 del st.session_state.planner_plan[selected_gw]["rebuilt_squad"]
                 if "rebuilt_bank" in st.session_state.planner_plan[selected_gw]:
@@ -3496,7 +3540,7 @@ with t_planner:
     def execute_planner_bench_swap(p_out_id, p_in_id):
         legal, err_msg = is_swap_legal(p_out_id, p_in_id, cur_gw_sim["squad_snapshot"])
         if not legal:
-            st.error(f"⚠️ {err_msg}")
+            st.error(f"{err_msg}")
             return
         snap = cur_gw_sim["squad_snapshot"]
         p_o = next((x for x in snap if x["element"] == p_out_id), None)
@@ -3515,7 +3559,7 @@ with t_planner:
                     orig_o["position"], orig_i["position"] = orig_i["position"], orig_o["position"]
             st.session_state.planner_selected_id = None
             st.session_state.planner_swap_active = False
-            st.toast(f"✅ {all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
+            st.toast(f"{all_players[p_out_id]['name']} ⇄ {all_players[p_in_id]['name']}")
             st.rerun()
 
     def set_planner_captain(target_id):
@@ -3523,7 +3567,7 @@ with t_planner:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["cap"] = target_id
         st.session_state.planner_selected_id = None
-        st.toast(f"👑 {all_players[target_id]['name']} (C) GW {selected_gw}")
+        st.toast(f"{all_players[target_id]['name']} (C) GW {selected_gw}")
         st.rerun()
 
     def set_planner_vice_captain(target_id):
@@ -3531,7 +3575,7 @@ with t_planner:
             st.session_state.planner_captains[selected_gw] = {}
         st.session_state.planner_captains[selected_gw]["vc"] = target_id
         st.session_state.planner_selected_id = None
-        st.toast(f"🥈 {all_players[target_id]['name']} (VC) GW {selected_gw}")
+        st.toast(f"{all_players[target_id]['name']} (VC) GW {selected_gw}")
         st.rerun()
 
     # רינדור מגרש פלנר נקי וממורכז
@@ -3603,25 +3647,25 @@ with t_planner:
             <div class="rebuild-banner">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
                     <div>
-                        <span style="font-size:16px; font-weight:800; color:#38bdf8;">{t('rebuild_title')} — Gameweek {selected_gw}</span>
-                        <div style="font-size:12px; color:#94a3b8;">{t('rebuild_subtitle')}</div>
+                        <span style="font-size:16px; font-weight:800; color:var(--accent-cyan);">{t('rebuild_title')} — Gameweek {selected_gw}</span>
+                        <div style="font-size:12px; color:var(--text-secondary);">{t('rebuild_subtitle')}</div>
                     </div>
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <div style="text-align:center; background:#111a28; border:1px solid #1e2e46; padding:5px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:#94a3b8;">{t('total_squad_val')}</div>
-                            <div style="font-size:14px; font-weight:700; color:#f8fafc;"><span class="ltr-tag">£{total_budget:.1f}m</span></div>
+                        <div style="text-align:center; background:var(--bg-main); border:1px solid var(--border-color); padding:5px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:var(--text-secondary);">{t('total_squad_val')}</div>
+                            <div style="font-size:14px; font-weight:700; color:var(--text-primary);"><span class="ltr-tag">£{total_budget:.1f}m</span></div>
                         </div>
-                        <div style="text-align:center; background:#111a28; border:1px solid {budget_color}; padding:5px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:#94a3b8;">{t('rem_budget')}</div>
+                        <div style="text-align:center; background:var(--bg-main); border:1px solid {budget_color}; padding:5px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:var(--text-secondary);">{t('rem_budget')}</div>
                             <div style="font-size:16px; font-weight:800; color:{budget_color};"><span class="ltr-tag">£{rem_budget:.1f}m</span></div>
                         </div>
-                        <div style="text-align:center; background:#111a28; border:1px solid #1e2e46; padding:5px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:#94a3b8;">{t('players_picked')}</div>
-                            <div style="font-size:14px; font-weight:700; color:#38bdf8;">{num_picks} / 15</div>
+                        <div style="text-align:center; background:var(--bg-main); border:1px solid var(--border-color); padding:5px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:var(--text-secondary);">{t('players_picked')}</div>
+                            <div style="font-size:14px; font-weight:700; color:var(--accent-cyan);">{num_picks} / 15</div>
                         </div>
-                        <div style="text-align:center; background:#111a28; border:1px solid #1e2e46; padding:5px 10px; border-radius:8px;">
-                            <div style="font-size:10px; color:#94a3b8;">{t('avg_per_player')}</div>
-                            <div style="font-size:14px; font-weight:700; color:#f8fafc;"><span class="ltr-tag">£{avg_budget:.1f}m</span></div>
+                        <div style="text-align:center; background:var(--bg-main); border:1px solid var(--border-color); padding:5px 10px; border-radius:8px;">
+                            <div style="font-size:10px; color:var(--text-secondary);">{t('avg_per_player')}</div>
+                            <div style="font-size:14px; font-weight:700; color:var(--text-primary);"><span class="ltr-tag">£{avg_budget:.1f}m</span></div>
                         </div>
                     </div>
                 </div>
@@ -3731,10 +3775,10 @@ with t_planner:
 
         # פריסת המשבצות לפי עמדות
         pos_cfg = [
-            {"code": 1, "name": t("pos_1_pl"), "singular": t("pos_1"), "req": 2, "icon": "🧤"},
-            {"code": 2, "name": t("pos_2_pl"), "singular": t("pos_2"), "req": 5, "icon": "🛡️"},
-            {"code": 3, "name": t("pos_3_pl"), "singular": t("pos_3"), "req": 5, "icon": "👟"},
-            {"code": 4, "name": t("pos_4_pl"), "singular": t("pos_4"), "req": 3, "icon": "🎯"},
+            {"code": 1, "name": t("pos_1_pl"), "singular": t("pos_1"), "req": 2},
+            {"code": 2, "name": t("pos_2_pl"), "singular": t("pos_2"), "req": 5},
+            {"code": 3, "name": t("pos_3_pl"), "singular": t("pos_3"), "req": 5},
+            {"code": 4, "name": t("pos_4_pl"), "singular": t("pos_4"), "req": 3},
         ]
 
         def remove_rebuild_player(pid_to_remove):
@@ -3751,11 +3795,10 @@ with t_planner:
             sec_name = sec["name"]
             sing_name = sec["singular"]
             req_cnt = sec["req"]
-            icon = sec["icon"]
             cur_pids = [pid for pid in rebuild_picks if pid in all_players and all_players[pid]["pos_code"] == p_code]
             cur_cnt = len(cur_pids)
 
-            st.markdown(f"**{icon} {sec_name} ({cur_cnt}/{req_cnt}):**")
+            st.markdown(f"**{sec_name} ({cur_cnt}/{req_cnt}):**")
             if req_cnt == 2:
                 cols = st.columns([1.5, 2, 2, 1.5])[1:3]
             elif req_cnt == 3:
@@ -3773,14 +3816,13 @@ with t_planner:
                             remove_rebuild_player(pid)
                     else:
                         is_active_pos = (st.session_state.get("planner_rebuild_target_pos") == p_code)
-                        border_color = "#38bdf8" if is_active_pos else "#334155"
-                        bg_color = "rgba(56, 189, 248, 0.12)" if is_active_pos else "rgba(15, 23, 42, 0.6)"
+                        border_color = "var(--primary-color)" if is_active_pos else "var(--border-color)"
+                        bg_color = "rgba(56, 189, 248, 0.08)" if is_active_pos else "var(--bg-main)"
 
                         render_html(
                             f"""
                             <div style="background:{bg_color}; border:2px dashed {border_color}; border-radius:10px; width:110px; height:158px; display:flex; flex-direction:column; justify-content:center; align-items:center; margin:0 auto 3px auto; box-sizing:border-box;">
-                                <div style="font-size:24px; opacity:0.6;">{icon}</div>
-                                <div style="font-size:10px; color:#94a3b8; font-weight:700; margin-top:4px;">{t('empty_slot')}</div>
+                                <div style="font-size:11px; color:var(--text-secondary); font-weight:700; margin-top:4px;">{t('empty_slot')}</div>
                             </div>
                             """
                         )
@@ -3808,8 +3850,8 @@ with t_planner:
                 <div class="transfer-drawer">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
                         <div>
-                            <span style="font-size:15px; font-weight:800; color:#38bdf8;">{drawer_title_str}</span>
-                            <div style="font-size:11px; color:#cbd5e1;">{max_price_desc_str} <b style="color:#10b981;">£{max_allowed_price:.1f}m</b></div>
+                            <span style="font-size:15px; font-weight:800; color:var(--accent-cyan);">{drawer_title_str}</span>
+                            <div style="font-size:11px; color:var(--text-secondary);">{max_price_desc_str} <b style="color:#10b981;">£{max_allowed_price:.1f}m</b></div>
                         </div>
                     </div>
                 </div>
@@ -3847,8 +3889,8 @@ with t_planner:
                             <div class="accessible-card" style="text-align:center; padding:10px;">
                                 {r_jersey}
                                 <b>{r_p['name']}</b> ({r_p['team']})<br>
-                                <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
-                                <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{get_player_reason(r_p)}</div>
+                                <span class="ltr-tag" style="color:var(--accent-cyan);">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
+                                <div style="font-size:10px; color:var(--text-secondary); margin:4px 0;">{get_player_reason(r_p)}</div>
                                 <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
                             </div>
                             """
@@ -3894,7 +3936,7 @@ with t_planner:
             c_pl_c1, c_pl_c2 = st.columns(2)
             with c_pl_c1:
                 new_pl_c = st.selectbox(
-                    f"👑 {t('cap_select_label')} (GW {selected_gw})",
+                    f"{t('cap_select_label')} (GW {selected_gw})",
                     list(pl_starter_dict.keys()),
                     index=list(pl_starter_dict.keys()).index(cur_pl_cap) if cur_pl_cap in pl_starter_dict else 0,
                     format_func=lambda x: pl_starter_dict[x],
@@ -3905,7 +3947,7 @@ with t_planner:
             with c_pl_c2:
                 pl_vc_cand = {k: v for k, v in pl_starter_dict.items() if k != cur_pl_cap}
                 new_pl_vc = st.selectbox(
-                    f"🥈 {t('vc_select_label')} (GW {selected_gw})",
+                    f"{t('vc_select_label')} (GW {selected_gw})",
                     list(pl_vc_cand.keys()),
                     index=list(pl_vc_cand.keys()).index(cur_pl_vc) if cur_pl_vc in pl_vc_cand else 0,
                     format_func=lambda x: pl_vc_cand[x],
@@ -3919,10 +3961,10 @@ with t_planner:
             p_pl_sw_from = all_players.get(st.session_state.planner_selected_id)
             if p_pl_sw_from:
                 is_pl_starter = any(p["id"] == p_pl_sw_from["id"] for p in cur_gw_sim["starters"])
-                target_area_text = "מהספסל" if is_pl_starter else "מההרכב"
+                target_area_text = t("from_the_bench") if is_pl_starter else t("from_the_xi")
                 c_sw_info, c_sw_canc = st.columns([4, 1])
                 with c_sw_info:
-                    st.info(f"🔁 **{t('swap_banner_title')}** {p_pl_sw_from['name']} ({p_pl_sw_from['team']} | {p_pl_sw_from['pos']}) — **{t('swap_active_hint_prefix')} {target_area_text} {t('swap_active_hint_suffix')}** (GW {selected_gw})")
+                    st.info(f"**{t('swap_banner_title')}** {p_pl_sw_from['name']} ({p_pl_sw_from['team']} | {get_player_pos(p_pl_sw_from)}) — **{t('swap_active_hint_prefix')} {target_area_text} {t('swap_active_hint_suffix')}** (GW {selected_gw})")
                 with c_sw_canc:
                     if st.button(t("cancel_swap"), key=f"pl_cancel_swap_top_{selected_gw}", use_container_width=True, type="primary"):
                         st.session_state.planner_swap_active = False
@@ -3931,7 +3973,7 @@ with t_planner:
 
         col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
         with col_pl_pitch:
-            st.markdown(f"#### 🏟️ {t('tab_squad')} — Gameweek {selected_gw}")
+            st.markdown(f"#### {t('tab_squad')} — Gameweek {selected_gw}")
             with st.container():
                 st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
                 # חלוצים
@@ -3956,7 +3998,6 @@ with t_planner:
                     <div class="bench-anchor"></div>
                     <div class="bench-dugout-badge">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:16px;">🪑</span>
                             <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
                         </div>
                         <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
@@ -3970,9 +4011,9 @@ with t_planner:
             render_gw_fixtures_panel(selected_gw)
 
         # חלון תכנון העברות שוק בפלנר
-        with st.expander(f"🛒 {t('planner_tr_expander')} (GW {selected_gw})"):
+        with st.expander(f"{t('planner_tr_expander')} (GW {selected_gw})"):
             all_sim_players = cur_gw_sim["starters"] + cur_gw_sim["bench"]
-            pl_tr_map = {p["id"]: f"{p['name']} ({p['pos']} | £{p['cost']}m | {p['team']})" for p in all_sim_players}
+            pl_tr_map = {p["id"]: f"{p['name']} ({get_player_pos(p)} | £{p['cost']}m | {p['team']})" for p in all_sim_players}
             sel_pl_tr_out = st.selectbox(f"{t('selling_player')} (GW {selected_gw}):", list(pl_tr_map.keys()), format_func=lambda x: pl_tr_map[x], key=f"pl_tr_sel_out_{selected_gw}")
             p_tr_out = all_players[sel_pl_tr_out]
             max_tr_budget = round(p_tr_out["cost"] + cur_gw_sim["bank"], 1)
@@ -4013,7 +4054,7 @@ with t_planner:
                             st.session_state.planner_plan[selected_gw]["transfers"].append(
                                 (p_tr_out["id"], r_p["id"])
                             )
-                            st.toast(f"✅ {r_p['name']} ({r_p['team']})")
+                            st.toast(f"{r_p['name']} ({r_p['team']})")
                             st.rerun()
 
             st.write("")
@@ -4034,7 +4075,7 @@ with t_planner:
                         st.session_state.planner_plan[selected_gw]["transfers"].append(
                             (p_tr_out["id"], chosen_pool_id)
                         )
-                        st.toast(f"✅ {p_tr_out['name']} ⬅️ {all_players[chosen_pool_id]['name']}")
+                        st.toast(f"{p_tr_out['name']} -> {all_players[chosen_pool_id]['name']}")
                         st.rerun()
 
 # ---------------------------------------------------------------------
@@ -4079,7 +4120,7 @@ with t_leagues:
             l_info = league_data.get("league", {})
             results = league_data["standings"].get("results", [])
 
-            st.markdown(f"#### 🏅 {t('t7_league_table')} **{l_info.get('name', 'Classic League')}**")
+            st.markdown(f"#### {t('t7_league_table')} **{l_info.get('name', 'Classic League')}**")
 
             if results:
                 leader = results[0]
@@ -4101,7 +4142,7 @@ with t_leagues:
                 table_rows = []
                 for r in results[:20]:
                     is_me = (str(r["entry"]) == str(team_id))
-                    prefix = "👉 " if is_me else ""
+                    prefix = f"{t('you_indicator')} " if is_me else ""
                     table_rows.append({
                         t("t7_th_rank"): r["rank"],
                         t("t7_th_team_name"): f"{prefix}{r['entry_name']}",
@@ -4147,12 +4188,12 @@ with t_leagues:
                                 f"""
                                 <div class="accessible-card">
                                     <div class="split-box">
-                                        <b style="color:#ffffff; font-size:13.5px;">🕵️ {t('t7_rival_details')}</b>
-                                        <span class="meta-chip" style="color:#ffd700;">GW {next_gw - 1}</span>
+                                        <b style="color:var(--text-primary); font-size:13.5px;">{t('t7_rival_details')}</b>
+                                        <span class="meta-chip" style="color:var(--accent-cyan);">GW {next_gw - 1}</span>
                                     </div>
-                                    <div style="font-size:13px; color:#e2d9f3; line-height:1.7;">
-                                        👑 {t('t7_rival_cap')} <b style="color:#ffd700;">{r_cap_obj}</b><br>
-                                        🎮 {t('t7_rival_chip')} <span class="ltr-tag" style="background:rgba(0, 255, 135, 0.15); color:#00ff87; padding:1px 6px; border-radius:4px; font-weight:700;">{chip_txt}</span>
+                                    <div style="font-size:13px; color:var(--text-secondary); line-height:1.7;">
+                                        {t('t7_rival_cap')} <b style="color:var(--text-primary);">{r_cap_obj}</b><br>
+                                        {t('t7_rival_chip')} <span class="ltr-tag" style="background:rgba(16, 185, 129, 0.12); color:#10b981; padding:1px 6px; border-radius:4px; font-weight:700;">{chip_txt}</span>
                                     </div>
                                 </div>
                                 """,
@@ -4163,13 +4204,13 @@ with t_leagues:
                                 f"""
                                 <div class="accessible-card">
                                     <div class="split-box">
-                                        <b style="color:#ffffff; font-size:13.5px;">🎯 {t('t7_differentials')}</b>
-                                        <span class="meta-chip" style="color:#00ff87; background:rgba(0, 255, 135, 0.15); border:1px solid rgba(0, 255, 135, 0.3);">H2H Edge</span>
+                                        <b style="color:var(--text-primary); font-size:13.5px;">{t('t7_differentials')}</b>
+                                        <span class="meta-chip" style="color:#10b981; background:rgba(16, 185, 129, 0.12); border:1px solid rgba(16, 185, 129, 0.3);">H2H Edge</span>
                                     </div>
-                                    <div style="font-size:11.5px; color:#a79bc8; margin-bottom:4px;">{t('t7_you_have')}</div>
-                                    <div style="color:#00ff87; font-size:12px; font-weight:700; background:rgba(0, 255, 135, 0.12); border:1px solid rgba(0, 255, 135, 0.3); padding:5px 8px; border-radius:6px; margin-bottom:8px;">{my_diffs_str}</div>
-                                    <div style="font-size:11.5px; color:#a79bc8; margin-bottom:4px;">{t('t7_rival_has')}</div>
-                                    <div style="color:#ff85ad; font-size:12px; font-weight:700; background:rgba(233, 0, 82, 0.12); border:1px solid rgba(233, 0, 82, 0.3); padding:5px 8px; border-radius:6px;">{rival_diffs_str}</div>
+                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px;">{t('t7_you_have')}</div>
+                                    <div style="color:#10b981; font-size:12px; font-weight:700; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.25); padding:5px 8px; border-radius:6px; margin-bottom:8px;">{my_diffs_str}</div>
+                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px;">{t('t7_rival_has')}</div>
+                                    <div style="color:#ef4444; font-size:12px; font-weight:700; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.25); padding:5px 8px; border-radius:6px;">{rival_diffs_str}</div>
                                 </div>
                                 """,
                                 unsafe_allow_html=True,
