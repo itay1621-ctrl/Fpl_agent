@@ -52,42 +52,31 @@ TEAM_KIT_COLORS = {
     "WOL": {"primary": "#FDB913", "secondary": "#231F20", "text": "#000000"},
 }
 
+def render_html(html_str):
+    """רינדור בטוח של HTML בסטרימליט ללא באגים של Markdown Indented Code Block"""
+    compact = "".join(line.strip() for line in html_str.splitlines())
+    st.markdown(compact, unsafe_allow_html=True)
+
 def get_jersey_svg(team_code, is_gk=False):
     if is_gk:
         c1, c2 = "#10b981", "#059669"
         stripe_defs = ""
         fill_attr = f'fill="{c1}"'
     else:
-        colors = TEAM_KIT_COLORS.get(team_code, {"primary": "#38bdf8", "secondary": "#0284c7"})
-        c1 = colors["primary"]
-        c2 = colors["secondary"]
-        fill_attr = f'fill="{c1}"'
-        stripe_defs = ""
-        if team_code in ["NEW", "BOU", "CRY", "BRE"]:
-            stripe_defs = f"""
-            <defs>
-              <pattern id="stripes-{team_code}" width="8" height="8" patternUnits="userSpaceOnUse">
-                <rect width="4" height="8" fill="{c1}" />
-                <rect x="4" width="4" height="8" fill="{c2}" />
-              </pattern>
-            </defs>
-            """
-            fill_attr = f'fill="url(#stripes-{team_code})"'
+        cfg = TEAM_KIT_COLORS.get(team_code, {"primary": "#38bdf8", "secondary": "#0284c7"})
+        c1 = cfg["primary"]
+        c2 = cfg["secondary"]
+        if team_code in ["NEW", "BHA", "BRE", "SOU", "BOU", "CRY"]:
+            stripe_defs = f'<defs><pattern id="str-{team_code}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="4" height="8" fill="{c1}"/><rect x="4" width="4" height="8" fill="{c2}"/></pattern></defs>'
+            fill_attr = f'fill="url(#str-{team_code})"'
+        else:
+            stripe_defs = ""
+            fill_attr = f'fill="{c1}"'
 
-    return f"""
-    <div style="display:flex; justify-content:center; align-items:center; margin:1px 0;">
-      <svg width="34" height="30" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {stripe_defs}
-        <path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/>
-        <path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/>
-        <path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    """
+    return f'<div style="display:flex;justify-content:center;align-items:center;margin:1px 0;"><svg width="34" height="30" viewBox="0 0 46 42" fill="none" xmlns="http://www.w3.org/2000/svg">{stripe_defs}<path d="M14 6L5 13L10 20L14 17V38H32V17L36 20L41 13L32 6C30 9 27 10 23 10C19 10 16 9 14 6Z" {fill_attr} stroke="#0f172a" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 6C16 9 19 10 23 10C27 10 30 9 32 6C30 4 27 3 23 3C19 3 16 4 14 6Z" fill="{c2}" stroke="#0f172a" stroke-width="1.2"/><path d="M10 20L5 13L9 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/><path d="M36 20L41 13L37 10" stroke="{c2}" stroke-width="1.5" stroke-linecap="round"/></svg></div>'
 
 # =====================================================================
-# 3. מערכת CSS גלובלית ועיצוב מותאם מובייל
+# 3. עיצוב CSS מלא: נגישות, RTL, רספונסיביות מובייל וכפתורי מיקרו
 # =====================================================================
 st.markdown(
     """
@@ -95,28 +84,22 @@ st.markdown(
 :root {
     --bg-main: #090e17;
     --bg-card: #111a28;
-    --bg-card-hover: #18283f;
-    --accent-blue: #38bdf8;
-    --accent-gold: #facc15;
-    --accent-silver: #94a3b8;
-    --accent-green: #10b981;
-    --accent-red: #ef4444;
+    --bg-card-hover: #162235;
+    --border-color: #1e2e46;
     --text-primary: #f8fafc;
     --text-muted: #94a3b8;
-    --border-color: #1e2e46;
+    --accent-blue: #38bdf8;
+    --accent-green: #10b981;
+    --accent-yellow: #f59e0b;
+    --accent-red: #ef4444;
 }
 
-div[data-testid="stAppViewContainer"] {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    direction: rtl;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-div[data-testid="stMarkdownContainer"] p {
+.main {
     direction: rtl;
     text-align: right;
-    line-height: 1.5;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .ltr-tag {
@@ -917,24 +900,19 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# פונקציית רינדור כרטיס שחקן נקייה
-def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None):
-    is_c = p.get("is_cap", False)
-    is_v = p.get("is_vc", False)
+# פונקציית רינדור כרטיס שחקן נקייה ואטומה לבאגי Markdown
+def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None, custom_cap=None, custom_vc=None):
+    is_c = custom_cap if custom_cap is not None else p.get("is_cap", False)
+    is_v = custom_vc if custom_vc is not None else p.get("is_vc", False)
 
-    cap_badge = ""
-    if is_c:
-        cap_badge = '<span class="badge-c">C</span>'
-    elif is_v:
-        cap_badge = '<span class="badge-vc">VC</span>'
-
+    cap_badge = '<span class="badge-c">C</span>' if is_c else ('<span class="badge-vc">VC</span>' if is_v else "")
     bench_class = "card-bench" if is_bench else ""
     sel_class = "p-card-selected" if is_selected else ("p-card-transfer-selected" if is_transfer_selected else "")
 
-    if p["status"] != "a" or p["chance"] <= 25:
+    if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
         status_class = "card-danger"
-        status_pill = f'<div class="prob-badge prob-red">🔴 פצוע {p["chance"]}%</div>'
-    elif p["chance"] < 100 or p["start_prob"] < 70:
+        status_pill = f'<div class="prob-badge prob-red">🔴 פצוע {p["start_prob"]}%</div>'
+    elif p["chance"] <= 75 or p["status"] == "d":
         status_class = "card-warning"
         status_pill = f'<div class="prob-badge prob-yellow">🟡 בספק {p["start_prob"]}%</div>'
     else:
@@ -943,7 +921,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
 
     jersey_svg = get_jersey_svg(p["team"], is_gk=(p["pos_code"] == 1))
     club_cfg = TEAM_KIT_COLORS.get(p["team"], {"primary": "#38bdf8"})
-    top_color_bar = f'<div style="height:3px; background:{club_cfg["primary"]}; border-radius:3px 3px 0 0; margin:-5px -3px 3px -3px;"></div>'
+    top_color_bar = f'<div style="height:3px;background:{club_cfg["primary"]};border-radius:3px 3px 0 0;margin:-5px -3px 3px -3px;"></div>'
 
     if target_gw is not None:
         gw_map = p.get("gw_fixtures_map", {})
@@ -968,7 +946,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     xp_mult = 2 if is_c else 1
     xp_val = round(p["xp"] * xp_mult, 1)
 
-    return (
+    card_html = (
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
         f'{top_color_bar}'
         f'{jersey_svg}'
@@ -979,6 +957,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div style="font-size:9px; color:#38bdf8; font-weight:700; margin-top:2px;">xP: {xp_val}</div>'
         f'</div>'
     )
+    return "".join(line.strip() for line in card_html.splitlines())
 
 # =====================================================================
 # 9. שבעת הטאבים המרכזיים
@@ -1100,7 +1079,7 @@ with t_squad:
         p_sel = all_players.get(st.session_state.squad_swap_id)
         if p_sel:
             is_starter = any(p["element"] == p_sel["id"] for p in starters)
-            st.markdown(
+            render_html(
                 f"""
                 <div class="action-bar-under-pitch">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
@@ -1114,8 +1093,7 @@ with t_squad:
                         </div>
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             col_a1, col_a2, col_a3, col_a4 = st.columns([1.2, 1.2, 2.5, 1])
@@ -1862,7 +1840,7 @@ with t_planner:
         p_pl_sel = all_players.get(st.session_state.planner_swap_out)
         if p_pl_sel:
             is_pl_starter = any(p["element"] == p_pl_sel["id"] for p in cur_gw_sim["starters"])
-            st.markdown(
+            render_html(
                 f"""
                 <div class="action-bar-under-pitch">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
@@ -1876,8 +1854,7 @@ with t_planner:
                         </div>
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             c_pa1, c_pa2, c_pa3, c_pa4, c_pa5 = st.columns([1, 1, 1.3, 1.2, 0.8])
@@ -1920,7 +1897,7 @@ with t_planner:
         max_tr_budget = round(p_tr_out["cost"] + cur_gw_sim["bank"], 1)
         cur_squad_ids = [p["id"] for p in cur_gw_sim["starters"] + cur_gw_sim["bench"]]
 
-        st.markdown(
+        render_html(
             f"""
             <div class="transfer-drawer">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1933,8 +1910,7 @@ with t_planner:
                     </div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         b_close_col, b_sch_col = st.columns([1, 3])
@@ -1964,17 +1940,16 @@ with t_planner:
             for r_idx, r_p in enumerate(recommended_picks):
                 with rec_cols[r_idx]:
                     r_jersey = get_jersey_svg(r_p["team"], is_gk=(r_p["pos_code"] == 1))
-                    st.markdown(
+                    render_html(
                         f"""
                         <div class="accessible-card" style="text-align:center; padding:10px;">
                             {r_jersey}
-                            <b style="font-size:13px;">{r_p['name']}</b>
-                            <div style="font-size:11px; color:#94a3b8;"><span class="ltr-tag">{r_p['team']} | £{r_p['cost']}m</span></div>
-                            <div style="font-size:11px; color:#10b981; font-weight:700;">xP: {r_p['xp']}</div>
-                            <div style="font-size:10px; color:#cbd5e1; margin-top:4px;">💡 {r_p['reason']}</div>
+                            <b>{r_p['name']}</b> ({r_p['team']})<br>
+                            <span class="ltr-tag" style="color:#38bdf8;">£{r_p['cost']}m | xP: {r_p['xp']}</span>
+                            <div style="font-size:10px; color:#cbd5e1; margin:4px 0;">{r_p['reason']}</div>
+                            <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
                         </div>
-                        """,
-                        unsafe_allow_html=True,
+                        """
                     )
                     if st.button(f"רכוש את {r_p['name']} 🛒", key=f"buy_rec_{r_p['id']}_{selected_gw}", use_container_width=True, type="primary"):
                         st.session_state.planner_plan[selected_gw]["transfers"].append((p_tr_out["id"], r_p["id"]))
