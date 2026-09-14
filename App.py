@@ -13,7 +13,51 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- עיצוב CSS: נגישות, RTL, כפתורי חילוף בראש השחקן (FPL Hub Style) ו-Planner מתקדם ---
+# =====================================================================
+# מילון צבעי חולצות הקבוצות הרשמי של הפרמייר-ליג (Kit Colors)
+# =====================================================================
+TEAM_KITS = {
+    "ARS": {"primary": "#EF0107", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "AVL": {"primary": "#670E36", "secondary": "#95B1D3", "text": "#FFFFFF"},
+    "BHA": {"primary": "#0057B8", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "BOU": {"primary": "#DA291C", "secondary": "#000000", "text": "#FFFFFF"},
+    "BRE": {"primary": "#E30613", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "CHE": {"primary": "#034694", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "CRY": {"primary": "#1B458F", "secondary": "#C4122E", "text": "#FFFFFF"},
+    "EVE": {"primary": "#003399", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "FUL": {"primary": "#FFFFFF", "secondary": "#000000", "text": "#000000"},
+    "IPS": {"primary": "#00448A", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "LEI": {"primary": "#003090", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "LIV": {"primary": "#C8102E", "secondary": "#00B2A9", "text": "#FFFFFF"},
+    "MCI": {"primary": "#6CABDD", "secondary": "#1C2C5B", "text": "#1C2C5B"},
+    "MUN": {"primary": "#DA291C", "secondary": "#000000", "text": "#FFFFFF"},
+    "NEW": {"primary": "#241F20", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "NFO": {"primary": "#DD0000", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "SOU": {"primary": "#D71920", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+    "TOT": {"primary": "#FFFFFF", "secondary": "#132257", "text": "#132257"},
+    "WHU": {"primary": "#7A263A", "secondary": "#1BB1E7", "text": "#FFFFFF"},
+    "WOL": {"primary": "#FDB913", "secondary": "#231F20", "text": "#231F20"},
+    "LEE": {"primary": "#FFFFFF", "secondary": "#0000FF", "text": "#0000FF"},
+    "BRU": {"primary": "#003399", "secondary": "#FFFFFF", "text": "#FFFFFF"},
+}
+
+def get_kit(team_code):
+    return TEAM_KITS.get(team_code, {"primary": "#38bdf8", "secondary": "#1e2e46", "text": "#ffffff"})
+
+def render_jersey_svg(team_code):
+    kit = get_kit(team_code)
+    p = kit["primary"]
+    s = kit["secondary"]
+    return f"""
+    <svg width="24" height="22" viewBox="0 0 40 38" style="margin: 0 auto 3px auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));">
+        <path d="M12,4 L20,9 L28,4 L38,11 L33,20 L29,17 L29,36 L11,36 L11,17 L7,20 L2,11 Z" fill="{p}" stroke="{s}" stroke-width="2"/>
+        <path d="M16,6 Q20,12 24,6" fill="none" stroke="{s}" stroke-width="2.5"/>
+    </svg>
+    """
+
+# =====================================================================
+# עיצוב CSS מתקדם: מגרש ממורכז ומהודק, כרטיסים פרופורציונליים ו-RTL
+# =====================================================================
 st.markdown(
     """
 <style>
@@ -86,32 +130,62 @@ div[data-testid="stMarkdownContainer"] p {
     color: var(--text-primary);
 }
 
-/* מעטפת מגרש כדורגל */
+/* =====================================================================
+   מגרש כדורגל מקצועי וממורכז (מונע מריחה במסכים רחבים)
+   ===================================================================== */
 .pitch-container-wrapper {
-    background: radial-gradient(circle, #1a3821 0%, #0d1e12 100%);
-    border: 2px solid #234e2c;
-    border-radius: 16px;
-    padding: 18px 12px;
-    margin: 12px 0;
-    box-shadow: inset 0 0 35px rgba(0,0,0,0.6);
+    max-width: 820px !important;
+    margin: 0 auto 16px auto !important;
+    background: radial-gradient(circle at 50% 50%, #1c4422 0%, #112d16 75%, #0a1c0d 100%) !important;
+    border: 2px solid #2d6b34 !important;
+    border-radius: 20px !important;
+    padding: 22px 16px !important;
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.65), inset 0 0 50px rgba(0, 0, 0, 0.5) !important;
+    position: relative;
 }
 
-/* כפתורי חילוף בראש השחקן */
+/* קווי מגרש עדינים ואותנטיים */
+.pitch-container-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    right: 8%;
+    height: 1.5px;
+    background: rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+}
+
+/* מרכוז תאי שחקנים ועצירת התרחבות מוגזמת */
+div[data-testid="column"] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* כפתור החילוף בראש הכרטיס */
+div[data-testid="stButton"] {
+    width: 100%;
+    max-width: 104px !important;
+}
+
 div[data-testid="stButton"] button {
-    border-radius: 8px 8px 0 0 !important;
+    width: 100% !important;
+    border-radius: 9px 9px 0 0 !important;
     margin-bottom: -1px !important;
-    padding: 2px 4px !important;
+    padding: 1px 4px !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    height: 25px !important;
-    min-height: 25px !important;
+    height: 24px !important;
+    min-height: 24px !important;
     line-height: 22px !important;
     transition: all 0.2s ease !important;
     box-shadow: none !important;
 }
 
 div[data-testid="stButton"] button[kind="secondary"] {
-    background: #162235 !important;
+    background: #141f2e !important;
     color: #38bdf8 !important;
     border: 1px solid #1e2e46 !important;
     border-bottom: none !important;
@@ -132,30 +206,37 @@ div[data-testid="stButton"] button[kind="primary"] {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.7) !important;
 }
 
-/* כרטיס שחקן צמוד לכפתור */
+/* כרטיס השחקן המעוצב - מידות מוגדרות ופרופורציות מדויקות */
 .p-card-body {
-    background: rgba(17, 26, 40, 0.95);
+    background: rgba(17, 26, 40, 0.94);
     border: 1px solid var(--border-color);
-    border-top: none !important;
-    border-radius: 0 0 8px 8px !important;
-    padding: 6px 4px 8px 4px;
+    border-radius: 0 0 9px 9px !important;
+    padding: 6px 4px 6px 4px;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    min-height: 105px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.4);
+    width: 100%;
+    max-width: 104px !important;
+    min-height: 118px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.p-card-body:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.6);
 }
 
 .cap-gold { border: 2px solid #facc15 !important; border-top: none !important; }
-.card-bench { background: rgba(30, 41, 59, 0.7); border: 1px dashed #475569; border-top: none !important; }
+.card-bench { background: rgba(22, 32, 48, 0.82); border: 1px dashed #475569; border-top: none !important; }
 .card-danger { border: 2px solid #f87171 !important; border-top: none !important; background: rgba(248, 113, 113, 0.15) !important; }
 .card-warning { border: 2px solid #fbd38d !important; border-top: none !important; background: rgba(251, 211, 141, 0.15) !important; }
-.card-selected-sub { border: 2px solid #38bdf8 !important; border-top: none !important; box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important; }
+.card-selected-sub { border: 2px solid #38bdf8 !important; border-top: none !important; box-shadow: 0 0 14px rgba(56, 189, 248, 0.75) !important; }
 
 .p-name {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -164,13 +245,13 @@ div[data-testid="stButton"] button[kind="primary"] {
 .p-sub {
     font-size: 9px;
     color: var(--text-muted);
-    margin: 2px 0;
+    margin: 1px 0;
 }
 
 .badge-fdr {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 1px 5px;
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 1px 4px;
     border-radius: 4px;
     display: inline-block;
 }
@@ -188,8 +269,8 @@ div[data-testid="stButton"] button[kind="primary"] {
     width: fit-content;
 }
 
-.prob-red { background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid #f87171; }
-.prob-yellow { background: rgba(251, 211, 141, 0.2); color: #fde68a; border: 1px solid #fbd38d; }
+.prob-red { background: rgba(248, 113, 113, 0.25); color: #fca5a5; border: 1px solid #f87171; }
+.prob-yellow { background: rgba(251, 211, 141, 0.25); color: #fde68a; border: 1px solid #fbd38d; }
 .prob-green { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
 
 .accessible-card {
@@ -242,20 +323,28 @@ div[data-testid="stButton"] button[kind="primary"] {
     display: flex; 
     justify-content: center; 
     gap: 3px; 
-    margin-top: 5px; 
+    margin-top: 4px; 
 }
 .mini-fxt { 
-    font-size: 8.5px; 
+    font-size: 8px; 
     font-weight: 800; 
     text-transform: uppercase; 
-    padding: 2px 4px; 
+    padding: 1px 3px; 
     border-radius: 3px; 
     color: white; 
-    line-height: 1; 
-    text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    line-height: 1.1; 
+    text-shadow: 0 1px 1px rgba(0,0,0,0.6);
 }
 
-/* תיבת החלפה מהירה ב-Planner */
+.bench-wrapper {
+    max-width: 620px !important;
+    margin: 12px auto !important;
+    background: #0d1624;
+    border: 1px dashed #2a3c55;
+    border-radius: 16px;
+    padding: 14px 12px;
+}
+
 .planner-swap-box {
     background: #111a28;
     border: 2px solid #38bdf8;
@@ -282,7 +371,7 @@ div[data-testid="stButton"] button[kind="primary"] {
 )
 
 
-# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי לכל מחזורי העונה (עד GW 38) ---
+# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי (GW 4 עד GW 38) ---
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -858,7 +947,7 @@ t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner = st.tabs([
 
 
 def render_player_unit(col, p, is_bench=False):
-    """רינדור שחקן עם כפתור חילוף בראשו"""
+    """רינדור כרטיס שחקן מהודק עם חולצת מועדון אותנטית וכפתור חילוף בראשו"""
     with col:
         curr_out = st.session_state.swap_state.get("out_id")
         is_sel = (curr_out == p["id"])
@@ -891,9 +980,14 @@ def render_player_unit(col, p, is_bench=False):
             status_class = "cap-gold" if p.get("is_cap") else ""
             status_pill = f'<div class="prob-badge prob-green">🟢 {p["start_prob"]}% פותח</div>'
 
+        kit = get_kit(p["team"])
+        kit_color = kit["primary"]
+        jersey_svg = render_jersey_svg(p["team"])
+
         st.markdown(
             f"""
-            <div class="p-card-body {status_class} {bench_class} {sel_class}">
+            <div class="p-card-body {status_class} {bench_class} {sel_class}" style="border-top: 3px solid {kit_color} !important;">
+                {jersey_svg}
                 <div class="p-name">{cap_badge}{p['name']}</div>
                 <div class="p-sub"><span class="ltr-tag">{p['team']} | £{p['cost']}m</span></div>
                 <div class="badge-fdr fdr-{p['next_fdr']}"><span class="ltr-tag">{p['next_match']}</span></div>
@@ -930,8 +1024,10 @@ with t_squad:
     defs = [p for p in starters if p["pos_code"] == 2]
     gks = [p for p in starters if p["pos_code"] == 1]
 
+    # מגרש כדורגל בממדים מדויקים וממורכזים (820px)
     st.markdown('<div class="pitch-container-wrapper">', unsafe_allow_html=True)
 
+    # 1. חלוצים
     if fwds:
         if len(fwds) == 1:
             _, c_fwd, _ = st.columns([1, 1, 1])
@@ -947,6 +1043,7 @@ with t_squad:
 
     st.write("")
 
+    # 2. קישור
     if mids:
         mid_cols = st.columns(len(mids))
         for i, p in enumerate(mids):
@@ -954,6 +1051,7 @@ with t_squad:
 
     st.write("")
 
+    # 3. הגנה
     if defs:
         def_cols = st.columns(len(defs))
         for i, p in enumerate(defs):
@@ -961,17 +1059,20 @@ with t_squad:
 
     st.write("")
 
+    # 4. שוער
     if gks:
         _, c_gk, _ = st.columns([2, 1, 2])
         render_player_unit(c_gk, gks[0])
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.write("")
+    # ספסל מהודק וממורכז
+    st.markdown('<div class="bench-wrapper">', unsafe_allow_html=True)
     st.caption("🪑 שחקני הספסל:")
     bench_cols = st.columns(4)
     for i, p in enumerate(bench):
         render_player_unit(bench_cols[i], p, is_bench=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # טאב 2: מעבדת חילופים
@@ -1368,7 +1469,7 @@ with t_scenarios:
 
 
 # =====================================================================
-# טאב 6: מתכנן מחזורים משורשר ואינטואיטיבי (עד מחזור 38)
+# טאב 6: מתכנן מחזורים משורשר עם חולצות קבוצה ומגרש מהודק (עד GW 38)
 # =====================================================================
 with t_planner:
     st.subheader("🗓️ מתכנן מחזורים משורשר וסימולטור צ'יפים (עד Gameweek 38)")
@@ -1376,7 +1477,6 @@ with t_planner:
         "מנוע החלטות אינטראקטיבי: לחץ על **'🔄 החלף'** בראש כרטיס שחקן על המגרש כדי להסירו ולבחור לו מחליף בלחיצה אחת."
     )
 
-    # בורר טווח תכנון (אפשרות לראות עד סוף העונה)
     max_possible_horizon = 38 - next_gw + 1
     horizon_options = {
         "5 מחזורים קרובים": 5,
@@ -1415,7 +1515,6 @@ with t_planner:
         next_gw + i for i in range(st.session_state.planner_horizon_count) if next_gw + i <= 38
     ]
 
-    # סימולציה משורשרת על פני המחזורים שנבחרו
     simulated_gw_data = {}
     current_sim_squad = [dict(p) for p in st.session_state.user_squad]
     current_sim_bank = float(st.session_state.user_bank)
@@ -1511,7 +1610,7 @@ with t_planner:
             "squad_snapshot": [dict(p) for p in current_sim_squad],
         }
 
-    # בורר מחזורים ראשי + כפתורי דפדוף קדימה/אחורה
+    # בורר מחזורים ראשי + כפתורי ניווט
     if "planner_selected_gw" not in st.session_state or st.session_state.planner_selected_gw not in current_horizon_gws:
         st.session_state.planner_selected_gw = current_horizon_gws[0]
 
@@ -1545,7 +1644,6 @@ with t_planner:
 
     cur_gw_sim = simulated_gw_data[selected_gw]
 
-    # מדדי המחזור
     pk1, pk2, pk3, pk4, pk5 = st.columns(5)
     with pk1:
         st.metric("חילופים זמינים", f"{cur_gw_sim['available_fts']} FT")
@@ -1563,7 +1661,6 @@ with t_planner:
     with pk5:
         st.metric("תחזית נקודות (xP)", f"{cur_gw_sim['xp']}")
 
-    # צ'יפ וניהול חילופים קיימים
     ch_col1, ch_col2 = st.columns([1, 2])
     with ch_col1:
         current_chip_val = st.session_state.planner_plan[selected_gw]["chip"]
@@ -1599,9 +1696,7 @@ with t_planner:
                         st.session_state.planner_plan[selected_gw]["transfers"].pop(idx_t)
                         st.rerun()
 
-    # =====================================================================
-    # מגירת החלפה אינטואיטיבית בלחיצה אחת מכרטיס השחקן
-    # =====================================================================
+    # מגירת החלפה מהירה
     if st.session_state.planner_sell_id is not None:
         sell_pid = st.session_state.planner_sell_id
         sell_player = all_players.get(sell_pid)
@@ -1627,7 +1722,6 @@ with t_planner:
                 unsafe_allow_html=True,
             )
 
-            # איתור שחקנים זמינים בעמדה זו בתקציב
             eligible = [
                 p
                 for p in all_players.values()
@@ -1644,9 +1738,12 @@ with t_planner:
                 for i, cand in enumerate(top_3):
                     with cols_top[i]:
                         c_fix, c_fdr = cand.get("gw_fixtures_map", {}).get(selected_gw, ("—", 3))
+                        cand_kit = get_kit(cand["team"])
+                        cand_svg = render_jersey_svg(cand["team"])
                         st.markdown(
                             f"""
-                            <div class="accessible-card" style="padding:10px; text-align:center; margin-bottom:6px;">
+                            <div class="accessible-card" style="padding:10px; text-align:center; margin-bottom:6px; border-top:3px solid {cand_kit['primary']};">
+                                {cand_svg}
                                 <div style="font-weight:700; color:#fff;">{cand['name']} ({cand['team']})</div>
                                 <div style="font-size:11px; color:#94a3b8;">£{cand['cost']}m | משחק: <span class="badge-fdr fdr-{c_fdr}">{c_fix}</span></div>
                                 <div style="font-size:11px; color:#10b981; font-weight:700; margin-top:2px;">xP: {cand['xp']}</div>
@@ -1660,7 +1757,6 @@ with t_planner:
                             st.toast(f"✅ נוסף חילוף: {sell_player['name']} ⬅️ {cand['name']}", icon="✅")
                             st.rerun()
 
-            # חיפוש חופשי ובחירת שחקן אחר
             st.write("")
             s_c1, s_c2, s_c3 = st.columns([2, 3, 1])
             with s_c1:
@@ -1694,9 +1790,7 @@ with t_planner:
 
     st.write("---")
 
-    # =====================================================================
-    # מגרש חי למחזור הנבחר עם כפתור החלפה ישיר בראש כל שחקן
-    # =====================================================================
+    # מגרש ה-Planner בממדים מדויקים וממורכזים (820px)
     st.markdown(f"#### 🏟️ הרכב הקבוצה על המגרש ל-Gameweek {selected_gw}")
     st.caption("לחץ על כפתור **'🔄 החלף'** בראש כל שחקן כדי להחליפו באופן מיידי.")
 
@@ -1723,7 +1817,6 @@ with t_planner:
             else:
                 fxt_str, fdr_val = "BLANK", 3
 
-            # טיקר 3 משחקים רצופים
             fxt_mini_html = '<div class="mini-fxt-container">'
             for f_gw in range(target_gw, target_gw + 3):
                 if f_gw in gw_map:
@@ -1734,9 +1827,14 @@ with t_planner:
                     fxt_mini_html += '<div class="mini-fxt" style="background:#334155;">BLK</div>'
             fxt_mini_html += '</div>'
 
+            kit = get_kit(p["team"])
+            kit_color = kit["primary"]
+            jersey_svg = render_jersey_svg(p["team"])
+
             st.markdown(
                 f"""
-                <div class="p-card-body {bench_class} {sel_class}">
+                <div class="p-card-body {bench_class} {sel_class}" style="border-top: 3px solid {kit_color} !important;">
+                    {jersey_svg}
                     <div class="p-name">{cap_badge}{p['name']}</div>
                     <div class="p-sub"><span class="ltr-tag">{p['team']} | £{p['cost']}m</span></div>
                     <div class="badge-fdr fdr-{fdr_val}"><span class="ltr-tag">{fxt_str}</span></div>
@@ -1788,8 +1886,9 @@ with t_planner:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.write("")
+    st.markdown('<div class="bench-wrapper">', unsafe_allow_html=True)
     st.caption("🪑 שחקני הספסל למחזור זה:")
     p_bench_cols = st.columns(4)
     for i, p in enumerate(cur_gw_sim["bench"]):
         render_planner_card_unit(p_bench_cols[i], p, selected_gw, is_bench=True)
+    st.markdown('</div>', unsafe_allow_html=True)
