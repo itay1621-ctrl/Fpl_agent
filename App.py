@@ -112,7 +112,6 @@ div[data-testid="stMarkdownContainer"] p {
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-/* צבעי הפציעות רוככו לצבעי פסטל נעימים יותר */
 .cap-gold { border: 2px solid #facc15 !important; }
 .card-bench { background: rgba(30, 41, 59, 0.7); border: 1px dashed #475569; }
 .card-danger { border: 2px solid #f87171 !important; background: rgba(248, 113, 113, 0.15) !important; }
@@ -153,7 +152,6 @@ div[data-testid="stMarkdownContainer"] p {
     width: fit-content;
 }
 
-/* התראות הפציעה בתגית הותאמו גם כן לצבעים רכים יותר */
 .prob-red { background: rgba(248, 113, 113, 0.2); color: #fca5a5; border: 1px solid #f87171; }
 .prob-yellow { background: rgba(251, 211, 141, 0.2); color: #fde68a; border: 1px solid #fbd38d; }
 .prob-green { background: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
@@ -204,7 +202,6 @@ div[data-testid="stMarkdownContainer"] p {
     font-size: 11px;
 }
 
-/* עיצוב 3 המשחקים הקרובים בכרטיס ה-Planner */
 .mini-fxt-container { 
     display: flex; 
     justify-content: center; 
@@ -227,7 +224,7 @@ div[data-testid="stMarkdownContainer"] p {
 )
 
 
-# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי (מעודכן ל-4 מחזורים בשביל ה-Planner) ---
+# --- 1. משיכת נתוני הליגה וכיול אלגוריתמי ---
 @st.cache_data(ttl=600)
 def fetch_league_data():
     base = "https://fantasy.premierleague.com/api/"
@@ -248,30 +245,43 @@ def fetch_league_data():
     elite_defenses = ["ARS", "MCI", "LIV", "NEW", "CHE"]
     processed = {}
 
+    target_gws = [next_gw + i for i in range(5)]
+
     for el_id, el in elements.items():
         if el["status"] == "u":
             continue
 
         team_short = teams[el["team"]]["short_name"]
+        gw_fixtures_map = {}
         upcoming = []
         fdr_list = []
-        # תכנון ל-4 מחזורים קדימה בשביל ה-Planner
+
         for f in fixtures:
-            if f["event"] in [next_gw, next_gw + 1, next_gw + 2, next_gw + 3]:
+            ev = f.get("event")
+            if ev in target_gws:
                 if f["team_h"] == el["team"]:
                     opp = teams[f["team_a"]]["short_name"]
-                    upcoming.append(f"{opp} (H)")
-                    fdr_list.append(f["team_h_difficulty"])
+                    diff = f["team_h_difficulty"]
+                    gw_fixtures_map[ev] = (f"{opp} (H)", diff)
                 elif f["team_a"] == el["team"]:
                     opp = teams[f["team_h"]]["short_name"]
-                    upcoming.append(f"{opp} (A)")
-                    fdr_list.append(f["team_a_difficulty"])
+                    diff = f["team_a_difficulty"]
+                    gw_fixtures_map[ev] = (f"{opp} (A)", diff)
+
+        for g in target_gws:
+            if g in gw_fixtures_map:
+                match_str, diff = gw_fixtures_map[g]
+                upcoming.append(match_str)
+                fdr_list.append(diff)
+            else:
+                upcoming.append("BLANK")
+                fdr_list.append(3)
 
         weights = [0.50, 0.30, 0.20]
         weighted_fdr = sum(
             (5.3 - fdr) * weights[i] for i, fdr in enumerate(fdr_list[:3])
         )
-        avg_fdr = sum(fdr_list[:3]) / min(3, len(fdr_list)) if fdr_list else 3.0
+        avg_fdr = sum(fdr_list[:3]) / 3.0
 
         mins = el.get("minutes", 0)
         actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
@@ -293,7 +303,6 @@ def fetch_league_data():
 
         mins_per_gw = mins / max(1, (next_gw - 1))
         
-        # תיקון 100% שחקני עוגן
         if mins_per_gw >= 75 or cost >= 8.0:
             tactical_rate = 100
         elif mins_per_gw >= 55:
@@ -393,6 +402,7 @@ def fetch_league_data():
             "next_fdr": next_fdr,
             "avg_fdr": round(avg_fdr, 2),
             "fixtures": " | ".join(upcoming[:3]),
+            "gw_fixtures_map": gw_fixtures_map,
             "upcoming_list": upcoming,
             "fdr_list_full": fdr_list,
         }
@@ -510,6 +520,14 @@ if (
     st.session_state.user_bank = initial_bank
     st.session_state.synced_team_id = team_id
     st.session_state.transfers_log = []
+
+# ניהול תוכנית ה-Planner ב-Session State
+if "planner_plan" not in st.session_state:
+    st.session_state.planner_plan = {
+        g: {"chip": "ללא צ'יפ", "transfers": []} for g in range(next_gw, next_gw + 5)
+    }
+if "planner_starting_fts" not in st.session_state:
+    st.session_state.planner_starting_fts = 1
 
 starters = []
 bench = []
@@ -714,7 +732,7 @@ t_squad, t_transfers, t_analysis, t_scout, t_scenarios, t_planner = st.tabs([
     "📊 ניתוח וחסרונות",
     "🌟 רדאר רכש עילית",
     "🎯 3 תרחישי תקציב",
-    "🗓️ מתכנן מחזורים וצ'יפים",
+    "🗓️ מתכנן מחזורים משורשר",
 ])
 
 
@@ -749,28 +767,6 @@ def render_pitch_card(p, is_bench=False):
         f'<div style="font-size:9px; color:#38bdf8; margin-top:2px;">xP:'
         f" {p['xp']}</div>"
         "</div>"
-    )
-
-def render_planner_card(p, is_bench=False, bb_active=False):
-    cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
-    bench_class = "card-bench" if is_bench and not bb_active else ""
-    
-    upcoming = p.get("upcoming_list", [])
-    fdrs = p.get("fdr_list_full", [])
-    fxt_html = '<div class="mini-fxt-container">'
-    
-    for i in range(min(3, len(upcoming))):
-        opp = upcoming[i].split(" ")[0][:3]
-        fdr = fdrs[i] if i < len(fdrs) else 3
-        fxt_html += f'<div class="mini-fxt fdr-{fdr}">{opp}</div>'
-    fxt_html += '</div>'
-
-    return (
-        f'<div class="p-card {bench_class}">'
-        f'<div class="p-name">{cap_badge}{p["name"]}</div>'
-        f'<div style="font-size:9.5px; color:#38bdf8; font-weight:bold;">£{p["cost"]}m | {p["start_prob"]}%</div>'
-        f'{fxt_html}'
-        f'</div>'
     )
 
 
@@ -1251,72 +1247,319 @@ with t_scenarios:
             unsafe_allow_html=True,
         )
 
-# טאב 6: מתכנן מחזורים אסטרטגי (Planner)
+# טאב 6: מתכנן מחזורים משורשר (Cascading Multi-Gameweek Planner)
 with t_planner:
-    st.subheader("🗓️ מתכנן מחזורים וסימולציית צ'יפים (3 Gameweeks)")
-    
-    # 1. צבירת חילופים
-    st.markdown("#### 🔄 צבירת חילופים (Transfer Bank Inventory)")
-    st.caption("חוק ברזל ל-Top 100K: תכנון לשמירת חילופים (Roll) מאפשר גמישות ומונע מינוסים עתידיים.")
-    col_t1, col_t2 = st.columns([1, 2])
-    with col_t1:
-        available_fts = st.number_input("כמה חילופים חינמיים זמינים לך כרגע?", min_value=1, max_value=5, value=1)
-        planned_transfers_this_gw = st.number_input("כמה חילופים אתה מתכנן לבצע השבוע?", min_value=0, max_value=5, value=0)
-    with col_t2:
-        rolled = min(5, max(0, available_fts - planned_transfers_this_gw))
-        next_week_fts = min(5, rolled + 1)
-        status_color = "#10b981" if next_week_fts >= 2 else "#ef4444"
-        st.markdown(f"""
-        <div style="background:#111a28; border:1px solid #1e2e46; border-radius:10px; padding:15px; margin-top:28px;">
-            <div style="font-size:13px; color:#94a3b8;">צפי מלאי חילופים לשבוע הבא:</div>
-            <div style="font-size:14px; margin-top:5px;">
-                • למחזור הנוכחי (GW {next_gw}): <b>{available_fts} חילופים</b><br>
-                • למחזור הבא (GW {next_gw + 1}): <b style="color:{status_color};">{next_week_fts} חילופים זמינים</b> (לאחר צבירה)
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        if next_week_fts < 2:
-            st.warning("⚠️ לא יישארו לך 2 חילופים לשבוע הבא. שקול לגלגל חילוף (Roll) אלא אם יש פציעת הרכב דחופה.")
+    st.subheader("🗓️ מתכנן מחזורים משורשר וסימולטור צ'יפים (5 Gameweeks)")
+    st.caption(
+        "מנוע החלטות אינטראקטיבי: בצע חילופים בכל מחזור עתידי, ראה את הצבירה האוטומטית של חילופים חינמיים (עד 5) והשפעת צ'יפים."
+    )
+
+    col_setup1, col_setup2 = st.columns([1, 2])
+    with col_setup1:
+        st.session_state.planner_starting_fts = st.number_input(
+            f"מלאי חילופים התחלתי (למחזור {next_gw}):",
+            min_value=1,
+            max_value=5,
+            value=st.session_state.planner_starting_fts,
+            step=1,
+        )
+    with col_setup2:
+        st.write("")
+        if st.button("🗑️ אפס את כל תוכנית ה-Planner"):
+            st.session_state.planner_plan = {
+                g: {"chip": "ללא צ'יפ", "transfers": []}
+                for g in range(next_gw, next_gw + 5)
+            }
+            st.rerun()
+
+    # --- חישוב סימולציה משורשרת על פני 5 מחזורים ---
+    simulated_gw_data = {}
+    current_sim_squad = [dict(p) for p in st.session_state.user_squad]
+    current_sim_bank = float(st.session_state.user_bank)
+    current_sim_fts = int(st.session_state.planner_starting_fts)
+
+    # מעקב אחר סגל לפני Free Hit לצורך שחזור
+    pre_fh_squad = None
+
+    for idx, g in enumerate(range(next_gw, next_gw + 5)):
+        gw_plan = st.session_state.planner_plan[g]
+        active_chip = gw_plan["chip"]
+        planned_transfers = gw_plan["transfers"]
+
+        # שחזור סגל במחזור שלאחר Free Hit
+        if pre_fh_squad is not None:
+            current_sim_squad = [dict(p) for p in pre_fh_squad]
+            pre_fh_squad = None
+
+        # חילופים זמינים במחזור הנוכחי
+        if idx == 0:
+            available_fts = current_sim_fts
+        else:
+            prev_gw = g - 1
+            prev_chip = st.session_state.planner_plan[prev_gw]["chip"]
+            if prev_chip in ["Wildcard", "Free Hit"]:
+                available_fts = 1
+            else:
+                prev_unused = max(
+                    0,
+                    simulated_gw_data[prev_gw]["available_fts"]
+                    - len(st.session_state.planner_plan[prev_gw]["transfers"]),
+                )
+                available_fts = min(5, prev_unused + 1)
+
+        # שמירת גיבוי אם מופעל Free Hit
+        if active_chip == "Free Hit" and pre_fh_squad is None:
+            pre_fh_squad = [dict(p) for p in current_sim_squad]
+
+        # החלת חילופים על הסגל
+        for out_id, in_id in planned_transfers:
+            for sp in current_sim_squad:
+                if sp["element"] == out_id:
+                    p_out_cost = all_players[out_id]["cost"]
+                    p_in_cost = all_players[in_id]["cost"]
+                    current_sim_bank = round(
+                        current_sim_bank + p_out_cost - p_in_cost, 1
+                    )
+                    sp["element"] = in_id
+                    break
+
+        # חישוב קנסות (Hits)
+        num_transfers = len(planned_transfers)
+        if active_chip in ["Wildcard", "Free Hit"]:
+            hits_cost = 0
+        else:
+            extra_transfers = max(0, num_transfers - available_fts)
+            hits_cost = extra_transfers * 4
+
+        # בניית שחקני הסגל של המחזור הזה
+        gw_starters = []
+        gw_bench = []
+        for p in current_sim_squad:
+            pid = p["element"]
+            p_data = all_players.get(pid)
+            if p_data:
+                item = {
+                    **p_data,
+                    "position": p["position"],
+                    "is_cap": p.get("is_captain", False),
+                    "is_vc": p.get("is_vice_captain", False),
+                }
+                if p["position"] <= 11:
+                    gw_starters.append(item)
+                else:
+                    gw_bench.append(item)
+
+        # חישוב נקודות צפויות למחזור
+        if active_chip == "Triple Captain":
+            gw_xp = sum(
+                p["xp"] * (3 if p.get("is_cap") else 1) for p in gw_starters
+            )
+        else:
+            gw_xp = sum(
+                p["xp"] * (2 if p.get("is_cap") else 1) for p in gw_starters
+            )
+
+        if active_chip == "Bench Boost":
+            gw_xp += sum(p["xp"] for p in gw_bench)
+
+        gw_xp = round(gw_xp - hits_cost, 1)
+
+        simulated_gw_data[g] = {
+            "available_fts": available_fts,
+            "transfers_count": num_transfers,
+            "hits_cost": hits_cost,
+            "bank": current_sim_bank,
+            "chip": active_chip,
+            "starters": gw_starters,
+            "bench": gw_bench,
+            "xp": gw_xp,
+            "squad_snapshot": [dict(p) for p in current_sim_squad],
+        }
+
+    # --- בורר מחזורים ראשי ---
+    gw_options = [g for g in range(next_gw, next_gw + 5)]
+    selected_gw = st.radio(
+        "בחר מחזור לתכנון ועריכה:",
+        gw_options,
+        format_func=lambda x: f"Gameweek {x} ({'נוכחי' if x == next_gw else 'עתידי'})",
+        horizontal=True,
+    )
+
+    cur_gw_sim = simulated_gw_data[selected_gw]
+
+    # כרטיסי KPI של המחזור שנבחר
+    pk1, pk2, pk3, pk4, pk5 = st.columns(5)
+    with pk1:
+        st.metric("חילופים זמינים", f"{cur_gw_sim['available_fts']} FT")
+    with pk2:
+        st.metric("חילופים שתוכננו", f"{cur_gw_sim['transfers_count']}")
+    with pk3:
+        hit_label = (
+            f"-{cur_gw_sim['hits_cost']} נק׳"
+            if cur_gw_sim["hits_cost"] > 0
+            else "ללא"
+        )
+        st.metric("קנס מינוס (Hits)", hit_label)
+    with pk4:
+        st.metric("יתרה בבנק", f"£{cur_gw_sim['bank']:.1f}m")
+    with pk5:
+        st.metric("תחזית נקודות (xP)", f"{cur_gw_sim['xp']}")
 
     st.write("---")
-    
-    # 2. סימולטור צ'יפים
-    st.markdown("#### 🎮 סימולטור צ'יפים למחזור הקרוב")
-    chip_sim = st.radio("בחר צ'יפ לסימולציה:", ["ללא צ'יפ", "Bench Boost", "Wildcard"], horizontal=True, label_visibility="collapsed")
-    bb_active = (chip_sim == "Bench Boost")
-    
-    if bb_active:
-        st.success("🟢 Bench Boost פעיל: שחקני הספסל מודגשים ומוסיפים ניקוד מלא לתחזית (תצוגת ספסל רגילה בוטלה).")
-        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters) + sum(p["xp"] for p in bench)
-    elif chip_sim == "Wildcard":
-        st.info("🃏 Wildcard פעיל: מלאי החילופים הוסר. היעזר בטאב 'מעבדת חילופים' כדי לתכנן את הסגל מחדש.")
-        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
-    else:
-        planner_xp = sum(p["xp"] * (2 if p.get("is_cap") else 1) for p in starters)
 
-    st.caption(f"תחזית נקודות צפויות בסגל הנוכחי (כולל סימולציה): **{planner_xp:.1f} xP**")
+    # ניהול צ'יפים וביצוע חילופים ישירות במחזור שנבחר
+    c_mgt1, c_mgt2 = st.columns([1, 2])
+    with c_mgt1:
+        st.markdown(f"#### 🎮 צ'יפ למחזור {selected_gw}")
+        current_chip_val = st.session_state.planner_plan[selected_gw]["chip"]
+        chip_opts = ["ללא צ'יפ", "Wildcard", "Free Hit", "Bench Boost", "Triple Captain"]
+        chosen_chip = st.selectbox(
+            "בחר צ'יפ להפעלה במחזור זה:",
+            chip_opts,
+            index=chip_opts.index(current_chip_val)
+            if current_chip_val in chip_opts
+            else 0,
+            key=f"chip_select_{selected_gw}",
+        )
+        if chosen_chip != current_chip_val:
+            st.session_state.planner_plan[selected_gw]["chip"] = chosen_chip
+            st.rerun()
+
+    with c_mgt2:
+        st.markdown(f"#### 🔄 ביצוע חילוף במחזור {selected_gw}")
+        cur_gw_all = cur_gw_sim["starters"] + cur_gw_sim["bench"]
+        cur_gw_ids = [p["id"] for p in cur_gw_all]
+
+        # בחירת שחקן למכירה
+        out_col, in_col = st.columns(2)
+        with out_col:
+            pl_out_id = st.selectbox(
+                "שחקן יוצא (OUT):",
+                [p["id"] for p in cur_gw_all],
+                format_func=lambda x: f"{all_players[x]['name']} ({all_players[x]['pos']} - £{all_players[x]['cost']}m)",
+                key=f"pl_out_{selected_gw}",
+            )
+            p_out_obj = all_players[pl_out_id]
+            max_in_budget = round(p_out_obj["cost"] + cur_gw_sim["bank"], 1)
+
+        with in_col:
+            eligible_in = [
+                p
+                for p in all_players.values()
+                if p["pos_code"] == p_out_obj["pos_code"]
+                and p["id"] not in cur_gw_ids
+                and p["cost"] <= max_in_budget
+            ]
+            eligible_in = sorted(eligible_in, key=lambda x: x["score"], reverse=True)
+
+            if eligible_in:
+                pl_in_id = st.selectbox(
+                    f"שחקן נכנס (IN - עד £{max_in_budget}m):",
+                    [p["id"] for p in eligible_in],
+                    format_func=lambda x: f"{all_players[x]['name']} ({all_players[x]['team']} - £{all_players[x]['cost']}m | xP: {all_players[x]['xp']})",
+                    key=f"pl_in_{selected_gw}",
+                )
+            else:
+                st.warning("אין שחקנים פנויים בתקציב זה.")
+                pl_in_id = None
+
+        add_col, clr_col = st.columns([1, 1])
+        with add_col:
+            if st.button("➕ הוסף חילוף למחזור זה", use_container_width=True):
+                if pl_in_id:
+                    st.session_state.planner_plan[selected_gw]["transfers"].append(
+                        (pl_out_id, pl_in_id)
+                    )
+                    st.rerun()
+        with clr_col:
+            if st.session_state.planner_plan[selected_gw]["transfers"]:
+                if st.button("🗑️ נקה חילופי מחזור זה", use_container_width=True):
+                    st.session_state.planner_plan[selected_gw]["transfers"] = []
+                    st.rerun()
+
+    # יומן חילופים שנרשמו למחזור
+    if st.session_state.planner_plan[selected_gw]["transfers"]:
+        st.caption("חילופים שבוצעו במחזור זה:")
+        for o_id, i_id in st.session_state.planner_plan[selected_gw]["transfers"]:
+            st.info(
+                f"• {all_players[o_id]['name']} (£{all_players[o_id]['cost']}m) ⬅️ {all_players[i_id]['name']} (£{all_players[i_id]['cost']}m)"
+            )
+
     st.write("---")
 
-    # 3. מגרש עתידי
-    st.markdown("#### 📅 תצוגת מגרש עתידית (FDR)")
-    fwd_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 4)
-    mid_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 3)
-    def_p = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 2)
-    gk_p  = "".join(render_planner_card(p, bb_active=bb_active) for p in starters if p["pos_code"] == 1)
+    # --- מגרש כדורגל חי למחזור הנבחר ---
+    st.markdown(f"#### 🏟️ הרכב הסגל על המגרש עבור Gameweek {selected_gw}")
+
+    def render_planner_pitch_card(p, target_gw, is_bench=False, bb_active=False):
+        cap_badge = "👑 " if p.get("is_cap") else ("🥈 " if p.get("is_vc") else "")
+        bench_class = "card-bench" if is_bench and not bb_active else ""
+
+        # משחק ספציפי ו-FDR עבור המחזור שנבחר
+        gw_map = p.get("gw_fixtures_map", {})
+        if target_gw in gw_map:
+            fxt_str, fdr_val = gw_map[target_gw]
+        else:
+            fxt_str, fdr_val = "BLANK", 3
+
+        # תצוגת 3 משחקים ברצף מתחת לשחקן
+        fxt_mini_html = '<div class="mini-fxt-container">'
+        for f_gw in range(target_gw, target_gw + 3):
+            if f_gw in gw_map:
+                opp_str, diff_val = gw_map[f_gw]
+                opp_short = opp_str.split(" ")[0][:3]
+                fxt_mini_html += f'<div class="mini-fxt fdr-{diff_val}">{opp_short}</div>'
+            else:
+                fxt_mini_html += '<div class="mini-fxt" style="background:#334155;">BLK</div>'
+        fxt_mini_html += '</div>'
+
+        return (
+            f'<div class="p-card {bench_class}">'
+            f'<div class="p-name">{cap_badge}{p["name"]}</div>'
+            f'<div class="p-sub"><span class="ltr-tag">{p["team"]} | £{p["cost"]}m</span></div>'
+            f'<div class="badge-fdr fdr-{fdr_val}"><span class="ltr-tag">{fxt_str}</span></div>'
+            f'{fxt_mini_html}'
+            f'</div>'
+        )
+
+    bb_is_active = (cur_gw_sim["chip"] == "Bench Boost")
+
+    fwd_pl = "".join(
+        render_planner_pitch_card(p, selected_gw, bb_active=bb_is_active)
+        for p in cur_gw_sim["starters"]
+        if p["pos_code"] == 4
+    )
+    mid_pl = "".join(
+        render_planner_pitch_card(p, selected_gw, bb_active=bb_is_active)
+        for p in cur_gw_sim["starters"]
+        if p["pos_code"] == 3
+    )
+    def_pl = "".join(
+        render_planner_pitch_card(p, selected_gw, bb_active=bb_is_active)
+        for p in cur_gw_sim["starters"]
+        if p["pos_code"] == 2
+    )
+    gk_pl = "".join(
+        render_planner_pitch_card(p, selected_gw, bb_active=bb_is_active)
+        for p in cur_gw_sim["starters"]
+        if p["pos_code"] == 1
+    )
 
     st.markdown(
         '<div class="pitch">'
-        f'<div class="pitch-row">{fwd_p}</div>'
-        f'<div class="pitch-row">{mid_p}</div>'
-        f'<div class="pitch-row">{def_p}</div>'
-        f'<div class="pitch-row">{gk_p}</div>'
+        f'<div class="pitch-row">{fwd_pl}</div>'
+        f'<div class="pitch-row">{mid_pl}</div>'
+        f'<div class="pitch-row">{def_pl}</div>'
+        f'<div class="pitch-row">{gk_pl}</div>'
         '</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
-    st.markdown("**🪑 ספסל (ישתתף בניקוד רק ב-Bench Boost):**")
-    bench_p = "".join(render_planner_card(p, is_bench=True, bb_active=bb_active) for p in bench)
+    st.markdown("**🪑 שחקני ספסל:**")
+    bench_pl = "".join(
+        render_planner_pitch_card(p, selected_gw, is_bench=True, bb_active=bb_is_active)
+        for p in cur_gw_sim["bench"]
+    )
     st.markdown(
-        f'<div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">{bench_p}</div>',
-        unsafe_allow_html=True
+        f'<div style="display:flex; justify-content:center; gap:8px; margin-bottom:12px;">{bench_pl}</div>',
+        unsafe_allow_html=True,
     )
