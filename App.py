@@ -689,24 +689,29 @@ div[data-baseweb="tab-list"] {
     border: 1px solid rgba(168, 85, 247, 0.25) !important;
     gap: 5px !important;
     overflow-x: auto !important;
+    overflow-y: hidden !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
     margin-bottom: 16px !important;
     direction: __DIR__ !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
 }
 div[data-baseweb="tab-list"]::-webkit-scrollbar {
     display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 button[data-baseweb="tab"] {
     border-radius: 8px !important;
-    padding: 8px 16px !important;
+    padding: 7px 13px !important;
     color: #a79bc8 !important;
-    font-size: 13px !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
     transition: all 0.2s ease !important;
     border: none !important;
     background: transparent !important;
+    flex-shrink: 0 !important;
 }
 button[data-baseweb="tab"]:hover {
     color: #ffffff !important;
@@ -721,6 +726,37 @@ button[data-baseweb="tab"][aria-selected="true"] {
 div[data-baseweb="tab-highlight"],
 div[data-baseweb="tab-border"] {
     display: none !important;
+}
+
+/* ביטול מוחלט של חיצי גלילה, מעברי צבע ומחווני גלילה של טאבים */
+div[data-testid="stTabs"] button[data-baseweb="tab-scroll-left"],
+div[data-testid="stTabs"] button[data-baseweb="tab-scroll-right"],
+div[data-testid="stTabs"] button[aria-label*="scroll" i],
+div[data-testid="stTabs"] button[aria-label*="Scroll"],
+div[data-testid="stTabs"] button[aria-label*="next" i],
+div[data-testid="stTabs"] button[aria-label*="prev" i],
+div[data-testid="stTabs"] [class*="ScrollButton"],
+div[data-testid="stTabs"] [class*="scrollButton"],
+div[data-testid="stTabs"] [class*="StyledScrollButton"],
+div[data-testid="stTabs"] [class*="StyledStartEnhancer"],
+div[data-testid="stTabs"] [class*="StyledEndEnhancer"],
+div[data-testid="stTabs"] [class*="StyledTabScrollButton"],
+div[data-testid="stTabs"] div[data-baseweb="tab-list-container"] button:not([data-baseweb="tab"]),
+div[data-testid="stTabs"] > div:first-child button:not([data-baseweb="tab"]),
+div[data-testid="stTabs"] div[data-baseweb="tab-list"] ~ button,
+div[data-testid="stTabs"] div[data-baseweb="tab-list"] ~ div:not([data-baseweb="tab-panel"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
 }
 
 /* --- 3. כרטיס כניסה / שער --- */
@@ -786,7 +822,7 @@ div[data-baseweb="tab-border"] {
 }
 
 /* --- 5. מגרש אצטדיון פרימיום עם דשא מפוספס מואר וקווים טקטיים --- */
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
+div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
     max-width: 840px !important;
     margin: 0 auto 12px auto !important;
     background:
@@ -803,6 +839,7 @@ div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
     padding: 18px 10px !important;
     box-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12), inset 0 0 60px rgba(0,0,0,0.65) !important;
     position: relative !important;
+    text-align: center !important;
 }
 
 .pitch-anchor {
@@ -836,7 +873,7 @@ div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
 }
 
 /* --- 5.2 ספסל מחליפים מואר ומובלט ב-PL Mint (Tactical Dugout) --- */
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
+div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
     max-width: 840px !important;
     margin: 14px auto 22px auto !important;
     background: linear-gradient(145deg, #1c0c36 0%, #2e1256 45%, #16092b 100%) !important;
@@ -845,6 +882,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
     padding: 16px 14px !important;
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 135, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     position: relative !important;
+    text-align: center !important;
 }
 
 .bench-dugout-badge {
@@ -860,19 +898,17 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
 }
 
 /* --- 6. ביטול מרווחים מוחלט ואיחוד כרטיס שחקן וכפתור לפלאק רציף אחד --- */
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor),
-div[data-testid="stVerticalBlock"]:has(.bench-anchor),
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) *,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) * {
+div[data-testid="column"]:has(.p-card-fpl) *,
+div[data-testid="column"]:has(.card-bench) * {
     text-align: center !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"],
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] > div,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] > div,
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"] div[data-testid="stVerticalBlock"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] div[data-testid="stVerticalBlock"] {
+div[data-testid="column"]:has(.p-card-fpl),
+div[data-testid="column"]:has(.card-bench),
+div[data-testid="column"]:has(.p-card-fpl) > div,
+div[data-testid="column"]:has(.card-bench) > div,
+div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stVerticalBlock"],
+div[data-testid="column"]:has(.card-bench) div[data-testid="stVerticalBlock"] {
     gap: 0 !important;
     row-gap: 0 !important;
     background: transparent !important;
@@ -937,9 +973,36 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] 
     text-align: center !important;
 }
 
-/* --- 6.2 כפתור פעולה תחתון מחובר ומותאם (Bottom Action Strip) --- */
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
+/* --- 6.2 עיצוב כפתורים כללי - מסגרת סגורה מכל 4 הצדדים עם פינות מעוגלות --- */
+div[data-testid="stButton"] button {
+    border-radius: 10px !important;
+    border: 1.5px solid #00ff87 !important;
+    background: rgba(26, 15, 46, 0.85) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 6px 14px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+div[data-testid="stButton"] button:hover {
+    border-color: #02efff !important;
+    color: #00ff87 !important;
+    background: rgba(45, 20, 75, 0.95) !important;
+    box-shadow: 0 4px 14px rgba(0, 255, 135, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+div[data-testid="stButton"] button[kind="primary"] {
+    background: linear-gradient(135deg, #00ff87 0%, #02efff 100%) !important;
+    border: 1.5px solid #00ff87 !important;
+    color: #090412 !important;
+    font-weight: 900 !important;
+    box-shadow: 0 0 16px rgba(0, 255, 135, 0.6) !important;
+}
+
+/* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
+div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
     height: 28px !important;
     min-height: 28px !important;
     line-height: 1 !important;
@@ -963,15 +1026,13 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
     transition: all 0.15s ease !important;
 }
 
-/* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור */
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"]:hover .p-card-fpl,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"]:hover .p-card-fpl {
+/* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור תחת שחקן */
+div[data-testid="column"]:has(.p-card-fpl):hover .p-card-fpl {
     border-color: #00ff87 !important;
     box-shadow: 0 6px 18px rgba(0,0,0,0.7), 0 0 14px rgba(0, 255, 135, 0.3) !important;
     transform: translateY(-2px);
 }
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"]:hover div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"]:hover div[data-testid="stButton"] button {
+div[data-testid="column"]:has(.p-card-fpl):hover div[data-testid="stButton"] button {
     border-color: #00ff87 !important;
     color: #00ff87 !important;
     background: #251046 !important;
@@ -992,8 +1053,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"]:
     background: rgba(60, 10, 30, 0.98) !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button[kind="primary"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button[kind="primary"] {
+div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button[kind="primary"] {
     background: linear-gradient(135deg, #00ff87 0%, #02efff 100%) !important;
     border: 1.5px solid #00ff87 !important;
     border-top: none !important;
@@ -1003,17 +1063,17 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
 }
 
 /* כרטיסים וכפתורים בספסל */
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) .p-card-fpl,
 .card-bench {
     background: linear-gradient(145deg, #28124c 0%, #190a30 100%) !important;
     border: 1.5px solid #00ff87 !important;
     border-bottom: 1px solid rgba(0, 255, 135, 0.3) !important;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 255, 135, 0.25) !important;
 }
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
+div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     background: #190a30 !important;
     border: 1.5px solid #00ff87 !important;
     border-top: none !important;
+    border-radius: 0 0 12px 12px !important;
     color: #00ff87 !important;
 }
 
@@ -1299,8 +1359,7 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"
         font-size: 7px !important;
         padding: 1px 2px !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stButton"] button,
-    div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stButton"] button {
+    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
         height: 24px !important;
         min-height: 24px !important;
         font-size: 9.5px !important;
