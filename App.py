@@ -3257,7 +3257,8 @@ with t_planner:
             p_tr_out = all_players[sel_pl_tr_out]
             max_tr_budget = round(p_tr_out["cost"] + cur_gw_sim["bank"], 1)
             cur_squad_ids = [p["id"] for p in all_sim_players]
-            st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({t(f'pos_{p_tr_out[\"pos_code\"]}')} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_tr_budget:.1f}m** | {t('bank_bal')}: **£{cur_gw_sim['bank']:.1f}m**")
+            pos_name = t(f"pos_{p_tr_out['pos_code']}")
+            st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({pos_name} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_tr_budget:.1f}m** | {t('bank_bal')}: **£{cur_gw_sim['bank']:.1f}m**")
 
             tr_search = st.text_input(t("search_placeholder"), key=f"tr_search_{selected_gw}").strip().lower()
             eligible_pool = [
