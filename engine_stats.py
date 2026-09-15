@@ -3,92 +3,100 @@ FPL Agent - Stats & Prediction Engine
 Handles all advanced calculations for xP, Minutes, Start Probability, and BPS.
 """
 
-def calculate_continuous_minutes(base_mins_per_gw, element_type):
+def calculate_playing_probabilities(starts, mins, team_matches, chance_of_playing, form, fixtures_congestion=False):
     """
-    P0.2 - Continuous Minutes Projection
-    Projects exact minutes based on historical average and position trends.
-    Removed artificial "Premium = 80 min" hack.
+    P0.3 & P0.2 - Advanced Start & Sub Probability
+    Calculates exact conditional probabilities based on historical starts/apps.
     """
-    proj_mins = base_mins_per_gw
+    # 1. Availability Probability
+    p_avail = (chance_of_playing / 100.0) if chance_of_playing is not None else 1.0
     
-    # Position based decay/boost trends (historical regression averages)
-    if element_type == 1: # GK
-        proj_mins = min(proj_mins + 5, 90.0) if proj_mins > 45 else proj_mins
-    elif element_type == 2: # DEF
-        if proj_mins > 65: 
-            proj_mins = min(proj_mins + 5, 90.0) # Nailed defs usually finish the 90
-    elif element_type in [3, 4]: # MID, FWD
-        # Attackers are highly prone to 60-80 min substitutions
-        pass
-            
-    return round(proj_mins, 1)
+    # 2. Conditional Probabilities (Historical Base)
+    team_matches = max(1, team_matches)
+    historical_start_rate = min(1.0, starts / team_matches)
+    
+    # Estimate sub appearances if we don't have explicit 'appearances'
+    estimated_subs = max(0, (mins - (starts * 60)) / 25.0) if starts > 0 else (mins / 25.0)
+    historical_sub_rate = min(1.0 - historical_start_rate, estimated_subs / team_matches)
+    
+    # Form and Congestion Adjustments on Conditional Start Rate
+    cond_p_start = historical_start_rate
+    if form >= 5.0 and cond_p_start > 0.4:
+        cond_p_start = min(1.0, cond_p_start + 0.15)
+    if fixtures_congestion and cond_p_start > 0.5:
+        cond_p_start *= 0.85
+        
+    cond_p_sub = min(1.0 - cond_p_start, historical_sub_rate * 1.2) # If rotated, sub chance increases
+    
+    # 3. Final Probabilities
+    p_start = p_avail * cond_p_start
+    p_sub = p_avail * cond_p_sub
+    
+    return p_start, p_sub, p_avail
 
-def calculate_start_probability(proj_mins, chance_of_playing, form, fixtures_congestion=False):
+def calculate_expected_minutes(p_start, p_sub, element_type, starts, mins):
     """
-    P0.3 - Advanced Start Probability
-    Uses a continuous function instead of hard step cliffs (74 mins vs 75 mins).
-    Incorporates form, injury chance, and tactical nailedness.
+    EV of minutes based on precise starting and subbing probabilities.
     """
-    if chance_of_playing == 0:
-        return 0
+    # Estimate typical minutes when starting
+    if starts > 0:
+        typical_start_mins = min(90.0, max(45.0, mins / starts))
+    else:
+        typical_start_mins = 90.0 if element_type in [1, 2] else 70.0
         
-    # Continuous tactical rate: scales smoothly based on projected minutes
-    # 80+ mins average -> ~100% tactical rate
-    # 40 mins average -> ~50% tactical rate
-    tactical_rate = min(100.0, max(0.0, (proj_mins / 80.0) * 100.0))
+    # Position based adjustments for typical sub minutes
+    typical_sub_mins = 15.0 if element_type in [3, 4] else 5.0
     
-    prob = tactical_rate * (chance_of_playing / 100.0)
-    
-    # High form players are less likely to be rotated
-    if form >= 5.0 and prob > 60:
-        prob = min(prob + 10, 100)
-        
-    # Congestion (Europe/Cups) increases rotation risk
-    if fixtures_congestion and prob > 50 and prob < 90:
-        prob -= 15
-        
-    return int(max(0, min(100, prob)))
+    e_mins = (p_start * typical_start_mins) + (p_sub * typical_sub_mins)
+    return round(e_mins, 1), typical_start_mins
 
-def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, chance_of_playing, cs_prob, form, is_elite_def=False, threat=0.0):
+def calculate_cs_prob(team_xgc_90, opp_fdr, is_home):
     """
-    P0.1 - Robust xP Calculation
-    Proper Expected Value (EV) math.
-    Injuries and benchings affect expected minutes (e_mins), which linearly scales attacking/defensive returns.
+    P0.4 - Advanced Clean Sheet Probability
+    Combines team's actual xGC/90 with opponent's attacking strength (proxied by FDR) and Home/Away.
     """
-    p_start = start_prob / 100.0
+    # Base expected goals conceded for the match
+    base_xgc = team_xgc_90 if team_xgc_90 > 0 else 1.5
     
-    # Probability of sub appearance: 
-    # chance_of_playing is overall availability. If available but not starting, they might sub.
-    # We estimate a 40% chance of subbing in if they don't start but are available.
-    p_avail = chance_of_playing / 100.0
-    p_sub = max(0.0, p_avail - p_start) * 0.4 
+    # Opponent attacking modifier based on FDR (2 to 5)
+    # FDR 2 -> weak attack (xG multiplier ~0.7)
+    # FDR 5 -> strong attack (xG multiplier ~1.4)
+    opp_attack_mod = 0.7 + ((opp_fdr - 2) * 0.233)
     
-    # Expected minutes conditional on starting vs subbing
-    expected_mins_if_start = max(proj_mins, 60.0) if p_start > 0.5 else proj_mins
-    expected_mins_if_sub = 15.0
+    # Home/Away modifier
+    ha_mod = 0.9 if is_home else 1.15
     
-    # True Expected Minutes (EV)
-    e_mins = (p_start * expected_mins_if_start) + (p_sub * expected_mins_if_sub)
+    match_xgc = base_xgc * opp_attack_mod * ha_mod
+    
+    # Convert xGC to Clean Sheet Probability using Poisson distribution (e^(-lambda))
+    import math
+    cs_prob = math.exp(-match_xgc)
+    return max(0.02, min(0.65, cs_prob)) # Cap realistically between 2% and 65%
+
+def calculate_expected_points(element_type, xgi_p90, e_mins, p_start, p_sub, typical_start_mins, cs_prob, form, is_elite_def=False, threat=0.0):
+    """
+    P0.1 - Robust xP Calculation (True EV)
+    """
     if e_mins == 0:
         return 0.0
         
     # 1. Expected Appearance Points
-    p_60_plus = p_start if expected_mins_if_start >= 60 else 0.0
-    p_under_60 = (p_start if expected_mins_if_start < 60 else 0.0) + p_sub
+    p_60_plus = p_start if typical_start_mins >= 60 else 0.0
+    p_under_60 = (p_start if typical_start_mins < 60 else 0.0) + p_sub
     expected_appearance = (p_60_plus * 2.0) + (p_under_60 * 1.0)
     
-    # 2. Expected Attacking Points (scaled precisely by true expected minutes)
+    # 2. Expected Attacking Points
     proj_xgi = (xgi_p90 / 90.0) * e_mins
     
     expected_attacking = 0.0
-    if element_type in [1, 2]: # GK / DEF
+    if element_type in [1, 2]:
         expected_attacking = proj_xgi * 5.0 
-    elif element_type == 3: # MID
+    elif element_type == 3:
         expected_attacking = proj_xgi * 5.5 
-    elif element_type == 4: # FWD
+    elif element_type == 4:
         expected_attacking = proj_xgi * 5.2 
         
-    # 3. Expected Defensive Points (scaled by probability of playing 60+ mins)
+    # 3. Expected Defensive Points
     expected_defensive = 0.0
     if element_type in [1, 2]:
         expected_defensive = p_60_plus * cs_prob * 4.0
@@ -104,12 +112,9 @@ def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, chan
     elif form <= 1.0:
         form_bonus = -0.3
         
-    # Scale threat bonus by p_avail
-    threat_bonus = (threat * 0.01) * p_avail
+    threat_bonus = (threat * 0.01) * (p_start + p_sub)
         
-    # Final True EV xP
     final_xp = expected_appearance + expected_attacking + expected_defensive + form_bonus + threat_bonus
-    
     return round(max(0.0, final_xp), 1)
 
 def get_defcon_level(team_short, is_home, next_fdr):

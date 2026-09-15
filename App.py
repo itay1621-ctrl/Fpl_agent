@@ -6,7 +6,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
-from engine_stats import calculate_continuous_minutes, calculate_start_probability, calculate_expected_points, get_defcon_level
+from engine_stats import calculate_playing_probabilities, calculate_expected_minutes, calculate_cs_prob, calculate_expected_points, get_defcon_level
 
 
 def html_escape(text):
@@ -2696,6 +2696,7 @@ def fetch_league_data():
         avg_fdr = sum(fdr_list[:3]) / 3.0
 
         mins = el.get("minutes", 0)
+        starts = el.get("starts", 0)
         actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
         expected_gi = float(el.get("expected_goal_involvements") or 0.0)
         form = float(el.get("form") or 0.0)
@@ -2712,16 +2713,30 @@ def fetch_league_data():
             chance = 50
         else:
             chance = 100
-
-        mins_per_gw = mins / max(1, (next_gw - 1))
-        
-        # P0.2 - Continuous Minutes Projection
-        proj_mins = calculate_continuous_minutes(mins_per_gw, el["element_type"])
             
-        # P0.3 - Advanced Start Probability (Continuous)
-        start_prob = calculate_start_probability(proj_mins, chance, form, fixtures_congestion=(next_gw > 30))
+        team_matches = max(1, next_gw - 1)
+        
+        # P0.3 - Rigorous Start Probability Math
+        p_start, p_sub, p_avail = calculate_playing_probabilities(
+            starts=starts, 
+            mins=mins, 
+            team_matches=team_matches, 
+            chance_of_playing=chance, 
+            form=form, 
+            fixtures_congestion=(next_gw > 30)
+        )
+        start_prob = int(p_start * 100)
+        
+        # P0.2 - Exact Expected Minutes
+        proj_mins, typical_start_mins = calculate_expected_minutes(
+            p_start=p_start, 
+            p_sub=p_sub, 
+            element_type=el["element_type"], 
+            starts=starts, 
+            mins=mins
+        )
 
-        # P1.1 - True Per 90 metrics directly from API (Fall back to cumulative if missing)
+        # P1.1 - True Per 90 metrics directly from API
         xg_90 = float(el.get("expected_goals_per_90") or 0.0)
         xa_90 = float(el.get("expected_assists_per_90") or 0.0)
         xgc_90 = float(el.get("expected_goals_conceded_per_90") or 0.0)
@@ -2738,7 +2753,9 @@ def fetch_league_data():
             tag_status = "OVERPERFORMING_TRAP"
             buy_low_bonus = -0.8
 
-        nailed_mult = 1.15 if proj_mins >= 75 else 0.85
+        # Continuous Nailed Multiplier (Replacing step cliff)
+        nailed_mult = 0.85 + (min(100.0, max(0.0, proj_mins - 45.0)) / 55.0) * 0.30
+        
         score = (
             (xgi_p90 * 3.2)
             + (form * 1.3)
@@ -2758,15 +2775,20 @@ def fetch_league_data():
         score *= nailed_mult
 
         next_fdr = fdr_list[0] if fdr_list else 3
-        cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_fdr, 0.22)
+        is_home_match = "(H)" in (upcoming[0] if upcoming else "")
+        
+        # P0.4 - Poisson Clean Sheet Probability
+        team_xgc_90_approx = xgc_90 if el["element_type"] in [1, 2] else 1.5
+        cs_prob = calculate_cs_prob(team_xgc_90=team_xgc_90_approx, opp_fdr=next_fdr, is_home=is_home_match)
         
         # P0.1 - Advanced xP Calculation (True EV)
         pred_xp = calculate_expected_points(
             element_type=el["element_type"], 
             xgi_p90=xgi_p90, 
-            proj_mins=proj_mins, 
-            start_prob=start_prob, 
-            chance_of_playing=chance,
+            e_mins=proj_mins, 
+            p_start=p_start, 
+            p_sub=p_sub,
+            typical_start_mins=typical_start_mins,
             cs_prob=cs_prob, 
             form=form, 
             is_elite_def=(team_short in elite_defenses), 
