@@ -4024,7 +4024,7 @@ with t_analysis:
         ]
         rows_deep = []
         # Sort by total xGI per 90 descending
-        sorted_deep = sorted(starters + subs, key=lambda x: x.get("xgi_p90", 0), reverse=True)
+        sorted_deep = sorted(starters + bench, key=lambda x: x.get("xgi_p90", 0), reverse=True)
         for p in sorted_deep:
             pos_str = t(f"pos_{p['pos_code']}")
             xg_val = p.get("xg_90", 0.0)
