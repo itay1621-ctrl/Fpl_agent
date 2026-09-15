@@ -1,3 +1,4 @@
+import html
 import json
 import time
 import pandas as pd
@@ -5,6 +6,13 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
+
+
+def html_escape(text):
+    """סניטציה של טקסט חיצוני למניעת XSS injection"""
+    if not isinstance(text, str):
+        return str(text)
+    return html.escape(text, quote=True)
 
 st.set_page_config(
     page_title="FPL Elite Scout | מנוע החלטות ומרגל סגלים",
@@ -2017,23 +2025,31 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizon
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
-    justify-content: center !important;
+    justify-content: space-evenly !important;
     align-items: stretch !important;
-    gap: 4px !important;
+    gap: 3px !important;
     margin: 0 auto !important;
     width: 100% !important;
     max-width: 100% !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="column"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="column"] {
+div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+div[data-testid="column"]:has(.p-card-fpl),
+div[data-testid="column"]:has(.card-bench) {
+    width: 0 !important;
     min-width: 0 !important;
+    max-width: 100% !important;
     flex: 1 1 0px !important;
+    flex-basis: 0 !important;
+    flex-grow: 1 !important;
+    flex-shrink: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    padding: 0 2px !important;
+    padding: 0 1px !important;
+    box-sizing: border-box !important;
 }
 
 /* מרכז טופס הכניסה לשער */
@@ -2045,11 +2061,13 @@ div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
 
 /* מתכנן מחזורים - פריסה אנכית במכשירים עם מסך עד 900px */
 @media (max-width: 900px) {
-    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) > div[data-testid="stHorizontalBlock"] {
+    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:has(.gw-fixtures-card)) {
+        display: flex !important;
         flex-direction: column !important;
         flex-wrap: wrap !important;
+        gap: 12px !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) > div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    div[data-testid="stVerticalBlock"]:has(.planner-split-anchor) div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:has(.gw-fixtures-card)) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
         max-width: 100% !important;
@@ -2057,48 +2075,164 @@ div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
     }
 }
 
-/* --- 8. התאמות מובייל קפדניות (Mobile Media Queries) --- */
-@media (max-width: 640px) {
+/* סרגל עליון - כפתורי פעולה 3 עמודות שוות */
+div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    width: 100% !important;
+}
+div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    flex: 1 1 0px !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+/* מניעת גלילה אופקית כוללת בכל האתר */
+html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+}
+
+/* --- 8. התאמות מובייל וטאבלט קפדניות (Mobile Media Queries: <= 768px) --- */
+@media (max-width: 768px) {
     .block-container {
-        padding-top: 0.6rem !important;
+        padding-top: 0.5rem !important;
         padding-bottom: max(2rem, env(safe-area-inset-bottom)) !important;
-        padding-left: 0.4rem !important;
-        padding-right: 0.4rem !important;
+        padding-left: 0.35rem !important;
+        padding-right: 0.35rem !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) {
-        padding: 6px 2px !important;
-        border-radius: 12px !important;
+
+    /* קריסת עמודות כלליות באפליקציה לפריסה אנכית נוחה (למעט מגרש וסרגל עליון) */
+    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)) {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        width: 100% !important;
     }
+    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+        padding: 0 !important;
+    }
+
+    /* החרגת סרגל עליון וכפתורי שער מקריסה אנכית - נשארים שורה אופקית מאוזנת */
+    /* Header: team name full width, buttons below */
+    div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:not(:first-child) {
+        flex: 1 1 0px !important;
+        min-width: 0 !important;
+        width: auto !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.gate-header-anchor) div[data-testid="stHorizontalBlock"],
+    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: auto !important;
+        min-width: 0 !important;
+        flex: 1 1 0px !important;
+    }
+
+    /* מדדי פלנר - רשת 2x2 נוחה לקריאה */
+    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+        width: 100% !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: auto !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
+        grid-column: span 2 !important;
+    }
+
+    /* מגרש כדורגל וספסל במובייל - שורה אופקית יציבה ללא גלילה וללא שבירה */
+    div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor),
+    div[data-testid="stVerticalBlock"]:has(> div .bench-anchor),
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor),
     div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
         padding: 6px 2px !important;
         border-radius: 12px !important;
+        margin: 6px auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
     div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"],
     div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] {
-        gap: 2px !important;
+        display: flex !important;
+        flex-direction: row !important;
         flex-wrap: nowrap !important;
-    }
-    div[data-testid="column"] {
-        padding: 0 1px !important;
-        min-width: 0 !important;
-    }
-    .p-card-fpl {
-        padding: 3px 2px !important;
-        border-radius: 8px 8px 0 0 !important;
-        max-width: 70px !important;
+        justify-content: space-evenly !important;
+        align-items: stretch !important;
+        gap: 2px !important;
         width: 100% !important;
-        height: 134px !important;
-        min-height: 134px !important;
-        max-height: 134px !important;
+        max-width: 100% !important;
+    }
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[data-testid="column"]:has(.p-card-fpl),
+    div[data-testid="column"]:has(.card-bench) {
+        width: 0 !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 1 1 0px !important;
+        flex-basis: 0 !important;
+        flex-grow: 1 !important;
+        flex-shrink: 1 !important;
+        padding: 0 1px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    /* כרטיס שחקן מותאם מסך סמארטפון (360px-430px) */
+    .p-card-fpl {
+        padding: 2px 1px !important;
+        border-radius: 8px 8px 0 0 !important;
+        max-width: 66px !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 128px !important;
+        max-height: 152px !important;
+        box-sizing: border-box !important;
     }
     .p-card-fpl svg {
-        width: 32px !important;
-        height: 28px !important;
+        width: 28px !important;
+        height: 24px !important;
     }
     .p-name-plate {
-        padding: 2px 2px !important;
+        padding: 1px 2px !important;
         border-radius: 4px !important;
-        margin: 2px 0 1px 0 !important;
+        margin: 1px auto !important;
         width: 98% !important;
         background: var(--p-name-plate-bg) !important;
         border: 1px solid var(--p-name-plate-border) !important;
@@ -2107,6 +2241,7 @@ div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
         font-size: 9px !important;
         font-weight: 800 !important;
         color: var(--p-name-plate-text) !important;
+        letter-spacing: -0.2px !important;
     }
     .p-sub, .badge-fdr, .mini-fxt {
         font-size: 7px !important;
@@ -2116,77 +2251,157 @@ div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
         font-size: 7px !important;
         padding: 1px 2px !important;
     }
+    .prob-badge {
+        font-size: 7px !important;
+        padding: 1px 2px !important;
+    }
+    .p-card-footer {
+        width: 95% !important;
+        padding-top: 1px !important;
+    }
     .p-card-cost {
         font-size: 8px !important;
     }
     .p-card-xp {
-        font-size: 9px !important;
+        font-size: 8.5px !important;
     }
     div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
     div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
-        height: 26px !important;
-        min-height: 26px !important;
-        font-size: 9.5px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        line-height: 24px !important;
+        font-size: 8.5px !important;
         padding: 0 1px !important;
         border-radius: 0 0 8px 8px !important;
-        max-width: 70px !important;
+        max-width: 66px !important;
         width: 100% !important;
-        margin-top: -3px !important;
+        margin-top: -2px !important;
     }
+
+    /* מדדי KPI עליונים */
     .kpi-container {
         grid-template-columns: repeat(2, 1fr) !important;
-        gap: 8px !important;
+        gap: 6px !important;
+        margin-bottom: 12px !important;
     }
     .kpi-card {
-        padding: 10px 8px !important;
+        padding: 8px 6px !important;
+        border-radius: 10px !important;
     }
     .kpi-title {
-        font-size: 10px !important;
+        font-size: 9.5px !important;
     }
     .kpi-value {
-        font-size: 17px !important;
-    }
-    div[data-baseweb="tab-list"] {
-        -webkit-overflow-scrolling: touch !important;
-        padding: 4px !important;
-    }
-    button[data-baseweb="tab"] {
-        padding: 6px 10px !important;
-        font-size: 11.5px !important;
-    }
-    div[data-testid="stButton"] button {
-        padding: 5px 8px !important;
-        font-size: 11.5px !important;
-    }
-    .fxt-team-name {
-        font-size: 10.5px !important;
-    }
-    .fxt-jersey svg {
-        width: 20px !important;
-        height: 18px !important;
-    }
-    .fxt-mid {
-        min-width: 50px !important;
-    }
-    .fxt-mid-time {
-        font-size: 9.5px !important;
-        padding: 1px 4px !important;
-    }
-    [data-testid="stMetric"] {
-        padding: 6px 8px !important;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 11px !important;
-    }
-    [data-testid="stMetricValue"] {
         font-size: 16px !important;
     }
-    [data-testid="stMetricDelta"] {
+
+    /* לשוניות טאבים */
+    div[data-baseweb="tab-list"] {
+        -webkit-overflow-scrolling: touch !important;
+        padding: 3px !important;
+        gap: 4px !important;
+    }
+    button[data-baseweb="tab"] {
+        padding: 5px 8px !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+    }
+
+    /* כפתורי מערכת כלליים */
+    div[data-testid="stButton"] button {
+        padding: 5px 8px !important;
         font-size: 11px !important;
     }
+
+    /* פאנל השוואת חילופים */
+    .comparison-panel-out, .comparison-panel-in {
+        padding: 8px 10px !important;
+        font-size: 11.5px !important;
+    }
+    .comparison-grid,
     div:has(> .comparison-panel-out) {
         grid-template-columns: 1fr !important;
         gap: 8px !important;
+    }
+
+    /* כרטיסי טיפים וחסרונות */
+    .accessible-card {
+        padding: 12px 10px !important;
+        border-radius: 10px !important;
+        margin-bottom: 10px !important;
+    }
+    .flaw-row {
+        padding: 8px 10px !important;
+        font-size: 11.5px !important;
+    }
+    .flaw-pen {
+        font-size: 10px !important;
+        padding: 1px 6px !important;
+    }
+
+    /* שעון דדליין */
+    #fpl-clock {
+        font-size: 16px !important;
+    }
+
+    /* משחקי מחזור */
+    .fxt-team-name {
+        font-size: 10px !important;
+    }
+    .fxt-jersey svg {
+        width: 18px !important;
+        height: 16px !important;
+    }
+    .fxt-mid {
+        min-width: 46px !important;
+    }
+    .fxt-mid-time {
+        font-size: 9px !important;
+        padding: 1px 4px !important;
+    }
+    .fxt-score-num {
+        font-size: 12px !important;
+    }
+
+    /* מדדי Streamlit מובנים */
+    [data-testid="stMetric"] {
+        padding: 5px 6px !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 10px !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 15px !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 10px !important;
+    }
+}
+
+/* מסכי סמארטפון צרים במיוחד (<= 380px כמו iPhone SE / Galaxy Mini) */
+@media (max-width: 380px) {
+    .p-card-fpl {
+        max-width: 58px !important;
+        height: 120px !important;
+        min-height: 120px !important;
+        max-height: 120px !important;
+        padding: 2px 1px !important;
+    }
+    .p-name-txt {
+        font-size: 8px !important;
+    }
+    .p-card-cost {
+        font-size: 7.5px !important;
+    }
+    .p-card-xp {
+        font-size: 8px !important;
+    }
+    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
+    div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
+        max-width: 58px !important;
+        font-size: 8px !important;
+        height: 22px !important;
+        min-height: 22px !important;
     }
 }
 </style>
@@ -2422,6 +2637,10 @@ def fetch_league_data():
 
 all_players, next_gw, next_deadline, gw_fixtures_by_event = fetch_league_data()
 
+if not all_players:
+    st.error("⚠️ Unable to load FPL data. The FPL servers may be down or undergoing maintenance. Please try again later." if "app_lang" not in st.session_state or st.session_state.app_lang == "en" else "⚠️ לא ניתן לטעון נתוני FPL. השרתים עשויים להיות מושבתים או בתחזוקה. נסה שוב מאוחר יותר.")
+    st.stop()
+
 def is_swap_legal(player1_id, player2_id, current_squad_list):
     """
     בדיקה קפדנית לפי חוקי ה-FPL הרשמיים האם חילוף בין שני שחקנים חוקי:
@@ -2487,16 +2706,18 @@ elif "user_team_id" not in st.session_state:
     st.session_state.user_team_id = None
 
 if not st.session_state.user_team_id:
-    c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([4, 1.2, 1])
-    with c_gate_theme:
-        theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
-        if st.button(theme_btn_lbl, key="gate_theme_btn", use_container_width=True):
-            st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
-            st.rerun()
-    with c_gate_top2:
-        if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="gate_lang_btn", use_container_width=True):
-            st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
-            st.rerun()
+    with st.container():
+        st.markdown('<div class="gate-header-anchor"></div>', unsafe_allow_html=True)
+        c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([4, 1.2, 1])
+        with c_gate_theme:
+            theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
+            if st.button(theme_btn_lbl, key="gate_theme_btn", use_container_width=True):
+                st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
+                st.rerun()
+        with c_gate_top2:
+            if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="gate_lang_btn", use_container_width=True):
+                st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
+                st.rerun()
 
     st.markdown(
         f"""
@@ -2521,20 +2742,22 @@ if not st.session_state.user_team_id:
             placeholder=t("team_id_placeholder"),
             help=t("team_id_help"),
         )
-        b1, b2 = st.columns(2)
-        with b1:
-            if st.button(t("login_btn"), use_container_width=True, type="primary"):
-                if input_val.strip().isdigit():
-                    st.session_state.user_team_id = input_val.strip()
-                    st.query_params["team"] = input_val.strip()
+        with st.container():
+            st.markdown('<div class="gate-btn-anchor"></div>', unsafe_allow_html=True)
+            b1, b2 = st.columns(2)
+            with b1:
+                if st.button(t("login_btn"), use_container_width=True, type="primary"):
+                    if input_val.strip().isdigit():
+                        st.session_state.user_team_id = input_val.strip()
+                        st.query_params["team"] = input_val.strip()
+                        st.rerun()
+                    else:
+                        st.error(t("digits_only"))
+            with b2:
+                if st.button(t("demo_btn"), use_container_width=True):
+                    st.session_state.user_team_id = "1"
+                    st.query_params["team"] = "1"
                     st.rerun()
-                else:
-                    st.error(t("digits_only"))
-        with b2:
-            if st.button(t("demo_btn"), use_container_width=True):
-                st.session_state.user_team_id = "1"
-                st.query_params["team"] = "1"
-                st.rerun()
 
         with st.expander(t("where_find_id")):
             st.markdown(
@@ -2784,34 +3007,36 @@ rating_color = (
 # =====================================================================
 # 7. סרגל עליון ומדדים ראשיים
 # =====================================================================
-h_col1, h_col_theme, h_col2, h_col3 = st.columns([3, 1.1, 1, 1])
-with h_col1:
-    render_html(
-        f"""
-        <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
-            <div>
-                <div style="font-size:22px; font-weight:900; color:var(--text-primary); letter-spacing:-0.3px; line-height:1.2;">{my_team_name}</div>
-                <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
-                    {t("engine_for_gw")} <b style="color:var(--accent-mint);">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
+with st.container():
+    st.markdown('<div class="app-header-anchor"></div>', unsafe_allow_html=True)
+    h_col1, h_col_theme, h_col2, h_col3 = st.columns([3, 1.1, 1, 1])
+    with h_col1:
+        render_html(
+            f"""
+            <div style="display:flex; align-items:center; gap:10px; padding:4px 0;">
+                <div>
+                    <div style="font-size:22px; font-weight:900; color:var(--text-primary); letter-spacing:-0.3px; line-height:1.2;">{html_escape(my_team_name)}</div>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:2px;">
+                        {t("engine_for_gw")} <b style="color:var(--accent-mint);">{next_gw}</b> | {t("team_label")} <span class="ltr-tag"><b>{team_id}</b></span>
+                    </div>
                 </div>
             </div>
-        </div>
-        """
-    )
-with h_col_theme:
-    theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
-    if st.button(theme_btn_lbl, key="hdr_theme_toggle", use_container_width=True):
-        st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
-        st.rerun()
-with h_col2:
-    if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="hdr_lang_toggle", use_container_width=True):
-        st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
-        st.rerun()
-with h_col3:
-    if st.button(t("change_team"), use_container_width=True):
-        st.session_state.user_team_id = None
-        st.query_params.clear()
-        st.rerun()
+            """
+        )
+    with h_col_theme:
+        theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
+        if st.button(theme_btn_lbl, key="hdr_theme_toggle", use_container_width=True):
+            st.session_state.app_theme = "dark" if st.session_state.get("app_theme", "light") == "light" else "light"
+            st.rerun()
+    with h_col2:
+        if st.button("English" if st.session_state.app_lang == "he" else "עברית", key="hdr_lang_toggle", use_container_width=True):
+            st.session_state.app_lang = "en" if st.session_state.app_lang == "he" else "he"
+            st.rerun()
+    with h_col3:
+        if st.button(t("change_team"), use_container_width=True):
+            st.session_state.user_team_id = None
+            st.query_params.clear()
+            st.rerun()
 
 rank_txt = (
     f"{my_rank:,}"
@@ -2847,6 +3072,7 @@ st.markdown(
 clock_title = f"{t('deadline_time_left')} (GW {next_gw})"
 clock_loading = "טוען שעון..." if st.session_state.app_lang == "he" else "Loading clock..."
 clock_expired = "הדד-ליין עבר!" if st.session_state.app_lang == "he" else "Deadline Passed!"
+clock_no_deadline = "אין מועד דדליין זמין" if st.session_state.app_lang == "he" else "No deadline available"
 clock_dir = "rtl" if st.session_state.app_lang == "he" else "ltr"
 
 is_lt = (st.session_state.get("app_theme", "light") == "light")
@@ -2863,6 +3089,10 @@ clock_html = f"""
 </div>
 <script>
     var deadline = new Date("{next_deadline}").getTime();
+    if (isNaN(deadline)) {{
+        document.getElementById("fpl-clock").innerHTML = "{clock_no_deadline}";
+        document.getElementById("fpl-clock").style.color = "#a79bc8";
+    }} else {{
     var x = setInterval(function() {{
         var now = new Date().getTime();
         var distance = deadline - now;
@@ -2881,9 +3111,10 @@ clock_html = f"""
         
         document.getElementById("fpl-clock").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
     }}, 1000);
+    }}
 </script>
 """
-components.html(clock_html, height=80)
+components.html(clock_html, height=70)
 
 # =====================================================================
 # 8. פונקציות עזר לרינדור משחקים וכרטיס שחקן עשיר ב-HTML
@@ -3014,10 +3245,12 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     lbl_dbt = "בספק" if lang == "he" else "Doubt"
 
     if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
-        status_class = "card-danger"
+        cap_class = "cap-gold" if is_c else ("vc-silver" if is_v else "")
+        status_class = f"card-danger {cap_class}".strip()
         status_pill = f'<div class="prob-badge prob-red">🚑 {lbl_inj} {p["start_prob"]}%</div>'
     elif p["chance"] <= 75 or p["status"] == "d":
-        status_class = "card-warning"
+        cap_class = "cap-gold" if is_c else ("vc-silver" if is_v else "")
+        status_class = f"card-warning {cap_class}".strip()
         status_pill = f'<div class="prob-badge prob-yellow">🩹 {lbl_dbt} {p["start_prob"]}%</div>'
     else:
         status_class = "cap-gold" if is_c else ("vc-silver" if is_v else "")
@@ -3026,7 +3259,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     jersey_svg = get_jersey_svg(p["team"], is_gk=(p["pos_code"] == 1))
     club_cfg = TEAM_KIT_COLORS.get(p["team"], {"primary": "#38bdf8"})
     c_primary = club_cfg["primary"]
-    top_color_bar = f'<div style="height:3px; background:{c_primary}; border-radius:12px 12px 0 0; margin:-4px -4px 2px -4px; width:calc(100% + 8px);"></div>'
+    top_color_bar = f'<div style="height:3px; background:{c_primary}; border-radius:8px 8px 0 0; margin:0 0 2px 0; width:100%;"></div>'
 
     if target_gw is not None:
         gw_map = p.get("gw_fixtures_map", {})
@@ -3055,9 +3288,9 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     card_html = (
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
         f'{top_color_bar}'
-        f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:2px 0;">{jersey_svg}</div>'
-        f'<div class="p-name-plate" style="background:var(--p-name-plate-bg) !important; border:1px solid var(--p-name-plate-border) !important;">{cap_badge}<span class="p-name-txt" style="color:var(--p-name-plate-text) !important; font-size:12.5px !important; font-weight:800 !important; text-align:center !important;">{p["name"]}</span></div>'
-        f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:2px 0;">{fixture_html}</div>'
+        f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:1px 0;">{jersey_svg}</div>'
+        f'<div class="p-name-plate">{cap_badge}<span class="p-name-txt">{p["name"]}</span></div>'
+        f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:1px 0;">{fixture_html}</div>'
         f'{status_pill}'
         f'<div class="p-card-footer">'
         f'<span class="p-card-cost"><span class="ltr-tag">£{p["cost"]}m</span></span>'
@@ -3216,11 +3449,11 @@ with t_squad:
     with st.container():
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
         render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
-        st.write("")
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
         render_clean_squad_row([p for p in starters if p["pos_code"] == 3])
-        st.write("")
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
         render_clean_squad_row([p for p in starters if p["pos_code"] == 2])
-        st.write("")
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
         gks = [p for p in starters if p["pos_code"] == 1]
         if gks:
             render_clean_squad_row(gks)
@@ -3230,7 +3463,10 @@ with t_squad:
         all_cur_squad = starters + bench
         p_tr_options = {p["id"]: f"{p['name']} ({get_player_pos(p)} | £{p['cost']}m | {p['team']})" for p in all_cur_squad}
         sel_tr_out_id = st.selectbox(t("selling_player"), list(p_tr_options.keys()), format_func=lambda x: p_tr_options[x], key="sq_tr_expander_sel")
-        p_tr_out = all_players[sel_tr_out_id]
+        p_tr_out = all_players.get(sel_tr_out_id)
+        if not p_tr_out:
+            st.error("Player data unavailable")
+            st.stop()
         max_budget = round(p_tr_out["cost"] + st.session_state.user_bank, 1)
         cur_pids = [x["element"] for x in st.session_state.user_squad]
         pos_name = get_player_pos(p_tr_out)
@@ -3344,7 +3580,9 @@ with t_transfers:
     )
 
     def format_transfer_out(pid):
-        p = all_players[pid]
+        p = all_players.get(pid)
+        if not p:
+            return f"Player {pid}"
         pos_str = get_player_pos(p)
         flag = "🚑 " if (p["status"] != "a" or p["chance"] < 100) else ("⚠️ " if mark_priority(p) else "")
         return f"{flag}{p['name']} ({pos_str} - {p['team']}) | £{p['cost']}m | xP: {p['xp']}"
@@ -3357,7 +3595,10 @@ with t_transfers:
             [p["id"] for p in sorted_squad],
             format_func=format_transfer_out,
         )
-        p_out = all_players[sel_out_id]
+        p_out = all_players.get(sel_out_id)
+        if not p_out:
+            st.error("Player data unavailable")
+            st.stop()
         budget_cap = round(p_out["cost"] + st.session_state.user_bank, 1)
 
     with col_in:
@@ -3404,7 +3645,9 @@ with t_transfers:
         )
 
         def format_transfer_in(pid):
-            p = all_players[pid]
+            p = all_players.get(pid)
+            if not p:
+                return f"Player {pid}"
             rec = "[Top] " if pid in ranked_recs else ""
             return f"{rec}{p['name']} ({p['team']}) | £{p['cost']}m | xP: {p['xp']}"
 
@@ -3431,7 +3674,7 @@ with t_transfers:
                     <b style="color:var(--text-primary); font-size:14px;">{t('h2h_comp')}</b>
                     <span style="color:#10b981; font-weight:800; font-size:13.5px;">{t('expected_add')} {delta:+} xP</span>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
+                <div class="comparison-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
                     <div class="comparison-panel-out">
                         <div style="color:var(--accent-pink); font-weight:800; margin-bottom:4px;">{t('out_label')} {p_out['name']} <span class="ltr-tag">({p_out['team']})</span></div>
                         <div style="color:var(--text-primary); font-size:12px;">{t('season_pts_lbl')} <b>{p_out['total_points']}</b> | xP: <b style="color:#ef4444;">{p_out['xp']}</b></div>
@@ -3667,47 +3910,51 @@ with t_scout:
             key=lambda x: x["score"],
             reverse=True,
         )
-        c_shield = premiums[0]
-        diffs = [p for p in premiums if p["selected_by"] < 18]
-        c_sword = diffs[0] if diffs else premiums[1]
+        if len(premiums) < 2:
+            st.info("Not enough premium players available for captain comparison." if st.session_state.app_lang == "en" else "אין מספיק שחקני פרימיום זמינים להשוואת קפטן.")
+        else:
+            c_shield = premiums[0]
+            diffs = [p for p in premiums if p["selected_by"] < 18]
+            c_sword = diffs[0] if diffs else premiums[1]
 
         col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            st.markdown(
-                f"""
-                <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #10b981; background: var(--bg-card);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span class="meta-chip" style="color:#10b981; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.3);">{t('t4_cap_shield')}</span>
-                        <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_shield['xp']}</span>
+        if len(premiums) >= 2:
+            with col_s1:
+                st.markdown(
+                    f"""
+                    <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #10b981; background: var(--bg-card);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span class="meta-chip" style="color:#10b981; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.3);">{t('t4_cap_shield')}</span>
+                            <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_shield['xp']}</span>
+                        </div>
+                        <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_shield['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_shield['team']})</span></h4>
+                        <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
+                            {t('t4_ownership')} <span class="ltr-tag"><b>{c_shield['selected_by']}%</b></span> | {t('t4_start_prob')} <b>{c_shield['start_prob']}%</b><br>
+                            {t('next_match_lbl')} <span class="ltr-tag"><b>{c_shield['next_match']}</b></span><br>
+                            <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_shield)}</div>
+                        </div>
                     </div>
-                    <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_shield['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_shield['team']})</span></h4>
-                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
-                        {t('t4_ownership')} <span class="ltr-tag"><b>{c_shield['selected_by']}%</b></span> | {t('t4_start_prob')} <b>{c_shield['start_prob']}%</b><br>
-                        {t('next_match_lbl')} <span class="ltr-tag"><b>{c_shield['next_match']}</b></span><br>
-                        <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_shield)}</div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+            with col_s2:
+                st.markdown(
+                    f"""
+                    <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #f59e0b; background: var(--bg-card);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span class="meta-chip" style="color:#d97706; background:rgba(245, 158, 11, 0.12); border-color:rgba(245, 158, 11, 0.3);">{t('t4_cap_sword')}</span>
+                            <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_sword['xp']}</span>
+                        </div>
+                        <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_sword['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_sword['team']})</span></h4>
+                        <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
+                            {t('t4_ownership')} <span class="ltr-tag"><b>{c_sword['selected_by']}% {t('t4_only')}</b></span> | {t('t4_start_prob')} <b>{c_sword['start_prob']}%</b><br>
+                            {t('next_match_lbl')} <span class="ltr-tag"><b>{c_sword['next_match']}</b></span><br>
+                            <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_sword)}</div>
+                        </div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-        with col_s2:
-            st.markdown(
-                f"""
-                <div class="accessible-card" style="border: 1px solid var(--border-color); border-inline-start: 4px solid #f59e0b; background: var(--bg-card);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <span class="meta-chip" style="color:#d97706; background:rgba(245, 158, 11, 0.12); border-color:rgba(245, 158, 11, 0.3);">{t('t4_cap_sword')}</span>
-                        <span class="ltr-tag" style="color:var(--accent-cyan); font-weight:800; font-size:13px;">xP: {c_sword['xp']}</span>
-                    </div>
-                    <h4 style="margin:4px 0 8px 0; color:var(--text-primary);">{c_sword['name']} <span class="ltr-tag" style="color:var(--text-secondary); font-size:13px;">({c_sword['team']})</span></h4>
-                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.6;">
-                        {t('t4_ownership')} <span class="ltr-tag"><b>{c_sword['selected_by']}% {t('t4_only')}</b></span> | {t('t4_start_prob')} <b>{c_sword['start_prob']}%</b><br>
-                        {t('next_match_lbl')} <span class="ltr-tag"><b>{c_sword['next_match']}</b></span><br>
-                        <div style="margin-top:6px; font-size:11.5px; color:var(--text-muted);">{get_player_reason(c_sword)}</div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
 
 # ---------------------------------------------------------------------
 # טאב 5: 3 תרחישי תקציב (3 Budget Scenarios)
@@ -3797,7 +4044,7 @@ with t_scenarios:
                     <b style="color:var(--text-primary); font-size:14px;">{item['title']}</b>
                     <span style="color:#10b981; font-weight:800; font-size:13.5px;">{t('t5_diff_xp')} +{diff_xp} xP</span>
                 </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
+                <div class="comparison-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; font-size:12.5px;">
                     <div class="comparison-panel-out">
                         <div style="color:var(--accent-pink); font-weight:800; margin-bottom:4px;">{t('out_label')} <b>{p_o['name']}</b> <span class="ltr-tag">({p_o['team']})</span></div>
                         <div style="color:var(--text-primary); font-size:12px;">{t('season_pts_lbl')} <b>{p_o['total_points']}</b> | xP: <b style="color:#ef4444;">{p_o['xp']}</b></div>
@@ -4029,18 +4276,20 @@ with t_planner:
     cur_gw_sim = simulated_gw_data[selected_gw]
 
     # מדדי מחזור
-    pk1, pk2, pk3, pk4, pk5 = st.columns(5)
-    with pk1:
-        st.metric(t("ft_available"), f"{cur_gw_sim['available_fts']} FT")
-    with pk2:
-        st.metric(t("ft_planned"), f"{cur_gw_sim['transfers_count']}")
-    with pk3:
-        hit_label = f"-{cur_gw_sim['hits_cost']} {t('pts')}" if cur_gw_sim["hits_cost"] > 0 else "0"
-        st.metric(t("hit_penalty"), hit_label)
-    with pk4:
-        st.metric(t("bank_bal"), f"£{cur_gw_sim['bank']:.1f}m")
-    with pk5:
-        st.metric(t("xp_pred"), f"{cur_gw_sim['xp']}")
+    with st.container():
+        st.markdown('<div class="planner-metrics-anchor"></div>', unsafe_allow_html=True)
+        pk1, pk2, pk3, pk4, pk5 = st.columns(5)
+        with pk1:
+            st.metric(t("ft_available"), f"{cur_gw_sim['available_fts']} FT")
+        with pk2:
+            st.metric(t("ft_planned"), f"{cur_gw_sim['transfers_count']}")
+        with pk3:
+            hit_label = f"-{cur_gw_sim['hits_cost']} {t('pts')}" if cur_gw_sim["hits_cost"] > 0 else "0"
+            st.metric(t("hit_penalty"), hit_label)
+        with pk4:
+            st.metric(t("bank_bal"), f"£{cur_gw_sim['bank']:.1f}m")
+        with pk5:
+            st.metric(t("xp_pred"), f"{cur_gw_sim['xp']}")
 
     st.write("---")
 
@@ -4567,45 +4816,46 @@ with t_planner:
                         st.session_state.planner_selected_id = None
                         st.rerun()
 
-        st.markdown('<div class="planner-split-anchor"></div>', unsafe_allow_html=True)
-        col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
-        with col_pl_pitch:
-            st.markdown(f"#### {t('tab_squad')} — Gameweek {selected_gw}")
-            with st.container():
-                st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-                # חלוצים
-                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 4])
-                st.write("")
-                # קשרים
-                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 3])
-                st.write("")
-                # מגנים
-                render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 2])
-                st.write("")
-                # שוער
-                pl_gks = [p for p in cur_gw_sim["starters"] if p["pos_code"] == 1]
-                if pl_gks:
-                    render_clean_planner_row(pl_gks)
+        with st.container():
+            st.markdown('<div class="planner-split-anchor"></div>', unsafe_allow_html=True)
+            col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
+            with col_pl_pitch:
+                st.markdown(f"#### {t('tab_squad')} — Gameweek {selected_gw}")
+                with st.container():
+                    st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
+                    # חלוצים
+                    render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 4])
+                    st.write("")
+                    # קשרים
+                    render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 3])
+                    st.write("")
+                    # מגנים
+                    render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 2])
+                    st.write("")
+                    # שוער
+                    pl_gks = [p for p in cur_gw_sim["starters"] if p["pos_code"] == 1]
+                    if pl_gks:
+                        render_clean_planner_row(pl_gks)
 
-            # ספסל מואר ומובלט בעיצוב Dugout ב-Planner
-            st.write("")
-            with st.container():
-                st.markdown(
-                    f"""
-                    <div class="bench-anchor"></div>
-                    <div class="bench-dugout-badge">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
+                # ספסל מואר ומובלט בעיצוב Dugout ב-Planner
+                st.write("")
+                with st.container():
+                    st.markdown(
+                        f"""
+                        <div class="bench-anchor"></div>
+                        <div class="bench-dugout-badge">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-weight:800; font-size:14px; color:var(--accent-mint);">{t('bench_title')}</span>
+                            </div>
+                            <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
                         </div>
-                        <span style="font-size:11px; color:var(--accent-mint); background:var(--badge-mint-bg); padding:2px 10px; border-radius:6px; font-weight:700; border:1px solid var(--badge-mint-border);">{t('bench_sub_order')}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-                render_clean_planner_row(cur_gw_sim["bench"], is_bench=True)
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                    render_clean_planner_row(cur_gw_sim["bench"], is_bench=True)
 
-        with col_pl_fixtures:
-            render_gw_fixtures_panel(selected_gw)
+            with col_pl_fixtures:
+                render_gw_fixtures_panel(selected_gw)
 
         # חלון תכנון העברות שוק בפלנר
         with st.expander(f"{t('planner_tr_expander')} (GW {selected_gw})"):
