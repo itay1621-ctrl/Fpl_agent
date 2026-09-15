@@ -359,7 +359,7 @@ TRANSLATIONS = {
         "th_xg": "xG/90",
         "th_xa": "xA/90",
         "th_xgi": "xGI/90",
-        "th_defcon": "DefCon",
+        "th_xgc": "xGC/90",
         "th_mins_played": "דקות ששוחקו",
         "th_proj_mins": "דקות צפויות",
         "t2_title": "מעבדת חילופים מותאמת עמדה ותקציב",
@@ -596,7 +596,7 @@ TRANSLATIONS = {
         "th_xg": "xG/90",
         "th_xa": "xA/90",
         "th_xgi": "xGI/90",
-        "th_defcon": "DefCon",
+        "th_xgc": "xGC/90",
         "th_mins_played": "Total Mins",
         "th_proj_mins": "Expected Mins",
         "t2_title": "Position & Budget Transfers Lab",
@@ -2724,6 +2724,7 @@ def fetch_league_data():
         # P1.1 - True Per 90 metrics directly from API (Fall back to cumulative if missing)
         xg_90 = float(el.get("expected_goals_per_90", 0.0))
         xa_90 = float(el.get("expected_assists_per_90", 0.0))
+        xgc_90 = float(el.get("expected_goals_conceded_per_90", 0.0))
         xgi_p90 = xg_90 + xa_90
         if xgi_p90 == 0 and mins > 0:
             xgi_p90 = (expected_gi / mins) * 90
@@ -2805,9 +2806,9 @@ def fetch_league_data():
             "xgi_p90": round(xgi_p90, 2),
             "xg_90": round(xg_90, 2),
             "xa_90": round(xa_90, 2),
+            "xgc_90": round(xgc_90, 2),
             "mins_played": mins,
             "proj_mins": round(proj_mins, 1),
-            "defcon": get_defcon_level(team_short, "(H)" in (upcoming[0] if upcoming else ""), next_fdr),
             "selected_by": float(el["selected_by_percent"]),
             "score": round(score, 2),
             "xp": pred_xp,
@@ -4045,7 +4046,7 @@ with t_analysis:
             t("th_team"),
             t("th_xg"),
             t("th_xa"),
-            t("th_defcon"),
+            t("th_xgc"),
             t("th_mins_played"),
             t("th_proj_mins")
         ]
@@ -4056,23 +4057,20 @@ with t_analysis:
             pos_str = t(f"pos_{p['pos_code']}")
             xg_val = p.get("xg_90", 0.0)
             xa_val = p.get("xa_90", 0.0)
-            defcon_val = p.get("defcon", 3.0)
+            xgc_val = p.get("xgc_90", 0.0)
             mins_val = p.get("mins_played", 0)
             proj_mins = p.get("proj_mins", 0.0)
             
-            # Fallback for old cached strings before cache clears
-            if isinstance(defcon_val, str):
-                if defcon_val == "High": defcon_val = 4.5
-                elif defcon_val == "Medium": defcon_val = 3.0
-                else: defcon_val = 1.5
-            
-            # Color defcon
-            if defcon_val >= 4.0:
-                dc_color = "#10b981"
-            elif defcon_val >= 2.5:
-                dc_color = "#f59e0b"
+            # Color xGC (lower is better)
+            if xgc_val > 0:
+                if xgc_val <= 1.0:
+                    xgc_color = "#10b981"
+                elif xgc_val <= 1.5:
+                    xgc_color = "#f59e0b"
+                else:
+                    xgc_color = "#ef4444"
             else:
-                dc_color = "#ef4444"
+                xgc_color = "var(--text-secondary)"
                 
             rows_deep.append([
                 f"<b>{p['name']}</b>",
@@ -4080,7 +4078,7 @@ with t_analysis:
                 f'<span class="ltr-tag">{p["team"]}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:700;">{xg_val}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-cyan); font-weight:700;">{xa_val}</span>',
-                f'<span class="ltr-tag" style="color:{dc_color}; font-weight:800;">{defcon_val:.1f}</span>',
+                f'<span class="ltr-tag" style="color:{xgc_color}; font-weight:800;">{xgc_val}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
