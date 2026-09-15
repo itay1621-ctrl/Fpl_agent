@@ -6,6 +6,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
+from engine_stats import calculate_continuous_minutes, calculate_start_probability, calculate_expected_points
 
 
 def html_escape(text):
@@ -2666,18 +2667,20 @@ def fetch_league_data():
 
         mins_per_gw = mins / max(1, (next_gw - 1))
         
-        if mins_per_gw >= 75 or cost >= 8.0:
+        # P0.2 - Continuous Minutes Projection
+        proj_mins = calculate_continuous_minutes(mins_per_gw, cost, el["element_type"], is_premium=(cost >= 8.0))
+        
+        if proj_mins >= 75:
             tactical_rate = 100
-        elif mins_per_gw >= 55:
+        elif proj_mins >= 55:
             tactical_rate = 85
-        elif mins_per_gw >= 35:
+        elif proj_mins >= 35:
             tactical_rate = 65
         else:
-            tactical_rate = 40 if mins_per_gw > 0 else 20
+            tactical_rate = 40 if proj_mins > 0 else 20
             
-        start_prob = (
-            int(round(tactical_rate * (chance / 100.0))) if chance > 0 else 0
-        )
+        # P0.3 - Advanced Start Probability
+        start_prob = calculate_start_probability(tactical_rate, chance, form, fixtures_congestion=(next_gw > 30))
 
         xgi_p90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
 
@@ -2690,7 +2693,7 @@ def fetch_league_data():
             tag_status = "OVERPERFORMING_TRAP"
             buy_low_bonus = -0.8
 
-        nailed_mult = 1.15 if mins_per_gw >= 75 else 0.85
+        nailed_mult = 1.15 if proj_mins >= 75 else 0.85
         score = (
             (xgi_p90 * 3.2)
             + (form * 1.3)
@@ -2711,17 +2714,19 @@ def fetch_league_data():
 
         next_fdr = fdr_list[0] if fdr_list else 3
         cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_fdr, 0.22)
-        base_app = 2.0 if chance >= 75 else (1.0 if chance >= 25 else 0.0)
-
-        if el["element_type"] in [1, 2]:
-            pred_xp = base_app + (cs_prob * 4.0) + (xgi_p90 * 0.4 * 5.0)
-        elif el["element_type"] == 3:
-            pred_xp = base_app + (cs_prob * 1.0) + (xgi_p90 * 5.5)
-        else:
-            pred_xp = base_app + (xgi_p90 * 5.2)
-
-        if form >= 5.0:
-            pred_xp += 0.6
+        
+        # P0.1 - Advanced xP Calculation
+        pred_xp = calculate_expected_points(
+            element_type=el["element_type"], 
+            xgi_p90=xgi_p90, 
+            proj_mins=proj_mins, 
+            start_prob=start_prob, 
+            cs_prob=cs_prob, 
+            form=form, 
+            is_elite_def=(team_short in elite_defenses), 
+            threat=threat
+        )
+        
         if chance < 100:
             pred_xp *= chance / 100.0
         pred_xp = round(max(0.0, pred_xp), 1)
