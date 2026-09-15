@@ -2883,7 +2883,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 126px !important;
     }
 }
-</style>
+
 """
 
 def inject_mobile_layout_js():
