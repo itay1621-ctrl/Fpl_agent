@@ -2371,7 +2371,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         font-size: 8.5px !important;
         padding: 0 1px !important;
         border-radius: 0 0 8px 8px !important;
-        max-width: 66px !important;
+        max-width: 100% !important;
         width: 100% !important;
         margin-top: -2px !important;
     }
@@ -2656,19 +2656,31 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 
 @media (max-width: 820px) {
-    /* Pitch Rows Horizontal Scrolling to prevent squishing */
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] {
+    /* Pitch Rows Horizontal Scrolling (TARGETED to player cards only) */
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"]:has(.p-card-fpl) {
         overflow-x: auto !important;
         flex-wrap: nowrap !important;
         -webkit-overflow-scrolling: touch !important;
         padding-bottom: 10px !important; /* Space for scrollbar */
+        width: 100% !important;
+        max-width: 100% !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        min-width: 75px !important; /* Prevents cards from getting microscopic */
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"]:has(.p-card-fpl) > div[data-testid="column"] {
+        min-width: 70px !important; /* Prevents cards from getting microscopic */
         flex: 0 0 auto !important;
     }
 
-    /* Force Planner Pitch & Fixtures to stack vertically instead of side-by-side */
+    /* Force generic columns (like Captain selectboxes) to stack on mobile */
+    div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.kpi-card)):not(:has(.fxt-score)):not(:has(button[data-baseweb="tab"])) {
+        flex-wrap: wrap !important;
+        flex-direction: column !important;
+    }
+    div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.kpi-card)):not(:has(.fxt-score)):not(:has(button[data-baseweb="tab"])) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Force Planner Pitch & Fixtures to stack vertically */
     div[data-testid="stHorizontalBlock"]:has(> div > div > div > div > .pitch-anchor) {
         flex-direction: column !important;
     }
@@ -2684,6 +2696,23 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
+    }
+
+    /* Hide Streamlit Toolbar on mobile to prevent header overlap */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+
+    /* Full-width Pitch background on mobile */
+    div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor):not(:has(.bench-anchor)),
+    div[data-testid="stVerticalBlock"]:has(> div .bench-anchor):not(:has(.pitch-anchor)) {
+        margin-left: -0.65rem !important;
+        margin-right: -0.65rem !important;
+        width: calc(100% + 1.3rem) !important;
+        padding-left: 0.65rem !important;
+        padding-right: 0.65rem !important;
+        border-radius: 0 !important;
+        max-width: 100vw !important;
     }
 }
 </style>
