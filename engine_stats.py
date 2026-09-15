@@ -3,39 +3,40 @@ FPL Agent - Stats & Prediction Engine
 Handles all advanced calculations for xP, Minutes, Start Probability, and BPS.
 """
 
-def calculate_continuous_minutes(base_mins_per_gw, cost, element_type, is_premium=False):
+def calculate_continuous_minutes(base_mins_per_gw, element_type):
     """
     P0.2 - Continuous Minutes Projection
-    Instead of binary <60 / >=60, project exact minutes based on historical average, 
-    price premium (nailedness), and position.
+    Projects exact minutes based on historical average and position trends.
+    Removed artificial "Premium = 80 min" hack.
     """
-    # Base projection
     proj_mins = base_mins_per_gw
     
-    # Premium / Nailed bonus
-    if cost >= 8.0 or is_premium:
-        proj_mins = max(proj_mins, 80.0) # Premiums rarely get subbed early unless blowout
-    
-    # Position based decay/boost
+    # Position based decay/boost trends (historical regression averages)
     if element_type == 1: # GK
-        proj_mins = 90.0 if proj_mins > 45 else proj_mins
+        proj_mins = min(proj_mins + 5, 90.0) if proj_mins > 45 else proj_mins
     elif element_type == 2: # DEF
-        if proj_mins > 60: proj_mins = min(proj_mins + 5, 90.0) # Defs usually play 90 if starting
+        if proj_mins > 65: 
+            proj_mins = min(proj_mins + 5, 90.0) # Nailed defs usually finish the 90
     elif element_type in [3, 4]: # MID, FWD
-        # Attackers are highly prone to 60-70 min substitutions (5 subs rule)
-        if proj_mins > 65 and cost < 8.0:
-            proj_mins = min(proj_mins, 75.0)
+        # Attackers are highly prone to 60-80 min substitutions
+        pass
             
     return round(proj_mins, 1)
 
-def calculate_start_probability(tactical_rate, chance_of_playing, form, fixtures_congestion=False):
+def calculate_start_probability(proj_mins, chance_of_playing, form, fixtures_congestion=False):
     """
     P0.3 - Advanced Start Probability
+    Uses a continuous function instead of hard step cliffs (74 mins vs 75 mins).
     Incorporates form, injury chance, and tactical nailedness.
     """
     if chance_of_playing == 0:
         return 0
         
+    # Continuous tactical rate: scales smoothly based on projected minutes
+    # 80+ mins average -> ~100% tactical rate
+    # 40 mins average -> ~50% tactical rate
+    tactical_rate = min(100.0, max(0.0, (proj_mins / 80.0) * 100.0))
+    
     prob = tactical_rate * (chance_of_playing / 100.0)
     
     # High form players are less likely to be rotated
@@ -48,40 +49,53 @@ def calculate_start_probability(tactical_rate, chance_of_playing, form, fixtures
         
     return int(max(0, min(100, prob)))
 
-def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, cs_prob, form, is_elite_def=False, threat=0.0):
+def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, chance_of_playing, cs_prob, form, is_elite_def=False, threat=0.0):
     """
     P0.1 - Robust xP Calculation
-    Separates historical xGI from future match xP prediction.
+    Proper Expected Value (EV) math.
+    Injuries and benchings affect expected minutes (e_mins), which linearly scales attacking/defensive returns.
     """
-    # 1. Appearance points
-    expected_appearance = 0.0
-    if proj_mins >= 60:
-        expected_appearance = 2.0 * (start_prob / 100.0)
-    elif proj_mins > 0:
-        expected_appearance = 1.0 * (start_prob / 100.0)
-        # Factor in sub appearances
-        sub_prob = max(0, 100 - start_prob) / 100.0
-        expected_appearance += 1.0 * sub_prob
+    p_start = start_prob / 100.0
+    
+    # Probability of sub appearance: 
+    # chance_of_playing is overall availability. If available but not starting, they might sub.
+    # We estimate a 40% chance of subbing in if they don't start but are available.
+    p_avail = chance_of_playing / 100.0
+    p_sub = max(0.0, p_avail - p_start) * 0.4 
+    
+    # Expected minutes conditional on starting vs subbing
+    expected_mins_if_start = max(proj_mins, 60.0) if p_start > 0.5 else proj_mins
+    expected_mins_if_sub = 15.0
+    
+    # True Expected Minutes (EV)
+    e_mins = (p_start * expected_mins_if_start) + (p_sub * expected_mins_if_sub)
+    if e_mins == 0:
+        return 0.0
         
-    # 2. Attacking points based on xGI per 90 scaled to projected minutes
-    proj_xgi = (xgi_p90 / 90.0) * proj_mins
+    # 1. Expected Appearance Points
+    p_60_plus = p_start if expected_mins_if_start >= 60 else 0.0
+    p_under_60 = (p_start if expected_mins_if_start < 60 else 0.0) + p_sub
+    expected_appearance = (p_60_plus * 2.0) + (p_under_60 * 1.0)
+    
+    # 2. Expected Attacking Points (scaled precisely by true expected minutes)
+    proj_xgi = (xgi_p90 / 90.0) * e_mins
     
     expected_attacking = 0.0
-    if element_type == 1 or element_type == 2: # GK / DEF
-        expected_attacking = proj_xgi * 5.0
+    if element_type in [1, 2]: # GK / DEF
+        expected_attacking = proj_xgi * 5.0 
     elif element_type == 3: # MID
-        expected_attacking = proj_xgi * 5.5
+        expected_attacking = proj_xgi * 5.5 
     elif element_type == 4: # FWD
-        expected_attacking = proj_xgi * 5.2
+        expected_attacking = proj_xgi * 5.2 
         
-    # 3. Defensive points (Clean Sheets)
+    # 3. Expected Defensive Points (scaled by probability of playing 60+ mins)
     expected_defensive = 0.0
     if element_type in [1, 2]:
-        expected_defensive = cs_prob * 4.0
+        expected_defensive = p_60_plus * cs_prob * 4.0
         if is_elite_def:
-            expected_defensive *= 1.15
+            expected_defensive *= 1.15 
     elif element_type == 3:
-        expected_defensive = cs_prob * 1.0
+        expected_defensive = p_60_plus * cs_prob * 1.0
         
     # 4. Form and Threat adjustments
     form_bonus = 0.0
@@ -90,10 +104,23 @@ def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, cs_p
     elif form <= 1.0:
         form_bonus = -0.3
         
-    threat_bonus = threat * 0.01
+    # Scale threat bonus by p_avail
+    threat_bonus = (threat * 0.01) * p_avail
         
-    # Final xP
-    raw_xp = expected_appearance + expected_attacking + expected_defensive + form_bonus + threat_bonus
+    # Final True EV xP
+    final_xp = expected_appearance + expected_attacking + expected_defensive + form_bonus + threat_bonus
     
-    # Chance of playing multiplier (injury/suspension)
-    return round(max(0.0, raw_xp), 1)
+    return round(max(0.0, final_xp), 1)
+
+def get_defcon_multiplier(team_short, opp_short, is_home):
+    """
+    P1.2 - Defensive Contributions (DefCon)
+    Placeholder for advanced team-vs-team defensive scaling.
+    """
+    elite_defenses = ["ARS", "MCI", "LIV", "NEW", "CHE"]
+    mult = 1.0
+    if team_short in elite_defenses:
+        mult += 0.2
+    if is_home:
+        mult += 0.1
+    return mult

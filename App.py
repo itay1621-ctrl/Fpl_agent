@@ -353,8 +353,14 @@ TRANSLATIONS = {
         "th_next_match": "משחק קרוב",
         "th_fdr": "FDR",
         "th_start_prob": "סבירות לפתוח",
-        "th_season_pts": "נקודות עונה",
+        "th_season_pts": "נק' עונה",
         "th_xp": "xP",
+        "deep_stats_title": "🔬 מדדים מתקדמים (xG, xA, דקות)",
+        "th_xg": "xG/90",
+        "th_xa": "xA/90",
+        "th_xgi": "xGI/90",
+        "th_mins_played": "דקות ששוחקו",
+        "th_proj_mins": "דקות צפויות",
         "t2_title": "מעבדת חילופים מותאמת עמדה ותקציב",
         "t2_out_header": "1. שחקן למכירה (OUT)",
         "t2_out_label": "בחר שחקן להוצאה:",
@@ -585,6 +591,12 @@ TRANSLATIONS = {
         "th_start_prob": "Start Prob",
         "th_season_pts": "Season Pts",
         "th_xp": "xP",
+        "deep_stats_title": "🔬 Advanced Metrics (xG, xA, Mins)",
+        "th_xg": "xG/90",
+        "th_xa": "xA/90",
+        "th_xgi": "xGI/90",
+        "th_mins_played": "Total Mins",
+        "th_proj_mins": "Expected Mins",
         "t2_title": "Position & Budget Transfers Lab",
         "t2_out_header": "1. Player to Sell (OUT)",
         "t2_out_label": "Select player to transfer out:",
@@ -809,6 +821,11 @@ if is_light:
     --kpi-rank-bg: #ffffff;
     --kpi-rank-border: #e11d48;
     --kpi-rank-shadow: rgba(225, 29, 72, 0.1);
+    --fdr-1-bg: #ffffff; --fdr-1-text: #0ea5e9; --fdr-1-border: #0ea5e9;
+    --fdr-2-bg: #ffffff; --fdr-2-text: #15803d; --fdr-2-border: #15803d;
+    --fdr-3-bg: #ffffff; --fdr-3-text: #475569; --fdr-3-border: #475569;
+    --fdr-4-bg: #ffffff; --fdr-4-text: #b91c1c; --fdr-4-border: #b91c1c;
+    --fdr-5-bg: #ffffff; --fdr-5-text: #7f1d1d; --fdr-5-border: #7f1d1d;
     """
 else:
     root_vars = """
@@ -895,6 +912,11 @@ else:
     --kpi-rank-bg: linear-gradient(135deg, rgba(233, 0, 82, 0.18) 0%, rgba(55, 0, 60, 0.95) 100%);
     --kpi-rank-border: #ff2882;
     --kpi-rank-shadow: rgba(233, 0, 82, 0.28);
+    --fdr-1-bg: #0ea5e9; --fdr-1-text: #ffffff; --fdr-1-border: #0ea5e9;
+    --fdr-2-bg: #15803d; --fdr-2-text: #ffffff; --fdr-2-border: #15803d;
+    --fdr-3-bg: #475569; --fdr-3-text: #ffffff; --fdr-3-border: #475569;
+    --fdr-4-bg: #b91c1c; --fdr-4-text: #ffffff; --fdr-4-border: #b91c1c;
+    --fdr-5-bg: #7f1d1d; --fdr-5-text: #ffffff; --fdr-5-border: #7f1d1d;
     """
 
 css_template = """
@@ -1761,11 +1783,11 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
-.fdr-1 { background: #0ea5e9 !important; color: #ffffff !important; }
-.fdr-2 { background: #15803d !important; color: #ffffff !important; }
-.fdr-3 { background: #475569 !important; color: #ffffff !important; }
-.fdr-4 { background: #b91c1c !important; color: #ffffff !important; }
-.fdr-5 { background: #7f1d1d !important; color: #ffffff !important; }
+.fdr-1 { background: var(--fdr-1-bg) !important; color: var(--fdr-1-text) !important; border: 1.5px solid var(--fdr-1-border) !important; }
+.fdr-2 { background: var(--fdr-2-bg) !important; color: var(--fdr-2-text) !important; border: 1.5px solid var(--fdr-2-border) !important; }
+.fdr-3 { background: var(--fdr-3-bg) !important; color: var(--fdr-3-text) !important; border: 1.5px solid var(--fdr-3-border) !important; }
+.fdr-4 { background: var(--fdr-4-bg) !important; color: var(--fdr-4-text) !important; border: 1.5px solid var(--fdr-4-border) !important; }
+.fdr-5 { background: var(--fdr-5-bg) !important; color: var(--fdr-5-text) !important; border: 1.5px solid var(--fdr-5-border) !important; }
 
 .prob-badge {
     font-size: 8px;
@@ -2668,21 +2690,17 @@ def fetch_league_data():
         mins_per_gw = mins / max(1, (next_gw - 1))
         
         # P0.2 - Continuous Minutes Projection
-        proj_mins = calculate_continuous_minutes(mins_per_gw, cost, el["element_type"], is_premium=(cost >= 8.0))
-        
-        if proj_mins >= 75:
-            tactical_rate = 100
-        elif proj_mins >= 55:
-            tactical_rate = 85
-        elif proj_mins >= 35:
-            tactical_rate = 65
-        else:
-            tactical_rate = 40 if proj_mins > 0 else 20
+        proj_mins = calculate_continuous_minutes(mins_per_gw, el["element_type"])
             
-        # P0.3 - Advanced Start Probability
-        start_prob = calculate_start_probability(tactical_rate, chance, form, fixtures_congestion=(next_gw > 30))
+        # P0.3 - Advanced Start Probability (Continuous)
+        start_prob = calculate_start_probability(proj_mins, chance, form, fixtures_congestion=(next_gw > 30))
 
-        xgi_p90 = (expected_gi / mins) * 90 if mins >= 60 else expected_gi
+        # P1.1 - True Per 90 metrics directly from API (Fall back to cumulative if missing)
+        xg_90 = float(el.get("expected_goals_per_90", 0.0))
+        xa_90 = float(el.get("expected_assists_per_90", 0.0))
+        xgi_p90 = xg_90 + xa_90
+        if xgi_p90 == 0 and mins > 0:
+            xgi_p90 = (expected_gi / mins) * 90
 
         tag_status = None
         buy_low_bonus = 0.0
@@ -2715,21 +2733,18 @@ def fetch_league_data():
         next_fdr = fdr_list[0] if fdr_list else 3
         cs_prob = {2: 0.45, 3: 0.28, 4: 0.15, 5: 0.08}.get(next_fdr, 0.22)
         
-        # P0.1 - Advanced xP Calculation
+        # P0.1 - Advanced xP Calculation (True EV)
         pred_xp = calculate_expected_points(
             element_type=el["element_type"], 
             xgi_p90=xgi_p90, 
             proj_mins=proj_mins, 
             start_prob=start_prob, 
+            chance_of_playing=chance,
             cs_prob=cs_prob, 
             form=form, 
             is_elite_def=(team_short in elite_defenses), 
             threat=threat
         )
-        
-        if chance < 100:
-            pred_xp *= chance / 100.0
-        pred_xp = round(max(0.0, pred_xp), 1)
 
         if tag_status == "BUY_LOW":
             reason_he = "מייצר מצבים ברצף (xGI גבוה) אך טרם תוגמל במספרים. פוטנציאל התפוצצות."
@@ -2762,6 +2777,10 @@ def fetch_league_data():
             "form": form,
             "total_points": el.get("total_points", 0),
             "xgi_p90": round(xgi_p90, 2),
+            "xg_90": round(xg_90, 2),
+            "xa_90": round(xa_90, 2),
+            "mins_played": mins,
+            "proj_mins": round(proj_mins, 1),
             "selected_by": float(el["selected_by_percent"]),
             "score": round(score, 2),
             "xp": pred_xp,
@@ -3990,6 +4009,41 @@ with t_analysis:
         ])
     
     render_styled_table(headers_s11, rows_s11, is_rtl=(st.session_state.app_lang == "he"))
+
+    st.write("")
+    with st.expander(f"{t('deep_stats_title')}", expanded=False):
+        headers_deep = [
+            t("th_player"),
+            t("th_pos"),
+            t("th_team"),
+            t("th_xg"),
+            t("th_xa"),
+            t("th_xgi"),
+            t("th_mins_played"),
+            t("th_proj_mins")
+        ]
+        rows_deep = []
+        # Sort by total xGI per 90 descending
+        sorted_deep = sorted(starters + subs, key=lambda x: x.get("xgi_p90", 0), reverse=True)
+        for p in sorted_deep:
+            pos_str = t(f"pos_{p['pos_code']}")
+            xg_val = p.get("xg_90", 0.0)
+            xa_val = p.get("xa_90", 0.0)
+            xgi_val = p.get("xgi_p90", 0.0)
+            mins_val = p.get("mins_played", 0)
+            proj_mins = p.get("proj_mins", 0.0)
+            
+            rows_deep.append([
+                f"<b>{p['name']}</b>",
+                f'<span style="font-size:12px;">{pos_str}</span>',
+                f'<span class="ltr-tag">{p["team"]}</span>',
+                f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:700;">{xg_val}</span>',
+                f'<span class="ltr-tag" style="color:var(--accent-cyan); font-weight:700;">{xa_val}</span>',
+                f'<span class="ltr-tag" style="color:var(--accent-magenta); font-weight:800;">{xgi_val}</span>',
+                f'<span class="ltr-tag">{mins_val}</span>',
+                f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
+            ])
+        render_styled_table(headers_deep, rows_deep, is_rtl=(st.session_state.app_lang == "he"))
 
 # ---------------------------------------------------------------------
 # טאב 4: רדאר רכש עילית (Scout Radar)
