@@ -2247,7 +2247,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     /* =================================================================
        STEP 8: לשוניות טאבים — גלילה אופקית חלקה
        ================================================================= */
-    div[data-baseweb="tab-list"] {
+        div[data-baseweb="tab-list"] {
+        display: flex !important;
+        flex-wrap: nowrap !important;
         -webkit-overflow-scrolling: touch !important;
         overflow-x: auto !important;
         scrollbar-width: none !important;
@@ -3301,6 +3303,79 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         font-size: 6px !important;
     }
 }
+
+@media (max-width: 600px) {
+    div[data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0.3rem !important;
+    }
+    div[data-testid="column"] {
+        padding: 0 !important;
+        min-width: 0 !important;
+    }
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        column-gap: 2px !important;
+        row-gap: 4px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .p-name-txt,
+    .st-key-fpl_pitch .p-name-txt,
+    .st-key-fpl_pitch_planner .p-name-txt,
+    .st-key-fpl_bench .p-name-txt,
+    .st-key-fpl_bench_planner .p-name-txt {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        font-size: 8px !important;
+        line-height: 1.1 !important;
+    }
+
+    .st-key-fpl_pitch .p-card-fpl,
+    .st-key-fpl_pitch_planner .p-card-fpl,
+    .st-key-fpl_bench .card-bench,
+    .st-key-fpl_bench_planner .card-bench {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        padding: 2px !important;
+    }
+
+    .st-key-fpl_pitch .p-card-fpl svg,
+    .st-key-fpl_pitch_planner .p-card-fpl svg,
+    .st-key-fpl_bench .card-bench svg,
+    .st-key-fpl_bench_planner .card-bench svg {
+        width: 36px !important;
+        height: 32px !important;
+        max-width: 40px !important;
+        max-height: 36px !important;
+    }
+}
+
 </style>
 """
 
@@ -4203,7 +4278,7 @@ def render_gw_fixtures_panel(gw_num):
     """
     render_html(panel_html)
 
-def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None, custom_cap=None, custom_vc=None):
+def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_selected=False, target_gw=None, custom_cap=None, custom_vc=None, is_list_view=False):
     is_c = custom_cap if custom_cap is not None else p.get("is_cap", False)
     is_v = custom_vc if custom_vc is not None else p.get("is_vc", False)
 
@@ -4256,6 +4331,15 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
     xp_mult = 2 if is_c else 1
     xp_val = round(p["xp"] * xp_mult, 1)
 
+    footer_html = ""
+    if is_list_view:
+        footer_html = (
+            f'<div class="p-card-footer">'
+            f'<span class="p-card-cost"><span class="ltr-tag">£{p["cost"]}m</span></span>'
+            f'<span class="p-card-xp"><span class="ltr-tag">xP {xp_val}</span></span>'
+            f'</div>'
+        )
+
     card_html = (
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
         f'{top_color_bar}'
@@ -4263,10 +4347,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div class="p-name-plate">{cap_badge}<span class="p-name-txt">{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:1px 0;">{fixture_html}</div>'
         f'{status_pill}'
-        f'<div class="p-card-footer">'
-        f'<span class="p-card-cost"><span class="ltr-tag">£{p["cost"]}m</span></span>'
-        f'<span class="p-card-xp"><span class="ltr-tag">xP {xp_val}</span></span>'
-        f'</div>'
+        f'{footer_html}'
         f'</div>'
     )
     return "".join(line.strip() for line in card_html.splitlines())
@@ -4347,28 +4428,7 @@ with t_squad:
     current_vc_id = next((p["id"] for p in starters if p.get("is_vc")), starters[1]["id"] if len(starters) > 1 else None)
 
     with st.container():
-        c_cap_col, c_vc_col = st.columns(2)
-        with c_cap_col:
-            new_cap_pick = st.selectbox(
-                t("cap_select_label"),
-                list(starter_dict.keys()),
-                index=list(starter_dict.keys()).index(current_cap_id) if current_cap_id in starter_dict else 0,
-                format_func=lambda x: starter_dict[x],
-                key="tab1_cap_select",
-            )
-            if new_cap_pick != current_cap_id:
-                set_squad_captain(new_cap_pick)
-        with c_vc_col:
-            vc_candidates = {k: v for k, v in starter_dict.items() if k != current_cap_id}
-            new_vc_pick = st.selectbox(
-                t("vc_select_label"),
-                list(vc_candidates.keys()),
-                index=list(vc_candidates.keys()).index(current_vc_id) if current_vc_id in vc_candidates else 0,
-                format_func=lambda x: vc_candidates[x],
-                key="tab1_vc_select",
-            )
-            if new_vc_pick != current_vc_id:
-                set_squad_vice_captain(new_vc_pick)
+        pass # Moved below pitch
 
     # באנר מצב חילוף פעיל
     if st.session_state.squad_swap_active and st.session_state.squad_selected_id:
@@ -4386,48 +4446,91 @@ with t_squad:
                     st.session_state.squad_selected_id = None
                     st.rerun()
 
-    def render_clean_squad_row(player_list, is_bench=False):
+    def render_clean_squad_row(player_list, is_bench=False, is_list_view=False):
         if not player_list:
             return
         cols = st.columns(len(player_list))
+        k_suf = "_list" if is_list_view else ""
 
         for i, p in enumerate(player_list):
             with cols[i]:
                 is_this_selected = (st.session_state.squad_selected_id == p["id"])
-                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected), unsafe_allow_html=True)
+                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected, is_list_view=is_list_view), unsafe_allow_html=True)
                 
                 if st.session_state.squad_swap_active:
                     if is_this_selected:
-                        if st.button(t("btn_cancel"), key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
+                        if st.button(t("btn_cancel"), key=f"sq_b_{p['id']}{k_suf}", use_container_width=True, type="secondary"):
                             st.session_state.squad_swap_active = False
                             st.session_state.squad_selected_id = None
                             st.rerun()
                     else:
                         legal, reason = is_swap_legal(st.session_state.squad_selected_id, p["id"], st.session_state.user_squad)
                         if legal:
-                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
+                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}{k_suf}", use_container_width=True, type="primary"):
                                 execute_squad_swap(st.session_state.squad_selected_id, p["id"])
                         else:
-                            st.button(reason, key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
+                            st.button(reason, key=f"sq_b_{p['id']}{k_suf}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True):
+                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}{k_suf}", use_container_width=True):
                         st.session_state.squad_selected_id = p["id"]
                         st.session_state.squad_swap_active = True
                         st.session_state.squad_transfer_active = False
                         st.rerun()
 
-    # מגרש
-    with st.container(key="fpl_pitch"):
-        st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 3])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 2])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        gks = [p for p in starters if p["pos_code"] == 1]
-        if gks:
-            render_clean_squad_row(gks)
+    # Pitch & List Tabs
+    st.markdown("### Squad Views")
+    t_pitch_view, t_list_view = st.tabs(["Pitch", "List"])
+
+    with t_pitch_view:
+        with st.container(key="fpl_pitch"):
+            st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 4], is_list_view=False)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 3], is_list_view=False)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 2], is_list_view=False)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            gks = [p for p in starters if p["pos_code"] == 1]
+            if gks:
+                render_clean_squad_row(gks, is_list_view=False)
+
+    with t_list_view:
+        with st.container(key="fpl_list"):
+            st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 4], is_list_view=True)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 3], is_list_view=True)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            render_clean_squad_row([p for p in starters if p["pos_code"] == 2], is_list_view=True)
+            st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+            if gks:
+                render_clean_squad_row(gks, is_list_view=True)
+
+    # Captain / VC Selectboxes moved here (below the pitch)
+    st.markdown("---")
+    st.markdown("#### Captain & Vice-Captain")
+    c_cap_col, c_vc_col = st.columns(2)
+    with c_cap_col:
+        new_cap_pick = st.selectbox(
+            t("cap_select_label"),
+            list(starter_dict.keys()),
+            index=list(starter_dict.keys()).index(current_cap_id) if current_cap_id in starter_dict else 0,
+            format_func=lambda x: starter_dict[x],
+            key="tab1_cap_select",
+        )
+        if new_cap_pick != current_cap_id:
+            set_squad_captain(new_cap_pick)
+    with c_vc_col:
+        vc_candidates = {k: v for k, v in starter_dict.items() if k != current_cap_id}
+        new_vc_pick = st.selectbox(
+            t("vc_select_label"),
+            list(vc_candidates.keys()),
+            index=list(vc_candidates.keys()).index(current_vc_id) if current_vc_id in vc_candidates else 0,
+            format_func=lambda x: vc_candidates[x],
+            key="tab1_vc_select",
+        )
+        if new_vc_pick != current_vc_id:
+            set_squad_vice_captain(new_vc_pick)
 
     # חלון העברות שוק במגרש (נפתח לפי דרישה)
     with st.expander(t("transfer_market_expander")):
