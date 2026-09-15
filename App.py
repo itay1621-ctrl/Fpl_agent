@@ -1054,6 +1054,14 @@ div[data-testid="stRadio"] label {
 }
 
 /* BaseWeb Select Container - הגנה מוחלטת מכל רקע כהה/שחור ב-Light Mode */
+div[data-testid="stSelectbox"] {
+    background: transparent !important;
+}
+
+div[data-testid="stSelectbox"] > div,
+div[data-testid="stSelectbox"] > div > div,
+div[data-testid="stSelectbox"] > div,
+div[data-testid="stSelectbox"] > div > div,
 div[data-testid="stSelectbox"] div[data-baseweb="select"],
 div[data-testid="stSelectbox"] div[data-baseweb="select"] *,
 div[data-baseweb="select"],
@@ -1066,6 +1074,23 @@ div[data-baseweb="select"] [role="combobox"] * {
     background: var(--input-bg) !important;
     color: var(--input-text) !important;
     border-color: var(--input-border) !important;
+}
+
+div[data-testid="stSelectbox"] [data-testid="stWidgetLabel"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Fallback for newer Streamlit versions (1.30+) that don't use BaseWeb */
+div[data-testid="stSelectbox"] > div[data-testid="stSelectboxVirtualDropdown"] {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+}
+div[data-testid="stSelectbox"] div[role="button"],
+div[data-testid="stSelectbox"] div[role="combobox"],
+div[data-testid="stSelectbox"] input {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
 }
 
 div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
@@ -1356,7 +1381,7 @@ div[data-testid="stTabs"] div[data-baseweb="tab-list"] ~ div:not([data-baseweb="
 }
 
 /* --- 5. מגרש אצטדיון פרימיום --- */
-div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
+div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor):not(:has(.bench-anchor)) {
     max-width: 940px !important;
     margin: 0 auto 12px auto !important;
     background: var(--pitch-bg) !important;
@@ -1367,7 +1392,7 @@ div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
     position: relative !important;
     text-align: center !important;
 }
-div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor) {
+div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor):not(:has(.bench-anchor)) {
     max-width: 100% !important;
 }
 
@@ -1402,7 +1427,7 @@ div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .pitch-an
 }
 
 /* --- 5.2 ספסל מחליפים מובלט (Tactical Dugout) --- */
-div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
+div[data-testid="stVerticalBlock"]:has(> div .bench-anchor):not(:has(.pitch-anchor)) {
     max-width: 940px !important;
     margin: 14px auto 22px auto !important;
     background: var(--bench-bg) !important;
@@ -1413,7 +1438,7 @@ div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
     position: relative !important;
     text-align: center !important;
 }
-div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .bench-anchor) {
+div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .bench-anchor):not(:has(.pitch-anchor)) {
     max-width: 100% !important;
 }
 
