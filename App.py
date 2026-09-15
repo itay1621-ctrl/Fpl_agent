@@ -1660,8 +1660,8 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 
 /* תגיות C ו-VC רשמיות */
 .badge-c {
-    background: #eab308;
-    color: #0f172a;
+    background: #eab308 !important;
+    color: #0f172a !important;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -1674,8 +1674,8 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
 }
 
 .badge-vc {
-    background: #94a3b8;
-    color: #ffffff;
+    background: #94a3b8 !important;
+    color: #ffffff !important;
     font-weight: 900;
     font-size: 9.5px;
     line-height: 1;
@@ -1738,16 +1738,16 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     border-top: 1px solid var(--border-color);
 }
 .p-card-cost {
-    font-size: 9.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    direction: ltr;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    color: var(--text-secondary) !important;
+    direction: ltr !important;
 }
 .p-card-xp {
-    font-size: 11px;
-    font-weight: 900;
-    color: var(--accent-mint);
-    direction: ltr;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    color: var(--accent-mint) !important;
+    direction: ltr !important;
 }
 
 .badge-fdr {
@@ -1760,10 +1760,11 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     text-align: center;
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
-.fdr-2 { background: #15803d; color: #ffffff; }
-.fdr-3 { background: #475569; color: #ffffff; }
-.fdr-4 { background: #b91c1c; color: #ffffff; }
-.fdr-5 { background: #7f1d1d; color: #ffffff; }
+.fdr-1 { background: #0ea5e9 !important; color: #ffffff !important; }
+.fdr-2 { background: #15803d !important; color: #ffffff !important; }
+.fdr-3 { background: #475569 !important; color: #ffffff !important; }
+.fdr-4 { background: #b91c1c !important; color: #ffffff !important; }
+.fdr-5 { background: #7f1d1d !important; color: #ffffff !important; }
 
 .prob-badge {
     font-size: 8px;
@@ -1774,8 +1775,8 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     width: fit-content;
     line-height: 1.1;
 }
-.prob-red { background: rgba(225, 29, 72, 0.18); color: #e11d48; border: 1px solid #e11d48; }
-.prob-yellow { background: rgba(234, 179, 8, 0.18); color: #d97706; border: 1px solid #eab308; }
+.prob-red { background: rgba(225, 29, 72, 0.18) !important; color: #e11d48 !important; border: 1px solid #e11d48 !important; }
+.prob-yellow { background: rgba(234, 179, 8, 0.18) !important; color: #d97706 !important; border: 1px solid #eab308 !important; }
 
 .mini-fxt-container { 
     display: flex !important; 
