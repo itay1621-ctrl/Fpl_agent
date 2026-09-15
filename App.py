@@ -2693,7 +2693,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         flex: 1 1 84px !important;
     }
 }
-</style>
+<style>
 /* ================================================================
    MOBILE RESPONSIVE V2
    Portrait-first layout for iPhone Safari + Android Chrome
