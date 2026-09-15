@@ -2156,6 +2156,7 @@ div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHo
 /* מניעת גלילה אופקית כוללת בכל האתר */
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     max-width: 100vw !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
 }
 
@@ -2563,7 +2564,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding-right: 0.65rem !important;
         border-radius: 0 !important;
     /* =================================================================
-       Clean Pitch & Bench (Fit on screen like official app)
+       Pitch & Bench Layout (Scrollable on Mobile)
        ================================================================= */
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
@@ -2573,70 +2574,27 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         justify-content: center !important; 
-        gap: 2px !important;
+        gap: 4px !important;
+        overflow-x: auto !important; /* Enable local horizontal scroll */
+        padding-bottom: 8px !important; /* Space for scrollbar */
     }
     
-    /* Allow columns to shrink to fit the screen */
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        min-width: 0 !important;
-        flex: 1 1 0px !important;
+        min-width: 90px !important; /* Ensure cards never squish below readable size */
+        max-width: 120px !important;
+        flex: 1 1 auto !important;
     }
 
     @media (max-width: 640px) {
+        /* On narrow screens, align start so scroll starts from the left (in LTR) */
         .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
         .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
         .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
         .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-            justify-content: space-evenly !important; 
-            gap: 0px !important;
-        }
-        
-        .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-        .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-        .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-        .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-            min-width: 0 !important;
-            max-width: 20vw !important; /* Force max 5 cards per row neatly */
-            flex: 1 1 0px !important;
-            padding: 0 1px !important;
-        }
-        
-        /* Ultra clean card on mobile to match official app */
-        .p-card-footer { display: none !important; }
-        .prob-badge { display: none !important; }
-        
-        .p-card-fpl {
-            min-height: 70px !important;
-            padding: 2px !important;
-            border-radius: 4px !important;
-        }
-        .p-card-fpl svg {
-            width: 28px !important;
-            height: 32px !important;
-        }
-        .p-name-plate {
-            padding: 1px !important;
-            border-radius: 2px !important;
-        }
-        .p-name-txt {
-            font-size: 9px !important;
-            line-height: 1 !important;
-        }
-        .badge-fdr {
-            font-size: 8.5px !important;
-            padding: 1px 2px !important;
-            border-radius: 2px !important;
-        }
-        
-        div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-            height: 20px !important;
-            min-height: 20px !important;
-            font-size: 9px !important;
-            padding: 0 !important;
-            border-radius: 0 0 4px 4px !important;
+            justify-content: flex-start !important;
         }
     }
 
