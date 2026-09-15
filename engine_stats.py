@@ -48,8 +48,9 @@ def calculate_expected_minutes(p_start, p_sub, element_type, starts, mins):
 
 def calculate_cs_prob(team_xgc_90, opp_fdr, is_home):
     """
-    P0.4 - Advanced Clean Sheet Probability
-    Combines team's actual xGC/90 with opponent's attacking strength (proxied by FDR) and Home/Away.
+    P0.4 - Poisson Clean Sheet Probability.
+    Future Enhancement: Replace opp_fdr with Opponent xG/90 + Recent Attacking Strength.
+    Currently uses FDR as a rough proxy for opponent attacking strength.
     """
     # Base expected goals conceded for the match
     base_xgc = team_xgc_90 if team_xgc_90 > 0 else 1.5
@@ -96,10 +97,11 @@ def calculate_expected_points(element_type, xg_90, xa_90, bps_90, e_mins, p_star
     elif element_type == 3:
         expected_defensive = p_60_plus * cs_prob * 1.0
         
-    # 4. Bonus Points System (BPS) & DefCon
-    # Instead of arbitrary DefCon, we project expected BPS based on historical generation
+    # 4. Expected Bonus Proxy (Approximation)
+    # Note: True BPS ranking requires matching against all 21 players in a match.
+    # This proxy approximates bonus chance based on raw BPS generation rate.
+    # Future enhancement: Add actual DefCon (CBI + Recoveries) when element-summary data is available.
     proj_bps = (bps_90 / 90.0) * e_mins
-    
     expected_bonus = 0.0
     if proj_bps > 25:
         expected_bonus = 1.2

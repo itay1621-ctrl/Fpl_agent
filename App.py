@@ -351,6 +351,7 @@ TRANSLATIONS = {
         "th_player": "שחקן",
         "th_pos": "עמדה",
         "th_team": "קבוצה",
+        "th_defcon": "DEFCON",
         "th_next_match": "משחק קרוב",
         "th_fdr": "FDR",
         "th_start_prob": "סבירות לפתוח",
@@ -588,6 +589,7 @@ TRANSLATIONS = {
         "th_player": "Player",
         "th_pos": "Pos",
         "th_team": "Team",
+        "th_defcon": "DEFCON",
         "th_next_match": "Next Match",
         "th_fdr": "FDR",
         "th_start_prob": "Start Prob",
@@ -2109,24 +2111,6 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizon
     max-width: 100% !important;
 }
 
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-div[data-testid="column"]:has(.p-card-fpl),
-div[data-testid="column"]:has(.card-bench) {
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    flex: 1 1 0px !important;
-    flex-basis: 0 !important;
-    flex-grow: 1 !important;
-    flex-shrink: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    padding: 0 1px !important;
-    box-sizing: border-box !important;
-}
 
 /* מרכז טופס הכניסה לשער */
 div[data-testid="stVerticalBlock"]:has(.gate-form-anchor) {
@@ -2183,9 +2167,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding-right: 0.35rem !important;
         max-width: 100vw !important;
     }
-    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-        touch-action: pan-y !important;
-    }
+
 
     /* =================================================================
        STEP 2: סרגל עליון — שם הקבוצה ברוחב מלא, כפתורים מתחת בשורה
@@ -2271,88 +2253,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         gap: 2px !important;
         width: 100% !important;
         max-width: 100% !important;
-    }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    div[data-testid="column"]:has(.p-card-fpl),
-    div[data-testid="column"]:has(.card-bench) {
-        width: 0 !important;
-        min-width: 0 !important;
-        max-width: 100% !important;
-        flex: 1 1 0px !important;
-        flex-basis: 0 !important;
-        flex-grow: 1 !important;
-        flex-shrink: 1 !important;
-        padding: 0 1px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    /* =================================================================
-       STEP 6: כרטיס שחקן מותאם מסך סמארטפון (360px-430px)
-       ================================================================= */
-    .p-card-fpl {
-        padding: 2px 1px !important;
-        border-radius: 8px 8px 0 0 !important;
-        max-width: 66px !important;
-        width: 100% !important;
-        height: 138px !important;
-        min-height: 138px !important;
-        max-height: 138px !important;
-        box-sizing: border-box !important;
-    }
-    .p-card-fpl svg {
-        width: 28px !important;
-        height: 24px !important;
-    }
-    .p-name-plate {
-        padding: 1px 2px !important;
-        border-radius: 4px !important;
-        margin: 1px auto !important;
-        width: 98% !important;
-        background: var(--p-name-plate-bg) !important;
-        border: 1px solid var(--p-name-plate-border) !important;
-    }
-    .p-name-txt {
-        font-size: 9px !important;
-        font-weight: 800 !important;
-        color: var(--p-name-plate-text) !important;
-        letter-spacing: -0.2px !important;
-    }
-    .p-sub, .badge-fdr, .mini-fxt {
-        font-size: 7px !important;
-        padding: 1px 2px !important;
-    }
-    .badge-c, .badge-vc {
-        font-size: 7px !important;
-        padding: 1px 2px !important;
-    }
-    .prob-badge {
-        font-size: 7px !important;
-        padding: 1px 2px !important;
-    }
-    .p-card-footer {
-        width: 95% !important;
-        padding-top: 1px !important;
-    }
-    .p-card-cost {
-        font-size: 8px !important;
-    }
-    .p-card-xp {
-        font-size: 8.5px !important;
-    }
-    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
-    div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
-        height: 24px !important;
-        min-height: 24px !important;
-        line-height: 24px !important;
-        font-size: 8.5px !important;
-        padding: 0 1px !important;
-        border-radius: 0 0 8px 8px !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        margin-top: -2px !important;
     }
 
     /* =================================================================
@@ -2977,6 +2877,8 @@ def fetch_league_data():
             "reason": reason_he,
             "reason_he": reason_he,
             "reason_en": reason_en,
+            "defcon": round(bps_90, 1),
+            "threat": threat,
             "status": status,
             "chance": chance,
             "start_prob": start_prob,
@@ -4164,6 +4066,7 @@ with t_analysis:
         t("th_next_match"),
         t("th_fdr"),
         t("th_start_prob"),
+        t("th_defcon"),
         t("th_season_pts"),
         t("th_xp"),
     ]
@@ -4195,6 +4098,7 @@ with t_analysis:
             f'<span class="badge-fdr fdr-{p["next_fdr"]}"><span class="ltr-tag">{p["next_match"]}</span></span>',
             f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
             f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
+            f'<span class="ltr-tag">{p.get("defcon", 0)}</span>',
             f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
             f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
         ])
@@ -4210,6 +4114,7 @@ with t_analysis:
             t("th_xg"),
             t("th_xa"),
             t("th_xgc"),
+            t("th_defcon"),
             t("th_mins_played"),
             t("th_proj_mins")
         ]
@@ -4221,6 +4126,7 @@ with t_analysis:
             xg_val = p.get("xg_90", 0.0)
             xa_val = p.get("xa_90", 0.0)
             xgc_val = p.get("xgc_90", 0.0)
+            defcon_val = p.get("defcon", 0.0)
             mins_val = p.get("mins_played", 0)
             proj_mins = p.get("proj_mins", 0.0)
             
@@ -4236,12 +4142,13 @@ with t_analysis:
                 xgc_color = "var(--text-secondary)"
                 
             rows_deep.append([
-                f"<b>{p['name']}</b>",
-                f'<span style="font-size:12px;">{pos_str}</span>',
-                f'<span class="ltr-tag">{p["team"]}</span>',
-                f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:700;">{xg_val}</span>',
-                f'<span class="ltr-tag" style="color:var(--accent-cyan); font-weight:700;">{xa_val}</span>',
-                f'<span class="ltr-tag" style="color:{xgc_color}; font-weight:800;">{xgc_val}</span>',
+                f'<span style="font-weight:600;">{p["name"]}</span>',
+                pos_str,
+                p["team"],
+                f'<span class="ltr-tag" style="color:{"#10b981" if xg_val >= 0.4 else "var(--text-primary)"};">{xg_val:.2f}</span>',
+                f'<span class="ltr-tag" style="color:{"#10b981" if xa_val >= 0.3 else "var(--text-primary)"};">{xa_val:.2f}</span>',
+                f'<span class="ltr-tag" style="color:{xgc_color};">{xgc_val:.2f}</span>',
+                f'<span class="ltr-tag" style="color:{"#10b981" if defcon_val >= 20.0 else "var(--text-primary)"};">{defcon_val:.1f}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
