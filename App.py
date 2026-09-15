@@ -2884,32 +2884,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 }
 
-"""
-
-def inject_mobile_layout_js():
-    js_code = """
-    <script>
-    const fixSafariLayout = () => {
-        const parentDoc = window.parent.document;
-        // Fix Planner split stacking
-        parentDoc.querySelectorAll('.planner-split-anchor').forEach(el => {
-            let col = el.closest('div[data-testid="column"]');
-            if (col && col.parentElement) {
-                col.parentElement.classList.add('mobile-stack-force');
-            }
-        });
-        
-        // Fix Transfer Lab stacking
-        parentDoc.querySelectorAll('.transfer-lab-anchor').forEach(el => {
-            let col = el.closest('div[data-testid="column"]');
-            if (col && col.parentElement) {
-                col.parentElement.classList.add('mobile-stack-force');
-            }
-        });
-    };
-    // Run periodically to catch Streamlit re-renders
-    setInterval(fixSafariLayout, 500);
-    /* ================================================================
+/* ================================================================
    FINAL MOBILE POLISH
    1. Future Planner: Pitch first, Fixtures below
    2. Compact FPL-style player cards
@@ -3325,7 +3300,32 @@ def inject_mobile_layout_js():
         font-size: 7px !important;
     }
 }
- </style>
+</style>
+"""
+
+def inject_mobile_layout_js():
+    js_code = """
+    <script>
+    const fixSafariLayout = () => {
+        const parentDoc = window.parent.document;
+        // Fix Planner split stacking
+        parentDoc.querySelectorAll('.planner-split-anchor').forEach(el => {
+            let col = el.closest('div[data-testid="column"]');
+            if (col && col.parentElement) {
+                col.parentElement.classList.add('mobile-stack-force');
+            }
+        });
+        
+        // Fix Transfer Lab stacking
+        parentDoc.querySelectorAll('.transfer-lab-anchor').forEach(el => {
+            let col = el.closest('div[data-testid="column"]');
+            if (col && col.parentElement) {
+                col.parentElement.classList.add('mobile-stack-force');
+            }
+        });
+    };
+    // Run periodically to catch Streamlit re-renders
+    setInterval(fixSafariLayout, 500);
     </script>
     """
     components.html(js_code, height=0)
@@ -4388,13 +4388,7 @@ with t_squad:
     def render_clean_squad_row(player_list, is_bench=False):
         if not player_list:
             return
-        cols = st.columns(
-    len(player_list),
-    gap="small",
-    vertical_alignment="bottom",
-    width="stretch",
-    wrap=True,
-)
+        cols = st.columns(len(player_list))
 
         for i, p in enumerate(player_list):
             with cols[i]:
