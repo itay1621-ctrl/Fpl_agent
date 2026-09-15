@@ -2697,10 +2697,10 @@ def fetch_league_data():
 
         mins = el.get("minutes", 0)
         actual_gi = el.get("goals_scored", 0) + el.get("assists", 0)
-        expected_gi = float(el.get("expected_goal_involvements", 0.0))
-        form = float(el.get("form", 0.0))
+        expected_gi = float(el.get("expected_goal_involvements") or 0.0)
+        form = float(el.get("form") or 0.0)
         cost = el["now_cost"] / 10
-        threat = float(el.get("threat", 0.0))
+        threat = float(el.get("threat") or 0.0)
 
         status = el.get("status", "a")
         chance_raw = el.get("chance_of_playing_next_round")
@@ -2722,9 +2722,9 @@ def fetch_league_data():
         start_prob = calculate_start_probability(proj_mins, chance, form, fixtures_congestion=(next_gw > 30))
 
         # P1.1 - True Per 90 metrics directly from API (Fall back to cumulative if missing)
-        xg_90 = float(el.get("expected_goals_per_90", 0.0))
-        xa_90 = float(el.get("expected_assists_per_90", 0.0))
-        xgc_90 = float(el.get("expected_goals_conceded_per_90", 0.0))
+        xg_90 = float(el.get("expected_goals_per_90") or 0.0)
+        xa_90 = float(el.get("expected_assists_per_90") or 0.0)
+        xgc_90 = float(el.get("expected_goals_conceded_per_90") or 0.0)
         xgi_p90 = xg_90 + xa_90
         if xgi_p90 == 0 and mins > 0:
             xgi_p90 = (expected_gi / mins) * 90
