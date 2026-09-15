@@ -4060,6 +4060,12 @@ with t_analysis:
             mins_val = p.get("mins_played", 0)
             proj_mins = p.get("proj_mins", 0.0)
             
+            # Fallback for old cached strings before cache clears
+            if isinstance(defcon_val, str):
+                if defcon_val == "High": defcon_val = 4.5
+                elif defcon_val == "Medium": defcon_val = 3.0
+                else: defcon_val = 1.5
+            
             # Color defcon
             if defcon_val >= 4.0:
                 dc_color = "#10b981"
