@@ -4056,14 +4056,14 @@ with t_analysis:
             pos_str = t(f"pos_{p['pos_code']}")
             xg_val = p.get("xg_90", 0.0)
             xa_val = p.get("xa_90", 0.0)
-            defcon_val = p.get("defcon", "Low")
+            defcon_val = p.get("defcon", 3.0)
             mins_val = p.get("mins_played", 0)
             proj_mins = p.get("proj_mins", 0.0)
             
             # Color defcon
-            if defcon_val == "High":
+            if defcon_val >= 4.0:
                 dc_color = "#10b981"
-            elif defcon_val == "Medium":
+            elif defcon_val >= 2.5:
                 dc_color = "#f59e0b"
             else:
                 dc_color = "#ef4444"
@@ -4074,7 +4074,7 @@ with t_analysis:
                 f'<span class="ltr-tag">{p["team"]}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:700;">{xg_val}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-cyan); font-weight:700;">{xa_val}</span>',
-                f'<span class="ltr-tag" style="color:{dc_color}; font-weight:800;">{defcon_val}</span>',
+                f'<span class="ltr-tag" style="color:{dc_color}; font-weight:800;">{defcon_val:.1f}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])

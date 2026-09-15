@@ -115,23 +115,25 @@ def calculate_expected_points(element_type, xgi_p90, proj_mins, start_prob, chan
 def get_defcon_level(team_short, is_home, next_fdr):
     """
     P1.2 - Defensive Contributions (DefCon)
-    Returns a string level (High/Med/Low) based on team defensive strength and fixture.
+    Returns a numerical score from 1.0 (lowest) to 5.0 (highest) 
+    representing clean sheet potential.
     """
     elite_defenses = ["ARS", "MCI", "LIV", "NEW", "CHE"]
     
-    score = 0
+    score = 3.0  # Base average score
     if team_short in elite_defenses:
-        score += 2
-    if is_home:
-        score += 1
-    if next_fdr <= 2:
-        score += 2
-    elif next_fdr == 3:
-        score += 1
+        score += 1.0
         
-    if score >= 4:
-        return "High"
-    elif score >= 2:
-        return "Medium"
+    if is_home:
+        score += 0.5
     else:
-        return "Low"
+        score -= 0.5
+        
+    if next_fdr <= 2:
+        score += 1.0
+    elif next_fdr == 4:
+        score -= 1.0
+    elif next_fdr >= 5:
+        score -= 1.5
+        
+    return round(max(1.0, min(5.0, score)), 1)
