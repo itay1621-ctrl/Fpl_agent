@@ -3227,7 +3227,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-height: 92px !important;
 
         padding: 2px 1px !important;
-    }
+    
 }
 
 
