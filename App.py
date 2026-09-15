@@ -2169,7 +2169,6 @@ div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHo
 
 /* מניעת גלילה אופקית כוללת בכל האתר */
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    overflow-x: hidden !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
 }
@@ -2183,29 +2182,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding-left: 0.35rem !important;
         padding-right: 0.35rem !important;
         max-width: 100vw !important;
-        overflow-x: hidden !important;
     }
     html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         touch-action: pan-y !important;
-    }
-
-    /* =================================================================
-       STEP 1: קריסת עמודות כלליות לפריסה אנכית
-       מחריג: מגרש, ספסל, סרגל עליון, כפתורי שער, מדדי פלנר
-       ================================================================= */
-    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)):not(:has(.app-header-anchor)):not(:has(.gate-header-anchor)):not(:has(.gate-btn-anchor)):not(:has(.planner-metrics-anchor)) {
-        display: flex !important;
-        flex-direction: column !important;
-        flex-wrap: wrap !important;
-        gap: 8px !important;
-        width: 100% !important;
-    }
-    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)):not(:has(.app-header-anchor)):not(:has(.gate-header-anchor)):not(:has(.gate-btn-anchor)):not(:has(.planner-metrics-anchor)) > div[data-testid="column"] {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        flex: 1 1 100% !important;
-        padding: 0 !important;
     }
 
     /* =================================================================
@@ -2553,49 +2532,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 }
 
-/* מסכי סמארטפון צרים במיוחד (<= 380px כמו iPhone SE / Galaxy Mini) */
-@media (max-width: 380px) {
-    .p-card-fpl {
-        max-width: 54px !important;
-        height: auto !important;
-        min-height: 114px !important;
-        max-height: 120px !important;
-        padding: 2px 0px !important;
-    }
-    .p-card-fpl svg {
-        width: 24px !important;
-        height: 20px !important;
-    }
-    .p-name-txt {
-        font-size: 7.5px !important;
-    }
-    .p-card-cost {
-        font-size: 7px !important;
-    }
-    .p-card-xp {
-        font-size: 7.5px !important;
-    }
-    .p-sub, .badge-fdr, .mini-fxt {
-        font-size: 6.5px !important;
-        padding: 0px 1px !important;
-    }
-    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
-    div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
-        max-width: 54px !important;
-        font-size: 7.5px !important;
-        height: 20px !important;
-        min-height: 20px !important;
-    }
-    .kpi-container {
-        grid-template-columns: 1fr !important;
-    }
-    button[data-baseweb="tab"] {
-        padding: 4px 6px !important;
-        font-size: 10px !important;
-    }
-    .gate-card h1 {
-        font-size: 20px !important;
-    }
+@media (max-width: 820px) {
     /* =================================================================
        STEP 15: Essential Mobile Usability & Safari Fixes
        ================================================================= */
@@ -2670,44 +2607,35 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         flex: 0 0 auto !important;
     }
 
-    /* Force generic columns (like Captain selectboxes) to stack on mobile */
-    div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.kpi-card)):not(:has(.fxt-score)):not(:has(button[data-baseweb="tab"])) {
-        flex-wrap: wrap !important;
-        flex-direction: column !important;
-    }
-    div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.kpi-card)):not(:has(.fxt-score)):not(:has(button[data-baseweb="tab"])) > div[data-testid="column"] {
-        width: 100% !important;
-        min-width: 100% !important;
-    }
 
-    /* Scale down player cards on mobile so they don't look huge */
+    /* Scale down player cards on mobile so they don't look huge, but keep them readable (rely on horizontal scroll) */
     .p-card-fpl {
-        max-width: 65px !important;
+        max-width: 90px !important;
         height: auto !important;
         min-height: 125px !important;
         margin: 0 auto !important;
-        padding: 2px 0px !important;
+        padding: 4px 0px !important;
     }
     .p-card-fpl svg {
-        width: 25px !important;
-        height: 22px !important;
+        width: 32px !important;
+        height: 28px !important;
     }
     .p-name-txt {
-        font-size: 8px !important;
+        font-size: 10px !important;
     }
     .p-card-cost, .p-card-xp {
-        font-size: 7.5px !important;
+        font-size: 9px !important;
     }
     .p-sub, .badge-fdr, .mini-fxt, .badge-c, .badge-vc {
-        font-size: 7px !important;
-        padding: 0 1px !important;
+        font-size: 8px !important;
+        padding: 0 2px !important;
     }
     div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-        max-width: 65px !important;
+        max-width: 90px !important;
         margin: -2px auto 0 auto !important;
-        height: 22px !important;
-        min-height: 22px !important;
-        font-size: 8px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        font-size: 9.5px !important;
     }
 
     /* Force Planner Pitch & Fixtures to stack vertically */
