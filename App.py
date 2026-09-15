@@ -2680,11 +2680,41 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-width: 100% !important;
     }
 
+    /* Scale down player cards on mobile so they don't look huge */
+    .p-card-fpl {
+        max-width: 65px !important;
+        height: auto !important;
+        min-height: 125px !important;
+        margin: 0 auto !important;
+        padding: 2px 0px !important;
+    }
+    .p-card-fpl svg {
+        width: 25px !important;
+        height: 22px !important;
+    }
+    .p-name-txt {
+        font-size: 8px !important;
+    }
+    .p-card-cost, .p-card-xp {
+        font-size: 7.5px !important;
+    }
+    .p-sub, .badge-fdr, .mini-fxt, .badge-c, .badge-vc {
+        font-size: 7px !important;
+        padding: 0 1px !important;
+    }
+    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
+        max-width: 65px !important;
+        margin: -2px auto 0 auto !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        font-size: 8px !important;
+    }
+
     /* Force Planner Pitch & Fixtures to stack vertically */
-    div[data-testid="stHorizontalBlock"]:has(> div > div > div > div > .pitch-anchor) {
+    div[data-testid="stHorizontalBlock"]:has(.pitch-anchor) {
         flex-direction: column !important;
     }
-    div[data-testid="stHorizontalBlock"]:has(> div > div > div > div > .pitch-anchor) > div[data-testid="column"] {
+    div[data-testid="stHorizontalBlock"]:has(.pitch-anchor) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
     }
