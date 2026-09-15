@@ -2515,35 +2515,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-width: 100% !important;
     }
 
-    /* Scale down player cards on mobile so they don't look huge, but keep them readable (rely on horizontal scroll) */
-    .p-card-fpl {
-        max-width: 90px !important;
-        height: auto !important;
-        min-height: 125px !important;
-        margin: 0 auto !important;
-        padding: 4px 0px !important;
-    }
-    .p-card-fpl svg {
-        width: 32px !important;
-        height: 28px !important;
-    }
-    .p-name-txt {
-        font-size: 10px !important;
-    }
-    .p-card-cost, .p-card-xp {
-        font-size: 9px !important;
-    }
-    .p-sub, .badge-fdr, .mini-fxt, .badge-c, .badge-vc {
-        font-size: 8px !important;
-        padding: 0 2px !important;
-    }
-    div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
-        max-width: 90px !important;
-        margin: -2px auto 0 auto !important;
-        height: 26px !important;
-        min-height: 26px !important;
-        font-size: 9.5px !important;
-    }
+
 
     /* Force Planner Pitch & Fixtures to stack vertically */
     div[data-testid="stHorizontalBlock"]:has(.pitch-anchor) {
@@ -2577,10 +2549,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding-left: 0.65rem !important;
         padding-right: 0.65rem !important;
         border-radius: 0 !important;
-        max-width: 100vw !important;
-    }
     /* =================================================================
-       Robust Pitch & Bench Horizontal Scroll (using st.container keys)
+       Clean Pitch & Bench (Fit on screen like official app)
        ================================================================= */
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
@@ -2589,42 +2559,85 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        gap: 6px !important;
         justify-content: center !important; 
-        padding-bottom: 8px !important;
+        gap: 2px !important;
     }
     
+    /* Allow columns to shrink to fit the screen */
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        min-width: 0 !important;
+        flex: 1 1 0px !important;
+    }
+
     @media (max-width: 640px) {
         .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
         .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
         .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
         .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-            justify-content: flex-start !important; /* Allow natural overflow scrolling */
+            justify-content: space-evenly !important; 
+            gap: 0px !important;
         }
-    }
-
-    /* Force columns to hold shape on mobile and desktop so scroll activates */
-    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        min-width: 85px !important;
-        max-width: 100px !important;
-        flex: 0 0 auto !important;
-        width: auto !important;
+        
+        .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+        .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+        .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+        .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            min-width: 0 !important;
+            max-width: 20vw !important; /* Force max 5 cards per row neatly */
+            flex: 1 1 0px !important;
+            padding: 0 1px !important;
+        }
+        
+        /* Ultra clean card on mobile to match official app */
+        .p-card-footer { display: none !important; }
+        .prob-badge { display: none !important; }
+        
+        .p-card-fpl {
+            min-height: 70px !important;
+            padding: 2px !important;
+            border-radius: 4px !important;
+        }
+        .p-card-fpl svg {
+            width: 28px !important;
+            height: 32px !important;
+        }
+        .p-name-plate {
+            padding: 1px !important;
+            border-radius: 2px !important;
+        }
+        .p-name-txt {
+            font-size: 9px !important;
+            line-height: 1 !important;
+        }
+        .badge-fdr {
+            font-size: 8.5px !important;
+            padding: 1px 2px !important;
+            border-radius: 2px !important;
+        }
+        
+        div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button {
+            height: 20px !important;
+            min-height: 20px !important;
+            font-size: 9px !important;
+            padding: 0 !important;
+            border-radius: 0 0 4px 4px !important;
+        }
     }
 
     .st-key-fpl_pitch, .st-key-fpl_pitch_planner {
         background: var(--pitch-bg) !important;
-        border-radius: 12px !important;
-        padding: 10px 0 !important;
+        border-radius: 8px !important;
+        padding: 5px 0 !important;
+        margin: 5px -10px !important; /* expand slightly on mobile */
     }
     .st-key-fpl_bench, .st-key-fpl_bench_planner {
         background: var(--bench-bg) !important;
-        border-radius: 12px !important;
-        padding: 10px 0 !important;
+        border-radius: 8px !important;
+        padding: 5px 0 !important;
+        margin: 5px -10px !important;
     }
 }
 </style>
@@ -2902,17 +2915,13 @@ def fetch_league_data():
                 reason_he = "תוחלת שערים יציבה לקראת משחקים נוחים."
                 reason_en = "Reliable goal threat facing favorable upcoming matches."
 
-        # Calculate intuitive DEFCON level from BPS (1 is elite, 5 is poor)
-        if bps_90 >= 24:
-            d_level = 1
-        elif bps_90 >= 20:
-            d_level = 2
-        elif bps_90 >= 16:
-            d_level = 3
-        elif bps_90 >= 12:
-            d_level = 4
+        ppg = float(el.get("points_per_game", "0"))
+        if ppg > 0:
+            games_played = max(1, round(el.get("total_points", 0) / ppg))
         else:
-            d_level = 5
+            games_played = 0
+            
+        avg_bps_per_game = round(el.get("bps", 0) / games_played) if games_played > 0 else 0
 
         processed[el_id] = {
             "id": el_id,
@@ -2936,8 +2945,7 @@ def fetch_league_data():
             "reason": reason_he,
             "reason_he": reason_he,
             "reason_en": reason_en,
-            "defcon": round(bps_90, 1),
-            "defcon_level": d_level,
+            "defcon": avg_bps_per_game,
             "threat": threat,
             "status": status,
             "chance": chance,
@@ -4158,7 +4166,7 @@ with t_analysis:
             f'<span class="badge-fdr fdr-{p["next_fdr"]}"><span class="ltr-tag">{p["next_match"]}</span></span>',
             f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
             f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
-            f'<span class="badge-fdr fdr-{p.get("defcon_level", 5)}">L{p.get("defcon_level", 5)}</span>',
+            f'<span class="ltr-tag">{p.get("defcon", 0)}</span>',
             f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
             f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
         ])
@@ -4208,7 +4216,7 @@ with t_analysis:
                 f'<span class="ltr-tag" style="color:{"#10b981" if xg_val >= 0.4 else "var(--text-primary)"};">{xg_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{"#10b981" if xa_val >= 0.3 else "var(--text-primary)"};">{xa_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{xgc_color};">{xgc_val:.2f}</span>',
-                f'<span class="badge-fdr fdr-{p.get("defcon_level", 5)}">L{p.get("defcon_level", 5)}</span>',
+                f'<span class="ltr-tag" style="color:{"#10b981" if p.get("defcon", 0) >= 20 else "var(--text-primary)"};">{p.get("defcon", 0)}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
