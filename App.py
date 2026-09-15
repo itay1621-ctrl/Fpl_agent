@@ -2101,19 +2101,6 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     border-radius: 3px !important;
 }
 
-/* מגרש כדורגל וספסל - שורות שחקנים רספונסיביות ללא שבירת עמודות */
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"],
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-evenly !important;
-    align-items: stretch !important;
-    gap: 3px !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-}
 
 
 /* מרכז טופס הכניסה לשער */
@@ -2237,28 +2224,6 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         grid-column: span 2 !important;
     }
 
-    /* =================================================================
-       STEP 5: מגרש כדורגל וספסל — שורה אופקית יציבה, ללא שבירה
-       ================================================================= */
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor),
-    div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
-        padding: 6px 2px !important;
-        border-radius: 12px !important;
-        margin: 6px auto !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"],
-    div[data-testid="stVerticalBlock"]:has(.bench-anchor) div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-evenly !important;
-        align-items: stretch !important;
-        gap: 2px !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
 
     /* =================================================================
        STEP 7: מדדי KPI עליונים
@@ -2607,459 +2572,286 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 }
 
-/* =================================================================
-   Pitch & Bench Styling - Responsive Wrap (No Horizontal Scroll)
-   ================================================================= */
-.st-key-fpl_pitch, .st-key-fpl_pitch_planner {
+/* ================================================================
+   FINAL MOBILE PITCH / BENCH
+   Portrait-first layout
+   ================================================================ */
+
+/* Base containers */
+
+.st-key-fpl_pitch,
+.st-key-fpl_pitch_planner,
+.st-key-fpl_bench,
+.st-key-fpl_bench_planner {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+
+/* ================================================================
+   PITCH
+   ================================================================ */
+
+.st-key-fpl_pitch {
     background: var(--pitch-bg) !important;
     border: 2px solid var(--pitch-border) !important;
     border-radius: 14px !important;
-    padding: 10px 4px !important;
+    padding: 10px 6px !important;
     margin: 8px 0 !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
 }
 
-.st-key-fpl_bench, .st-key-fpl_bench_planner {
-    background: var(--bench-bg) !important;
-    border: 1.5px solid var(--bench-border) !important;
-    border-radius: 14px !important;
-    padding: 10px 4px !important;
-    margin: 8px 0 !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
-}
 
-/* Row of players: flex wrap to allow natural wrapping without horizontal scroll */
+/* Each player row becomes a responsive CSS Grid */
+
 .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
-.st-key-fpl_bench div[data-testid="stHorizontalBlock"],
-.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
-.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important; 
-    align-items: flex-start !important;
-    gap: 8px 4px !important;
-    overflow-x: hidden !important;
-    width: 100% !important;
-    padding: 2px 0 !important;
-}
+.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
+    display: grid !important;
 
-/* Each player column in the pitch/bench */
-.st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-.st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-    min-width: 88px !important;
-    max-width: 118px !important;
-    width: auto !important;
-    flex: 1 1 88px !important;
-    box-sizing: border-box !important;
-    padding: 0 !important;
-    margin: 2px 0 !important;
-}
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(96px, 118px)
+    ) !important;
 
-/* Player cards within pitch/bench */
-.p-card-fpl {
+    justify-content: center !important;
+    justify-items: center !important;
+    align-items: start !important;
+
     width: 100% !important;
-    min-width: 88px !important;
-    max-width: 118px !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+
     margin: 0 auto !important;
+    padding: 2px 0 !important;
+
+    overflow: visible !important;
     box-sizing: border-box !important;
 }
 
-.p-card-fpl svg {
+
+/* Streamlit columns become grid cells */
+
+.st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 118px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* Player card */
+
+.st-key-fpl_pitch .p-card-fpl,
+.st-key-fpl_pitch_planner .p-card-fpl {
+    width: 100% !important;
+    max-width: 118px !important;
+    min-width: 0 !important;
+
+    margin: 0 auto !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* SVG shirt */
+
+.st-key-fpl_pitch .p-card-fpl svg,
+.st-key-fpl_pitch .p-card-fpl img,
+.st-key-fpl_pitch_planner .p-card-fpl svg,
+.st-key-fpl_pitch_planner .p-card-fpl img {
     max-width: 100% !important;
     height: auto !important;
 }
 
-@media (max-width: 480px) {
-    /* Tighten spacing slightly on smallest screens (320-375px) */
-    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-        gap: 6px 3px !important;
-    }
-    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        min-width: 84px !important;
-        max-width: 105px !important;
-        flex: 1 1 84px !important;
-    }
+
+/* Player name */
+
+.st-key-fpl_pitch .p-name-plate,
+.st-key-fpl_pitch_planner .p-name-plate {
+    width: 96% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+
+    box-sizing: border-box !important;
 }
-<style>
+
+
+/* Keep player text readable */
+
+.st-key-fpl_pitch .p-name-txt,
+.st-key-fpl_pitch_planner .p-name-txt {
+    max-width: 100% !important;
+
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+
+    font-size: 12px !important;
+}
+
+
 /* ================================================================
-   MOBILE RESPONSIVE V2
-   Portrait-first layout for iPhone Safari + Android Chrome
+   BENCH
+   ================================================================ */
+
+.st-key-fpl_bench,
+.st-key-fpl_bench_planner {
+    background: var(--bench-bg) !important;
+    border: 1.5px solid var(--bench-border) !important;
+    border-radius: 14px !important;
+
+    padding: 10px 6px !important;
+    margin: 8px 0 !important;
+}
+
+
+/* Bench grid */
+
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+    display: grid !important;
+
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(96px, 118px)
+    ) !important;
+
+    justify-content: center !important;
+    justify-items: center !important;
+    align-items: start !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    column-gap: 8px !important;
+    row-gap: 10px !important;
+
+    margin: 0 auto !important;
+    padding: 2px 0 !important;
+
+    overflow: visible !important;
+    box-sizing: border-box !important;
+}
+
+
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 118px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+.st-key-fpl_bench .card-bench,
+.st-key-fpl_bench_planner .card-bench {
+    width: 100% !important;
+    max-width: 118px !important;
+    min-width: 0 !important;
+
+    margin: 0 auto !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* ================================================================
+   MOBILE
    ================================================================ */
 
 @media (max-width: 640px) {
 
-    /* ------------------------------------------------------------
-       1. Page foundation
-       ------------------------------------------------------------ */
-
-    html,
-    body,
-    .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"] {
-        max-width: 100% !important;
-        min-width: 0 !important;
-        overflow-x: clip !important;
-    }
-
-    [data-testid="stMainBlockContainer"] {
+    .block-container {
         width: 100% !important;
         max-width: 100% !important;
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-        padding-top: 8px !important;
-        padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+
+        padding-left: max(10px, env(safe-area-inset-left)) !important;
+        padding-right: max(10px, env(safe-area-inset-right)) !important;
+
         box-sizing: border-box !important;
     }
 
-    [data-testid="stVerticalBlock"],
-    [data-testid="stHorizontalBlock"],
-    [data-testid="column"] {
-        min-width: 0 !important;
+
+    /* Pitch row */
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(96px, 118px)
+        ) !important;
+
+        column-gap: 8px !important;
+        row-gap: 10px !important;
     }
 
-    /* ------------------------------------------------------------
-       2. Never let regular page content create horizontal scroll
-       ------------------------------------------------------------ */
 
-    [data-testid="stMarkdownContainer"],
-    [data-testid="stText"],
-    [data-testid="stCaptionContainer"],
-    [data-testid="stAlert"],
-    [data-testid="stExpander"],
-    [data-testid="stDataFrame"],
-    [data-testid="stTable"] {
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
+    /* Bench row */
 
-    /* ------------------------------------------------------------
-       3. Pitch
-       ------------------------------------------------------------ */
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(96px, 118px)
+        ) !important;
 
-    .st-key-fpl_pitch {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .st-key-fpl_pitch [data-testid="stHorizontalBlock"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        align-items: flex-end !important;
-        gap: 10px 8px !important;
-        overflow: visible !important;
-    }
-
-    .st-key-fpl_pitch [data-testid="column"] {
-        flex: 0 0 clamp(96px, 29vw, 118px) !important;
-        width: clamp(96px, 29vw, 118px) !important;
-        max-width: clamp(96px, 29vw, 118px) !important;
-        min-width: 96px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .st-key-fpl_pitch .p-card-fpl {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-    }
-
-    .st-key-fpl_pitch .p-card-fpl img,
-    .st-key-fpl_pitch .p-card-fpl svg {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-
-    /* Player name */
-    .st-key-fpl_pitch .p-name-plate {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-
-    /* Player card text */
-    .st-key-fpl_pitch .p-card-fpl,
-    .st-key-fpl_pitch .p-card-fpl * {
-        line-height: 1.15 !important;
-    }
-
-    /* Don't make tiny text microscopic */
-    .st-key-fpl_pitch .p-card-fpl .fdr,
-    .st-key-fpl_pitch .p-card-fpl .xp,
-    .st-key-fpl_pitch .p-card-fpl .price,
-    .st-key-fpl_pitch .p-card-fpl .start-prob {
-        font-size: 10px !important;
-    }
-
-    .st-key-fpl_pitch .p-card-fpl button {
-        min-height: 38px !important;
-        min-width: 38px !important;
-    }
-
-    /* ------------------------------------------------------------
-       4. Bench
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_bench {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .st-key-fpl_bench [data-testid="stHorizontalBlock"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        display: flex !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        align-items: flex-start !important;
-        gap: 10px 8px !important;
-        overflow: visible !important;
-    }
-
-    .st-key-fpl_bench [data-testid="column"] {
-        flex: 0 0 clamp(96px, 29vw, 118px) !important;
-        width: clamp(96px, 29vw, 118px) !important;
-        max-width: clamp(96px, 29vw, 118px) !important;
-        min-width: 96px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    .st-key-fpl_bench .card-bench {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-    }
-
-    .st-key-fpl_bench .card-bench .p-name-plate {
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-    }
-
-    .st-key-fpl_bench button {
-        min-height: 38px !important;
-    }
-
-    /* ------------------------------------------------------------
-       5. KPI cards
-       ------------------------------------------------------------ */
-
-    [data-testid="stHorizontalBlock"]:has(.kpi-card),
-    [data-testid="stHorizontalBlock"]:has(.metric-card),
-    [data-testid="stHorizontalBlock"]:has(.planner-metric) {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        gap: 8px !important;
-    }
-
-    [data-testid="stHorizontalBlock"]:has(.kpi-card) > [data-testid="column"],
-    [data-testid="stHorizontalBlock"]:has(.metric-card) > [data-testid="column"],
-    [data-testid="stHorizontalBlock"]:has(.planner-metric) > [data-testid="column"] {
-        flex: 1 1 calc(50% - 8px) !important;
-        width: calc(50% - 8px) !important;
-        max-width: calc(50% - 8px) !important;
-        min-width: 0 !important;
-    }
-
-    /* ------------------------------------------------------------
-       6. Filters / controls
-       ------------------------------------------------------------ */
-
-    [data-testid="stHorizontalBlock"]:has(input),
-    [data-testid="stHorizontalBlock"]:has(button),
-    [data-testid="stHorizontalBlock"]:has(select) {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    [data-testid="stHorizontalBlock"]:has(input) > [data-testid="column"],
-    [data-testid="stHorizontalBlock"]:has(select) > [data-testid="column"] {
-        min-width: 0 !important;
-        flex: 1 1 calc(50% - 8px) !important;
-    }
-
-    /* ------------------------------------------------------------
-       7. Buttons
-       ------------------------------------------------------------ */
-
-    [data-testid="stButton"] button,
-    [data-testid="stDownloadButton"] button {
-        min-height: 44px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        white-space: normal !important;
-        line-height: 1.2 !important;
-    }
-
-    /* ------------------------------------------------------------
-       8. Tabs
-       Tabs may scroll horizontally, but the entire page must not.
-       ------------------------------------------------------------ */
-
-    [data-testid="stTabs"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    [data-testid="stTabs"] [data-baseweb="tab-list"] {
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none !important;
-        white-space: nowrap !important;
-        touch-action: pan-x pan-y !important;
-    }
-
-    [data-testid="stTabs"] [data-baseweb="tab-list"]::-webkit-scrollbar {
-        display: none !important;
-    }
-
-    [data-testid="stTabs"] [data-baseweb="tab"] {
-        flex: 0 0 auto !important;
-        min-height: 44px !important;
-        white-space: nowrap !important;
-    }
-
-    /* ------------------------------------------------------------
-       9. Tables
-       Only tables are allowed to scroll horizontally.
-       ------------------------------------------------------------ */
-
-    .table-wrapper {
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        -webkit-overflow-scrolling: touch !important;
-        overscroll-behavior-x: contain !important;
-        touch-action: pan-x pan-y !important;
-    }
-
-    .table-wrapper table {
-        min-width: max-content !important;
-    }
-
-    /* ------------------------------------------------------------
-       10. Inputs / selects
-       ------------------------------------------------------------ */
-
-    input,
-    textarea,
-    [data-baseweb="select"] > div {
-        min-height: 44px !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Avoid iOS Safari zooming into small text inputs */
-    input,
-    textarea,
-    select {
-        font-size: 16px !important;
-    }
-
-    /* ------------------------------------------------------------
-       11. Cards and generic content
-       ------------------------------------------------------------ */
-
-    .card,
-    .fxt-card,
-    .metric-card,
-    .kpi-card {
-        max-width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* ------------------------------------------------------------
-       12. Safe areas for iPhone
-       ------------------------------------------------------------ */
-
-    [data-testid="stHeader"] {
-        padding-top: env(safe-area-inset-top) !important;
-    }
-
-    /* ------------------------------------------------------------
-       13. Avoid huge desktop spacings on small screens
-       ------------------------------------------------------------ */
-
-    h1 {
-        font-size: clamp(24px, 7vw, 34px) !important;
-    }
-
-    h2 {
-        font-size: clamp(20px, 6vw, 28px) !important;
-    }
-
-    h3 {
-        font-size: clamp(18px, 5vw, 24px) !important;
+        column-gap: 8px !important;
+        row-gap: 10px !important;
     }
 }
 
 
 /* ================================================================
-   EXTRA SMALL PHONES
-   320px - 359px
+   VERY SMALL PHONES
    ================================================================ */
 
 @media (max-width: 359px) {
 
-    [data-testid="stMainBlockContainer"] {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(92px, 104px)
+        ) !important;
+
+        column-gap: 6px !important;
+        row-gap: 8px !important;
     }
 
-    .st-key-fpl_pitch [data-testid="column"],
-    .st-key-fpl_bench [data-testid="column"] {
-        flex-basis: 96px !important;
-        width: 96px !important;
-        max-width: 96px !important;
-        min-width: 96px !important;
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        max-width: 104px !important;
     }
 
-    .st-key-fpl_pitch [data-testid="stHorizontalBlock"],
-    .st-key-fpl_bench [data-testid="stHorizontalBlock"] {
-        gap: 8px 6px !important;
-    }
-
-    [data-testid="stButton"] button {
-        font-size: 13px !important;
+    .st-key-fpl_pitch .p-card-fpl,
+    .st-key-fpl_pitch_planner .p-card-fpl,
+    .st-key-fpl_bench .card-bench,
+    .st-key-fpl_bench_planner .card-bench {
+        max-width: 104px !important;
     }
 }
 
@@ -3070,34 +2862,25 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
 @media (min-width: 641px) and (max-width: 1024px) {
 
-    .st-key-fpl_pitch [data-testid="stHorizontalBlock"],
-    .st-key-fpl_bench [data-testid="stHorizontalBlock"] {
-        justify-content: center !important;
-        gap: 12px !important;
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(105px, 126px)
+        ) !important;
+
+        column-gap: 10px !important;
+        row-gap: 12px !important;
     }
 
-    .st-key-fpl_pitch [data-testid="column"],
-    .st-key-fpl_bench [data-testid="column"] {
-        min-width: 105px !important;
-    }
-}
-
-
-/* ================================================================
-   Dynamic mobile viewport
-   ================================================================ */
-
-@supports (height: 100dvh) {
-
-    .stApp {
-        min-height: 100dvh !important;
-    }
-}
-
-@supports not (height: 100dvh) {
-
-    .stApp {
-        min-height: 100vh !important;
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        max-width: 126px !important;
     }
 }
 </style>
