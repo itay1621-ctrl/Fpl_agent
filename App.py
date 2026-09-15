@@ -6,7 +6,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
-from engine_stats import calculate_playing_probabilities, calculate_expected_minutes, calculate_cs_prob, calculate_expected_points, get_defcon_level
+from engine_stats import calculate_playing_probabilities, calculate_expected_minutes, calculate_cs_prob, calculate_expected_points
 
 
 def html_escape(text):
@@ -2740,6 +2740,10 @@ def fetch_league_data():
         xg_90 = float(el.get("expected_goals_per_90") or 0.0)
         xa_90 = float(el.get("expected_assists_per_90") or 0.0)
         xgc_90 = float(el.get("expected_goals_conceded_per_90") or 0.0)
+        
+        bps = float(el.get("bps") or 0.0)
+        bps_90 = (bps / mins) * 90 if mins > 0 else 0.0
+        
         xgi_p90 = xg_90 + xa_90
         if xgi_p90 == 0 and mins > 0:
             xgi_p90 = (expected_gi / mins) * 90
@@ -2781,16 +2785,17 @@ def fetch_league_data():
         team_xgc_90_approx = xgc_90 if el["element_type"] in [1, 2] else 1.5
         cs_prob = calculate_cs_prob(team_xgc_90=team_xgc_90_approx, opp_fdr=next_fdr, is_home=is_home_match)
         
-        # P0.1 - Advanced xP Calculation (True EV)
+        # P0.1 - True FPL Scoring Engine (EV)
         pred_xp = calculate_expected_points(
             element_type=el["element_type"], 
-            xgi_p90=xgi_p90, 
+            xg_90=xg_90,
+            xa_90=xa_90,
+            bps_90=bps_90,
             e_mins=proj_mins, 
             p_start=p_start, 
             p_sub=p_sub,
             typical_start_mins=typical_start_mins,
             cs_prob=cs_prob, 
-            form=form, 
             is_elite_def=(team_short in elite_defenses), 
             threat=threat
         )
