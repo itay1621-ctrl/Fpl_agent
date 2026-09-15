@@ -2162,13 +2162,13 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
 /* --- 8. התאמות מובייל וטאבלט קפדניות (Mobile Media Queries: <= 768px) --- */
 @media (max-width: 768px) {
-    /* בסיס: ריפוד צפוף ומניעת גלילה */
     .block-container {
         padding-top: 0.5rem !important;
-        padding-bottom: max(2rem, env(safe-area-inset-bottom)) !important;
-        padding-left: 0.35rem !important;
-        padding-right: 0.35rem !important;
+        padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+        padding-left: max(10px, env(safe-area-inset-left)) !important;
+        padding-right: max(10px, env(safe-area-inset-right)) !important;
         max-width: 100vw !important;
+        box-sizing: border-box !important;
     }
 
 
@@ -2458,7 +2458,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-height: 44px !important;
     }
 
-    /* Native Horizontal Scrolling for Tables */
+    /* Keep player card sub/swap button compact and fitted */
+    .st-key-fpl_pitch div[data-testid="stButton"] button,
+    .st-key-fpl_bench div[data-testid="stButton"] button,
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button,
+    .st-key-fpl_bench_planner div[data-testid="stButton"] button {
+        min-height: 32px !important;
+        height: 32px !important;
+    }
+
+    /* Native Horizontal Scrolling for Tables with pan-x pan-y touch action */
     table {
         min-width: 650px !important;
     }
@@ -2466,6 +2475,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         overflow-x: auto !important;
         width: 100% !important;
         -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
         border-radius: 8px !important;
     }
 
@@ -2554,61 +2564,131 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         display: none !important;
     }
 
-    /* Full-width Pitch background on mobile */
-    div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor):not(:has(.bench-anchor)),
-    div[data-testid="stVerticalBlock"]:has(> div .bench-anchor):not(:has(.pitch-anchor)) {
-        margin-left: -0.65rem !important;
-        margin-right: -0.65rem !important;
-        width: calc(100% + 1.3rem) !important;
-        padding-left: 0.65rem !important;
-        padding-right: 0.65rem !important;
-        border-radius: 0 !important;
-    /* =================================================================
-       Pitch & Bench Layout (Scrollable on Mobile)
-       ================================================================= */
+    /* Mobile layout classes */
+    .mobile-pitch-scroll {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .mobile-pitch-scroll > div[data-testid="column"] {
+        min-width: 85px !important;
+        flex: 0 0 auto !important;
+    }
+
+    .mobile-stack-force {
+        flex-direction: column !important;
+    }
+    .mobile-stack-force > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Transfer Lab In/Out columns stacking */
+    div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) {
+        flex-direction: column !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Planner Pitch & Fixtures stacking on smaller screens */
+    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) {
+        flex-direction: column !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+}
+
+/* =================================================================
+   Pitch & Bench Styling - Responsive Wrap (No Horizontal Scroll)
+   ================================================================= */
+.st-key-fpl_pitch, .st-key-fpl_pitch_planner {
+    background: var(--pitch-bg) !important;
+    border: 2px solid var(--pitch-border) !important;
+    border-radius: 14px !important;
+    padding: 10px 4px !important;
+    margin: 8px 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.st-key-fpl_bench, .st-key-fpl_bench_planner {
+    background: var(--bench-bg) !important;
+    border: 1.5px solid var(--bench-border) !important;
+    border-radius: 14px !important;
+    padding: 10px 4px !important;
+    margin: 8px 0 !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* Row of players: flex wrap to allow natural wrapping without horizontal scroll */
+.st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important; 
+    align-items: flex-start !important;
+    gap: 8px 4px !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    padding: 2px 0 !important;
+}
+
+/* Each player column in the pitch/bench */
+.st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+.st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+.st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    min-width: 88px !important;
+    max-width: 118px !important;
+    width: auto !important;
+    flex: 1 1 88px !important;
+    box-sizing: border-box !important;
+    padding: 0 !important;
+    margin: 2px 0 !important;
+}
+
+/* Player cards within pitch/bench */
+.p-card-fpl {
+    width: 100% !important;
+    min-width: 88px !important;
+    max-width: 118px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+}
+
+.p-card-fpl svg {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+@media (max-width: 480px) {
+    /* Tighten spacing slightly on smallest screens (320-375px) */
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: center !important; 
-        gap: 4px !important;
-        overflow-x: auto !important; /* Enable local horizontal scroll */
-        padding-bottom: 8px !important; /* Space for scrollbar */
+        gap: 6px 3px !important;
     }
-    
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        min-width: 90px !important; /* Ensure cards never squish below readable size */
-        max-width: 120px !important;
-        flex: 1 1 auto !important;
-    }
-
-    @media (max-width: 640px) {
-        /* On narrow screens, align start so scroll starts from the left (in LTR) */
-        .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
-        .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
-        .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
-        .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
-            justify-content: flex-start !important;
-        }
-    }
-
-    .st-key-fpl_pitch, .st-key-fpl_pitch_planner {
-        background: var(--pitch-bg) !important;
-        border-radius: 8px !important;
-        padding: 5px 0 !important;
-        margin: 5px -10px !important; /* expand slightly on mobile */
-    }
-    .st-key-fpl_bench, .st-key-fpl_bench_planner {
-        background: var(--bench-bg) !important;
-        border-radius: 8px !important;
-        padding: 5px 0 !important;
-        margin: 5px -10px !important;
+        min-width: 84px !important;
+        max-width: 105px !important;
+        flex: 1 1 84px !important;
     }
 }
 </style>
@@ -2632,26 +2712,6 @@ def inject_mobile_layout_js():
             let col = el.closest('div[data-testid="column"]');
             if (col && col.parentElement) {
                 col.parentElement.classList.add('mobile-stack-force');
-            }
-        });
-
-        // Fix Pitch rows scrolling
-        parentDoc.querySelectorAll('.pitch-anchor').forEach(el => {
-            let verticalBlock = el.closest('div[data-testid="stVerticalBlock"]');
-            if (verticalBlock) {
-                verticalBlock.querySelectorAll('div[data-testid="stHorizontalBlock"]').forEach(hBlock => {
-                    if (hBlock.querySelector('.p-card-fpl')) {
-                        hBlock.classList.add('mobile-pitch-scroll');
-                    }
-                });
-            }
-        });
-        
-        // Fix Pitch background
-        parentDoc.querySelectorAll('.pitch-anchor, .bench-anchor').forEach(el => {
-            let verticalBlock = el.closest('div[data-testid="stVerticalBlock"]');
-            if (verticalBlock && !verticalBlock.classList.contains('pitch-bg-force')) {
-                verticalBlock.classList.add('pitch-bg-force');
             }
         });
     };
