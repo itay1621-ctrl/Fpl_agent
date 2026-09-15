@@ -6,7 +6,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime
-from engine_stats import calculate_continuous_minutes, calculate_start_probability, calculate_expected_points
+from engine_stats import calculate_continuous_minutes, calculate_start_probability, calculate_expected_points, get_defcon_level
 
 
 def html_escape(text):
@@ -359,6 +359,7 @@ TRANSLATIONS = {
         "th_xg": "xG/90",
         "th_xa": "xA/90",
         "th_xgi": "xGI/90",
+        "th_defcon": "DefCon",
         "th_mins_played": "דקות ששוחקו",
         "th_proj_mins": "דקות צפויות",
         "t2_title": "מעבדת חילופים מותאמת עמדה ותקציב",
@@ -595,6 +596,7 @@ TRANSLATIONS = {
         "th_xg": "xG/90",
         "th_xa": "xA/90",
         "th_xgi": "xGI/90",
+        "th_defcon": "DefCon",
         "th_mins_played": "Total Mins",
         "th_proj_mins": "Expected Mins",
         "t2_title": "Position & Budget Transfers Lab",
@@ -1447,6 +1449,30 @@ div[data-testid="column"] div[data-testid="stVerticalBlock"]:has(> div .pitch-an
     border: 1.5px solid var(--pitch-line);
     border-radius: 50%;
     transform: translate(-50%, -50%);
+}
+
+/* --- כפתורים (כולל ייצוא והורדה) --- */
+[data-testid="stDownloadButton"] button,
+[data-testid="stBaseButton-secondary"] {
+    background: var(--btn-general-bg) !important;
+    border: 1px solid var(--btn-general-border) !important;
+    color: var(--btn-general-text) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-testid="stDownloadButton"] button:hover,
+[data-testid="stBaseButton-secondary"]:hover {
+    background: var(--btn-general-hover-bg) !important;
+    color: var(--btn-general-hover-text) !important;
+    border-color: var(--btn-general-border) !important;
+}
+
+[data-testid="stDownloadButton"] button p,
+[data-testid="stBaseButton-secondary"] p {
+    color: inherit !important;
 }
 
 /* --- 5.2 ספסל מחליפים מובלט (Tactical Dugout) --- */
@@ -2781,6 +2807,7 @@ def fetch_league_data():
             "xa_90": round(xa_90, 2),
             "mins_played": mins,
             "proj_mins": round(proj_mins, 1),
+            "defcon": get_defcon_level(team_short, is_home="(H)" in (upcoming[0] if upcoming else ""), next_fdr),
             "selected_by": float(el["selected_by_percent"]),
             "score": round(score, 2),
             "xp": pred_xp,
@@ -4018,7 +4045,7 @@ with t_analysis:
             t("th_team"),
             t("th_xg"),
             t("th_xa"),
-            t("th_xgi"),
+            t("th_defcon"),
             t("th_mins_played"),
             t("th_proj_mins")
         ]
@@ -4029,17 +4056,25 @@ with t_analysis:
             pos_str = t(f"pos_{p['pos_code']}")
             xg_val = p.get("xg_90", 0.0)
             xa_val = p.get("xa_90", 0.0)
-            xgi_val = p.get("xgi_p90", 0.0)
+            defcon_val = p.get("defcon", "Low")
             mins_val = p.get("mins_played", 0)
             proj_mins = p.get("proj_mins", 0.0)
             
+            # Color defcon
+            if defcon_val == "High":
+                dc_color = "#10b981"
+            elif defcon_val == "Medium":
+                dc_color = "#f59e0b"
+            else:
+                dc_color = "#ef4444"
+                
             rows_deep.append([
                 f"<b>{p['name']}</b>",
                 f'<span style="font-size:12px;">{pos_str}</span>',
                 f'<span class="ltr-tag">{p["team"]}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:700;">{xg_val}</span>',
                 f'<span class="ltr-tag" style="color:var(--accent-cyan); font-weight:700;">{xa_val}</span>',
-                f'<span class="ltr-tag" style="color:var(--accent-magenta); font-weight:800;">{xgi_val}</span>',
+                f'<span class="ltr-tag" style="color:{dc_color}; font-weight:800;">{defcon_val}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
@@ -4468,11 +4503,11 @@ with t_planner:
     gw_options = list(range(next_gw, max_sim_gw + 1))
     curr_lbl = "Current" if st.session_state.app_lang == "en" else "נוכחי"
     fut_lbl = "Future" if st.session_state.app_lang == "en" else "עתידי"
-    selected_gw = st.radio(
+    
+    selected_gw = st.selectbox(
         t("t6_select_gw"),
         gw_options,
         format_func=lambda x: f"GW {x} ({curr_lbl if x == next_gw else fut_lbl})",
-        horizontal=True,
     )
 
     cur_gw_sim = simulated_gw_data[selected_gw]
