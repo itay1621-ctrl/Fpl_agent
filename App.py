@@ -2593,20 +2593,27 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 
 @media (max-width: 820px) {
-    /* Pitch Rows Horizontal Scrolling (TARGETED to player cards only) */
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"]:has(.p-card-fpl) {
+    /* Mobile layout classes (injected by JS to bypass Safari :has() limitations) */
+    .mobile-pitch-scroll {
         overflow-x: auto !important;
         flex-wrap: nowrap !important;
         -webkit-overflow-scrolling: touch !important;
-        padding-bottom: 10px !important; /* Space for scrollbar */
+        padding-bottom: 10px !important;
         width: 100% !important;
         max-width: 100% !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"]:has(.p-card-fpl) > div[data-testid="column"] {
-        min-width: 70px !important; /* Prevents cards from getting microscopic */
+    .mobile-pitch-scroll > div[data-testid="column"] {
+        min-width: 70px !important;
         flex: 0 0 auto !important;
     }
 
+    .mobile-stack-force {
+        flex-direction: column !important;
+    }
+    .mobile-stack-force > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
 
     /* Scale down player cards on mobile so they don't look huge, but keep them readable (rely on horizontal scroll) */
     .p-card-fpl {
@@ -2676,11 +2683,61 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 </style>
 """
 
+def inject_mobile_layout_js():
+    js_code = """
+    <script>
+    const fixSafariLayout = () => {
+        const parentDoc = window.parent.document;
+        // Fix Planner split stacking
+        parentDoc.querySelectorAll('.planner-split-anchor').forEach(el => {
+            let col = el.closest('div[data-testid="column"]');
+            if (col && col.parentElement) {
+                col.parentElement.classList.add('mobile-stack-force');
+            }
+        });
+        
+        // Fix Transfer Lab stacking
+        parentDoc.querySelectorAll('.transfer-lab-anchor').forEach(el => {
+            let col = el.closest('div[data-testid="column"]');
+            if (col && col.parentElement) {
+                col.parentElement.classList.add('mobile-stack-force');
+            }
+        });
+
+        // Fix Pitch rows scrolling
+        parentDoc.querySelectorAll('.pitch-anchor').forEach(el => {
+            let verticalBlock = el.closest('div[data-testid="stVerticalBlock"]');
+            if (verticalBlock) {
+                verticalBlock.querySelectorAll('div[data-testid="stHorizontalBlock"]').forEach(hBlock => {
+                    if (hBlock.querySelector('.p-card-fpl')) {
+                        hBlock.classList.add('mobile-pitch-scroll');
+                    }
+                });
+            }
+        });
+        
+        // Fix Pitch background
+        parentDoc.querySelectorAll('.pitch-anchor, .bench-anchor').forEach(el => {
+            let verticalBlock = el.closest('div[data-testid="stVerticalBlock"]');
+            if (verticalBlock && !verticalBlock.classList.contains('pitch-bg-force')) {
+                verticalBlock.classList.add('pitch-bg-force');
+            }
+        });
+    };
+    // Run periodically to catch Streamlit re-renders
+    setInterval(fixSafariLayout, 500);
+    </script>
+    """
+    components.html(js_code, height=0)
+
+
+
 is_rtl = (st.session_state.get("app_lang", "he") == "he")
 dir_val = "rtl" if is_rtl else "ltr"
 align_val = "right" if is_rtl else "left"
 rendered_css = css_template.replace("__ROOT_VARS__", root_vars).replace("__DIR__", dir_val).replace("__ALIGN__", align_val)
 st.markdown(rendered_css, unsafe_allow_html=True)
+inject_mobile_layout_js()
 
 # =====================================================================
 # 4. משיכת נתוני הליגה והגנת API מבוססת כותרות
