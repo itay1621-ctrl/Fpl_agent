@@ -4327,7 +4327,12 @@ with t_squad:
     def render_clean_squad_row(player_list, is_bench=False):
         if not player_list:
             return
-        cols = st.columns(len(player_list))
+        cols = st.columns(
+    len(player_list),
+    gap=None,
+    vertical_alignment="bottom",
+    width="stretch",
+)
 
         for i, p in enumerate(player_list):
             with cols[i]:
