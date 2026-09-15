@@ -77,12 +77,13 @@ def render_styled_table(headers, rows, is_rtl=False):
         tr_rows.append(f'<tr style="transition:background 0.15s ease;">{td_cells}</tr>')
     table_body = "".join(tr_rows)
     table_html = f"""
-    <div style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,0.03); direction:{dir_attr};">
+    <div class="table-wrapper" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:1px solid var(--border-color); background:var(--bg-card); margin:10px 0; box-shadow:0 4px 14px rgba(0,0,0,0.03); direction:{dir_attr};">
         <table style="width:100%; border-collapse:collapse; font-size:13px; font-family:inherit;">
             <thead>
                 <tr>{th_cells}</tr>
             </thead>
             <tbody>
+
                 {table_body}
             </tbody>
         </table>
@@ -2594,6 +2595,58 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
     .gate-card h1 {
         font-size: 20px !important;
+    }
+    /* =================================================================
+       STEP 15: Essential Mobile Usability & Safari Fixes
+       ================================================================= */
+    .block-container {
+        padding: 0.75rem 0.65rem !important;
+        max-width: 100% !important;
+    }
+
+    /* Prevent Safari Auto-Zoom */
+    input, select, textarea,
+    div[data-testid="stTextInput"] input,
+    div[data-testid="stSelectbox"] select,
+    div[data-testid="stNumberInput"] input,
+    div[data-baseweb="select"] * {
+        font-size: 16px !important;
+    }
+
+    /* Touch Targets */
+    button, div[data-testid="stButton"] button, [data-testid="stDownloadButton"] button {
+        min-height: 44px !important;
+    }
+
+    /* Native Horizontal Scrolling for Tables */
+    table {
+        min-width: 650px !important;
+    }
+    .table-wrapper {
+        overflow-x: auto !important;
+        width: 100% !important;
+        -webkit-overflow-scrolling: touch !important;
+        border-radius: 8px !important;
+    }
+
+    .mobile-hide {
+        display: none !important;
+    }
+
+    /* Responsive Grids for Custom HTML */
+    .responsive-grid {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+    }
+
+    .responsive-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .card, .gate-card {
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 15px !important;
     }
 }
 </style>
