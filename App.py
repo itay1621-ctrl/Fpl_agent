@@ -3239,6 +3239,102 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-height: 80px !important;
     }
 }
+/* =========================================================
+   MOBILE FPL ROWS - TRUE HORIZONTAL LAYOUT
+   ========================================================= */
+
+.st-key-fpl_fwd,
+.st-key-fpl_mid,
+.st-key-fpl_def,
+.st-key-fpl_gk,
+.st-key-fpl_bench {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.st-key-fpl_fwd > div,
+.st-key-fpl_mid > div,
+.st-key-fpl_def > div,
+.st-key-fpl_gk > div,
+.st-key-fpl_bench > div {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.st-key-fpl_fwd div[data-testid="stHorizontalBlock"],
+.st-key-fpl_mid div[data-testid="stHorizontalBlock"],
+.st-key-fpl_def div[data-testid="stHorizontalBlock"],
+.st-key-fpl_gk div[data-testid="stHorizontalBlock"],
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"] {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.st-key-fpl_fwd div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
+.st-key-fpl_mid div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
+.st-key-fpl_def div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
+.st-key-fpl_gk div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
+.st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"] {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+@media (max-width: 640px) {
+
+    .st-key-fpl_fwd,
+    .st-key-fpl_mid,
+    .st-key-fpl_def,
+    .st-key-fpl_gk,
+    .st-key-fpl_bench {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .st-key-fpl_fwd div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_mid div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_def div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_gk div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] {
+        gap: 4px !important;
+    }
+
+    .st-key-fpl_fwd .p-card-fpl,
+    .st-key-fpl_mid .p-card-fpl,
+    .st-key-fpl_def .p-card-fpl,
+    .st-key-fpl_gk .p-card-fpl,
+    .st-key-fpl_bench .p-card-fpl {
+        width: 58px !important;
+        min-width: 58px !important;
+        max-width: 58px !important;
+        height: 88px !important;
+        min-height: 88px !important;
+        max-height: 88px !important;
+    }
+
+    .st-key-fpl_fwd div[data-testid="stButton"] button,
+    .st-key-fpl_mid div[data-testid="stButton"] button,
+    .st-key-fpl_def div[data-testid="stButton"] button,
+    .st-key-fpl_gk div[data-testid="stButton"] button,
+    .st-key-fpl_bench div[data-testid="stButton"] button {
+        width: 58px !important;
+        min-width: 58px !important;
+        max-width: 58px !important;
+        padding: 2px 3px !important;
+        font-size: 8px !important;
+    }
+}
+
 </style>
 """
 
@@ -4324,36 +4420,78 @@ with t_squad:
                     st.session_state.squad_selected_id = None
                     st.rerun()
 
-    def render_clean_squad_row(player_list, is_bench=False):
-        if not player_list:
-            return
-        cols = st.columns(
-    len(player_list),
-    gap=None,
-    vertical_alignment="bottom",
-    width="stretch",
-)
+def render_clean_squad_row(player_list, is_bench=False, row_id="row"):
+    if not player_list:
+        return
 
-        for i, p in enumerate(player_list):
-            with cols[i]:
-                is_this_selected = (st.session_state.squad_selected_id == p["id"])
-                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected), unsafe_allow_html=True)
-                
+    with st.container(
+        key=f"fpl_{row_id}",
+        horizontal=True,
+        horizontal_alignment="center",
+        vertical_alignment="bottom",
+        gap="small",
+        width="stretch",
+    ):
+        for p in player_list:
+            with st.container(
+                width="content",
+                horizontal_alignment="center",
+            ):
+                is_this_selected = (
+                    st.session_state.squad_selected_id == p["id"]
+                )
+
+                st.markdown(
+                    render_player_card_html(
+                        p,
+                        is_bench=is_bench,
+                        is_selected=is_this_selected,
+                    ),
+                    unsafe_allow_html=True,
+                )
+
                 if st.session_state.squad_swap_active:
                     if is_this_selected:
-                        if st.button(t("btn_cancel"), key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
+                        if st.button(
+                            t("btn_cancel"),
+                            key=f"sq_b_{p['id']}",
+                            use_container_width=True,
+                            type="secondary",
+                        ):
                             st.session_state.squad_swap_active = False
                             st.session_state.squad_selected_id = None
                             st.rerun()
                     else:
-                        legal, reason = is_swap_legal(st.session_state.squad_selected_id, p["id"], st.session_state.user_squad)
+                        legal, reason = is_swap_legal(
+                            st.session_state.squad_selected_id,
+                            p["id"],
+                            st.session_state.user_squad,
+                        )
+
                         if legal:
-                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
-                                execute_squad_swap(st.session_state.squad_selected_id, p["id"])
+                            if st.button(
+                                t("btn_swap_here"),
+                                key=f"sq_b_{p['id']}",
+                                use_container_width=True,
+                                type="primary",
+                            ):
+                                execute_squad_swap(
+                                    st.session_state.squad_selected_id,
+                                    p["id"]
+                                )
                         else:
-                            st.button(reason, key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
+                            st.button(
+                                reason,
+                                key=f"sq_b_{p['id']}",
+                                use_container_width=True,
+                                disabled=True,
+                            )
                 else:
-                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True):
+                    if st.button(
+                        t("btn_sub_single"),
+                        key=f"sq_b_{p['id']}",
+                        use_container_width=True,
+                    ):
                         st.session_state.squad_selected_id = p["id"]
                         st.session_state.squad_swap_active = True
                         st.session_state.squad_transfer_active = False
@@ -4362,15 +4500,33 @@ with t_squad:
     # מגרש
     with st.container(key="fpl_pitch"):
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 3])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        render_clean_squad_row([p for p in starters if p["pos_code"] == 2])
-        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-        gks = [p for p in starters if p["pos_code"] == 1]
-        if gks:
-            render_clean_squad_row(gks)
+render_clean_squad_row(
+    [p for p in starters if p["pos_code"] == 4],
+    row_id="fwd",
+)
+
+st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+
+render_clean_squad_row(
+    [p for p in starters if p["pos_code"] == 3],
+    row_id="mid",
+)
+
+st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+
+render_clean_squad_row(
+    [p for p in starters if p["pos_code"] == 2],
+    row_id="def",
+)
+
+st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+
+gks = [p for p in starters if p["pos_code"] == 1]
+if gks:
+    render_clean_squad_row(
+        gks,
+        row_id="gk",
+    )
 
     # חלון העברות שוק במגרש (נפתח לפי דרישה)
     with st.expander(t("transfer_market_expander")):
@@ -4469,7 +4625,11 @@ with t_squad:
             """,
             unsafe_allow_html=True,
         )
-        render_clean_squad_row(bench, is_bench=True)
+        render_clean_squad_row(
+    bench,
+    is_bench=True,
+    row_id="bench",
+)
 
 # ---------------------------------------------------------------------
 # טאב 2: מעבדת חילופים (Transfers Lab)
