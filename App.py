@@ -3100,6 +3100,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-height: 100vh !important;
     }
 }
+</style>
 """
 
 def inject_mobile_layout_js():
