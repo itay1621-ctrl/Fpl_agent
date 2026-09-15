@@ -2579,6 +2579,53 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         border-radius: 0 !important;
         max-width: 100vw !important;
     }
+    /* =================================================================
+       Robust Pitch & Bench Horizontal Scroll (using st.container keys)
+       ================================================================= */
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 6px !important;
+        justify-content: center !important; 
+        padding-bottom: 8px !important;
+    }
+    
+    @media (max-width: 640px) {
+        .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+        .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+        .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+        .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+            justify-content: flex-start !important; /* Allow natural overflow scrolling */
+        }
+    }
+
+    /* Force columns to hold shape on mobile and desktop so scroll activates */
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        min-width: 85px !important;
+        max-width: 100px !important;
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+
+    .st-key-fpl_pitch, .st-key-fpl_pitch_planner {
+        background: var(--pitch-bg) !important;
+        border-radius: 12px !important;
+        padding: 10px 0 !important;
+    }
+    .st-key-fpl_bench, .st-key-fpl_bench_planner {
+        background: var(--bench-bg) !important;
+        border-radius: 12px !important;
+        padding: 10px 0 !important;
+    }
 }
 </style>
 """
@@ -2855,6 +2902,18 @@ def fetch_league_data():
                 reason_he = "תוחלת שערים יציבה לקראת משחקים נוחים."
                 reason_en = "Reliable goal threat facing favorable upcoming matches."
 
+        # Calculate intuitive DEFCON level from BPS (1 is elite, 5 is poor)
+        if bps_90 >= 24:
+            d_level = 1
+        elif bps_90 >= 20:
+            d_level = 2
+        elif bps_90 >= 16:
+            d_level = 3
+        elif bps_90 >= 12:
+            d_level = 4
+        else:
+            d_level = 5
+
         processed[el_id] = {
             "id": el_id,
             "name": el["web_name"],
@@ -2878,6 +2937,7 @@ def fetch_league_data():
             "reason_he": reason_he,
             "reason_en": reason_en,
             "defcon": round(bps_90, 1),
+            "defcon_level": d_level,
             "threat": threat,
             "status": status,
             "chance": chance,
@@ -3703,8 +3763,8 @@ with t_squad:
                         st.session_state.squad_transfer_active = False
                         st.rerun()
 
-    # מגרש ראשי
-    with st.container():
+    # מגרש
+    with st.container(key="fpl_pitch"):
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
         render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
         st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
@@ -3800,7 +3860,7 @@ with t_squad:
 
     # ספסל מואר ומובלט בעיצוב Dugout
     st.write("")
-    with st.container():
+    with st.container(key="fpl_bench"):
         st.markdown(
             f"""
             <div class="bench-anchor"></div>
@@ -4098,7 +4158,7 @@ with t_analysis:
             f'<span class="badge-fdr fdr-{p["next_fdr"]}"><span class="ltr-tag">{p["next_match"]}</span></span>',
             f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
             f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
-            f'<span class="ltr-tag">{p.get("defcon", 0)}</span>',
+            f'<span class="badge-fdr fdr-{p.get("defcon_level", 5)}">L{p.get("defcon_level", 5)}</span>',
             f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
             f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
         ])
@@ -4148,7 +4208,7 @@ with t_analysis:
                 f'<span class="ltr-tag" style="color:{"#10b981" if xg_val >= 0.4 else "var(--text-primary)"};">{xg_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{"#10b981" if xa_val >= 0.3 else "var(--text-primary)"};">{xa_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{xgc_color};">{xgc_val:.2f}</span>',
-                f'<span class="ltr-tag" style="color:{"#10b981" if defcon_val >= 20.0 else "var(--text-primary)"};">{defcon_val:.1f}</span>',
+                f'<span class="badge-fdr fdr-{p.get("defcon_level", 5)}">L{p.get("defcon_level", 5)}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
@@ -5132,7 +5192,7 @@ with t_planner:
             col_pl_pitch, col_pl_fixtures = st.columns([1.65, 1.0], gap="medium")
             with col_pl_pitch:
                 st.markdown(f"#### {t('tab_squad')} — Gameweek {selected_gw}")
-                with st.container():
+                with st.container(key="fpl_pitch_planner"):
                     st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
                     # חלוצים
                     render_clean_planner_row([p for p in cur_gw_sim["starters"] if p["pos_code"] == 4])
@@ -5150,7 +5210,7 @@ with t_planner:
 
                 # ספסל מואר ומובלט בעיצוב Dugout ב-Planner
                 st.write("")
-                with st.container():
+                with st.container(key="fpl_bench_planner"):
                     st.markdown(
                         f"""
                         <div class="bench-anchor"></div>

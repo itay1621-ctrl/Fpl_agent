@@ -13,7 +13,7 @@ def calculate_playing_probabilities(starts, mins, team_matches, chance_of_playin
     # Prevent punishing winter transfers or returning injured players with a massive denominator
     effective_matches = min(max(1, team_matches), max(3, starts + estimated_subs + (2 if form > 3.0 else 5)))
     historical_start_rate = min(1.0, starts / effective_matches)
-    historical_sub_rate = min(1.0 - historical_start_rate, estimated_subs / effective_matches)
+    estimated_sub_rate = min(1.0 - historical_start_rate, estimated_subs / effective_matches)
     
     # Form and Congestion Adjustments on Conditional Start Rate
     cond_p_start = historical_start_rate
@@ -22,7 +22,7 @@ def calculate_playing_probabilities(starts, mins, team_matches, chance_of_playin
     if fixtures_congestion and cond_p_start > 0.5:
         cond_p_start *= 0.85
         
-    cond_p_sub = min(1.0 - cond_p_start, historical_sub_rate * 1.2) # If rotated, sub chance increases
+    cond_p_sub = min(1.0 - cond_p_start, estimated_sub_rate * 1.2) # If rotated, sub chance increases
     
     # 3. Final Probabilities
     p_start = p_avail * cond_p_start
@@ -102,18 +102,18 @@ def calculate_expected_points(element_type, xg_90, xa_90, bps_90, e_mins, p_star
     # This proxy approximates bonus chance based on raw BPS generation rate.
     # Future enhancement: Add actual DefCon (CBI + Recoveries) when element-summary data is available.
     proj_bps = (bps_90 / 90.0) * e_mins
-    expected_bonus = 0.0
+    expected_bonus_proxy = 0.0
     if proj_bps > 25:
-        expected_bonus = 1.2
+        expected_bonus_proxy = 1.2
     elif proj_bps > 20:
-        expected_bonus = 0.6
+        expected_bonus_proxy = 0.6
     elif proj_bps > 15:
-        expected_bonus = 0.2
+        expected_bonus_proxy = 0.2
         
     # 5. Threat / Set Pieces / Penalties proxy
     threat_bonus = (threat * 0.01) * (p_start + p_sub)
         
     # Note: Explicit form_bonus was removed to avoid double counting, as form already boosts e_mins.
     
-    final_xp = expected_appearance + expected_attacking + expected_defensive + expected_bonus + threat_bonus
+    final_xp = expected_appearance + expected_attacking + expected_defensive + expected_bonus_proxy + threat_bonus
     return round(max(0.0, final_xp), 1)
