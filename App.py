@@ -2084,11 +2084,11 @@ div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHo
     width: 100% !important;
 }
 div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-    flex: 1 1 0px !important;
     min-width: 0 !important;
-    width: auto !important;
-    max-width: 100% !important;
     padding: 0 !important;
+}
+div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:not(:first-child) {
+    flex-shrink: 1 !important;
 }
 
 /* מניעת גלילה אופקית כוללת בכל האתר */
@@ -2100,6 +2100,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
 /* --- 8. התאמות מובייל וטאבלט קפדניות (Mobile Media Queries: <= 768px) --- */
 @media (max-width: 768px) {
+    /* בסיס: ריפוד צפוף ומניעת גלילה */
     .block-container {
         padding-top: 0.5rem !important;
         padding-bottom: max(2rem, env(safe-area-inset-bottom)) !important;
@@ -2108,16 +2109,22 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 100vw !important;
         overflow-x: hidden !important;
     }
+    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+        touch-action: pan-y !important;
+    }
 
-    /* קריסת עמודות כלליות באפליקציה לפריסה אנכית נוחה (למעט מגרש וסרגל עליון) */
-    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)) {
+    /* =================================================================
+       STEP 1: קריסת עמודות כלליות לפריסה אנכית
+       מחריג: מגרש, ספסל, סרגל עליון, כפתורי שער, מדדי פלנר
+       ================================================================= */
+    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)):not(:has(.app-header-anchor)):not(:has(.gate-header-anchor)):not(:has(.gate-btn-anchor)):not(:has(.planner-metrics-anchor)) {
         display: flex !important;
         flex-direction: column !important;
         flex-wrap: wrap !important;
         gap: 8px !important;
         width: 100% !important;
     }
-    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)) > div[data-testid="column"] {
+    div[data-testid="stMain"] div[data-testid="stHorizontalBlock"]:not(:has(.p-card-fpl)):not(:has(.card-bench)):not(:has(.pitch-anchor)):not(:has(.bench-anchor)):not(:has(.app-header-anchor)):not(:has(.gate-header-anchor)):not(:has(.gate-btn-anchor)):not(:has(.planner-metrics-anchor)) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
         max-width: 100% !important;
@@ -2125,13 +2132,15 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding: 0 !important;
     }
 
-    /* החרגת סרגל עליון וכפתורי שער מקריסה אנכית - נשארים שורה אופקית מאוזנת */
-    /* Header: team name full width, buttons below */
-    div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] {
+    /* =================================================================
+       STEP 2: סרגל עליון — שם הקבוצה ברוחב מלא, כפתורים מתחת בשורה
+       ================================================================= */
+    div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"],
+    div[data-testid="stHorizontalBlock"]:has(.app-header-anchor) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: wrap !important;
-        gap: 6px !important;
+        gap: 4px !important;
         width: 100% !important;
     }
     div[data-testid="stVerticalBlock"]:has(.app-header-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
@@ -2144,28 +2153,39 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-width: 0 !important;
         width: auto !important;
     }
+
+    /* =================================================================
+       STEP 3: שער כניסה — כפתורים אופקיים
+       ================================================================= */
     div[data-testid="stVerticalBlock"]:has(.gate-header-anchor) div[data-testid="stHorizontalBlock"],
-    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"] {
+    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"],
+    div[data-testid="stHorizontalBlock"]:has(.gate-header-anchor),
+    div[data-testid="stHorizontalBlock"]:has(.gate-btn-anchor) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         gap: 6px !important;
         width: 100% !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    div[data-testid="stVerticalBlock"]:has(.gate-btn-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.gate-btn-anchor) > div[data-testid="column"] {
         width: auto !important;
         min-width: 0 !important;
         flex: 1 1 0px !important;
     }
 
-    /* מדדי פלנר - רשת 2x2 נוחה לקריאה */
-    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] {
+    /* =================================================================
+       STEP 4: מדדי פלנר — רשת 2x2 נוחה לקריאה
+       ================================================================= */
+    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"],
+    div[data-testid="stHorizontalBlock"]:has(.planner-metrics-anchor) {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 6px !important;
         width: 100% !important;
     }
-    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+    div[data-testid="stVerticalBlock"]:has(.planner-metrics-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.planner-metrics-anchor) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
         max-width: 100% !important;
@@ -2175,9 +2195,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         grid-column: span 2 !important;
     }
 
-    /* מגרש כדורגל וספסל במובייל - שורה אופקית יציבה ללא גלילה וללא שבירה */
-    div[data-testid="stVerticalBlock"]:has(> div .pitch-anchor),
-    div[data-testid="stVerticalBlock"]:has(> div .bench-anchor),
+    /* =================================================================
+       STEP 5: מגרש כדורגל וספסל — שורה אופקית יציבה, ללא שבירה
+       ================================================================= */
     div[data-testid="stVerticalBlock"]:has(.pitch-anchor),
     div[data-testid="stVerticalBlock"]:has(.bench-anchor) {
         padding: 6px 2px !important;
@@ -2214,15 +2234,17 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         align-items: center !important;
     }
 
-    /* כרטיס שחקן מותאם מסך סמארטפון (360px-430px) */
+    /* =================================================================
+       STEP 6: כרטיס שחקן מותאם מסך סמארטפון (360px-430px)
+       ================================================================= */
     .p-card-fpl {
         padding: 2px 1px !important;
         border-radius: 8px 8px 0 0 !important;
         max-width: 66px !important;
         width: 100% !important;
-        height: auto !important;
-        min-height: 128px !important;
-        max-height: 152px !important;
+        height: 138px !important;
+        min-height: 138px !important;
+        max-height: 138px !important;
         box-sizing: border-box !important;
     }
     .p-card-fpl svg {
@@ -2278,7 +2300,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         margin-top: -2px !important;
     }
 
-    /* מדדי KPI עליונים */
+    /* =================================================================
+       STEP 7: מדדי KPI עליונים
+       ================================================================= */
     .kpi-container {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 6px !important;
@@ -2295,25 +2319,37 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         font-size: 16px !important;
     }
 
-    /* לשוניות טאבים */
+    /* =================================================================
+       STEP 8: לשוניות טאבים — גלילה אופקית חלקה
+       ================================================================= */
     div[data-baseweb="tab-list"] {
         -webkit-overflow-scrolling: touch !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
         padding: 3px !important;
         gap: 4px !important;
+    }
+    div[data-baseweb="tab-list"]::-webkit-scrollbar {
+        display: none !important;
     }
     button[data-baseweb="tab"] {
         padding: 5px 8px !important;
         font-size: 11px !important;
         white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 
-    /* כפתורי מערכת כלליים */
+    /* =================================================================
+       STEP 9: כפתורי מערכת כלליים
+       ================================================================= */
     div[data-testid="stButton"] button {
         padding: 5px 8px !important;
         font-size: 11px !important;
     }
 
-    /* פאנל השוואת חילופים */
+    /* =================================================================
+       STEP 10: פאנל השוואת חילופים — עמודה אחת
+       ================================================================= */
     .comparison-panel-out, .comparison-panel-in {
         padding: 8px 10px !important;
         font-size: 11.5px !important;
@@ -2324,7 +2360,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         gap: 8px !important;
     }
 
-    /* כרטיסי טיפים וחסרונות */
+    /* =================================================================
+       STEP 11: כרטיסי טיפים וחסרונות
+       ================================================================= */
     .accessible-card {
         padding: 12px 10px !important;
         border-radius: 10px !important;
@@ -2339,12 +2377,19 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         padding: 1px 6px !important;
     }
 
-    /* שעון דדליין */
+    /* =================================================================
+       STEP 12: שעון דדליין
+       ================================================================= */
     #fpl-clock {
         font-size: 16px !important;
     }
 
-    /* משחקי מחזור */
+    /* =================================================================
+       STEP 13: משחקי מחזור — גדלים מותאמים
+       ================================================================= */
+    .gw-fixtures-scroll {
+        max-height: 350px !important;
+    }
     .fxt-team-name {
         font-size: 10px !important;
     }
@@ -2363,7 +2408,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         font-size: 12px !important;
     }
 
-    /* מדדי Streamlit מובנים */
+    /* =================================================================
+       STEP 14: מדדי Streamlit מובנים
+       ================================================================= */
     [data-testid="stMetric"] {
         padding: 5px 6px !important;
     }
@@ -2376,32 +2423,102 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     [data-testid="stMetricDelta"] {
         font-size: 10px !important;
     }
+
+    /* =================================================================
+       STEP 15: טבלאות וגריד נתונים — גלילה אופקית ולא שבירה
+       ================================================================= */
+    div[data-testid="stDataFrame"],
+    div[data-testid="stTable"],
+    .styled-table-wrapper {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        max-width: 100vw !important;
+    }
+    div[data-testid="stDataFrame"] table,
+    div[data-testid="stTable"] table {
+        font-size: 11px !important;
+    }
+
+    /* =================================================================
+       STEP 16: שער כניסה — כרטיס הזנה
+       ================================================================= */
+    .gate-card {
+        padding: 16px 12px !important;
+    }
+    .gate-card h1 {
+        font-size: 22px !important;
+    }
+
+    /* =================================================================
+       STEP 17: אקספנדרים — טקסט קריא
+       ================================================================= */
+    div[data-testid="stExpander"] details summary span {
+        font-size: 12px !important;
+    }
+
+    /* =================================================================
+       STEP 18: Selectbox וInput — גדלי מגע מינימליים (44px)
+       ================================================================= */
+    div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+        min-height: 44px !important;
+    }
+    div[data-testid="stTextInput"] input {
+        min-height: 44px !important;
+        font-size: 16px !important;
+    }
+
+    /* =================================================================
+       STEP 19: Radio + Checkbox — גדלי מגע נוחים
+       ================================================================= */
+    div[data-testid="stRadio"] label {
+        min-height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
 }
 
 /* מסכי סמארטפון צרים במיוחד (<= 380px כמו iPhone SE / Galaxy Mini) */
 @media (max-width: 380px) {
     .p-card-fpl {
-        max-width: 58px !important;
-        height: 120px !important;
-        min-height: 120px !important;
+        max-width: 54px !important;
+        height: auto !important;
+        min-height: 114px !important;
         max-height: 120px !important;
-        padding: 2px 1px !important;
+        padding: 2px 0px !important;
+    }
+    .p-card-fpl svg {
+        width: 24px !important;
+        height: 20px !important;
     }
     .p-name-txt {
-        font-size: 8px !important;
-    }
-    .p-card-cost {
         font-size: 7.5px !important;
     }
+    .p-card-cost {
+        font-size: 7px !important;
+    }
     .p-card-xp {
-        font-size: 8px !important;
+        font-size: 7.5px !important;
+    }
+    .p-sub, .badge-fdr, .mini-fxt {
+        font-size: 6.5px !important;
+        padding: 0px 1px !important;
     }
     div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
     div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
-        max-width: 58px !important;
-        font-size: 8px !important;
-        height: 22px !important;
-        min-height: 22px !important;
+        max-width: 54px !important;
+        font-size: 7.5px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+    }
+    .kpi-container {
+        grid-template-columns: 1fr !important;
+    }
+    button[data-baseweb="tab"] {
+        padding: 4px 6px !important;
+        font-size: 10px !important;
+    }
+    .gate-card h1 {
+        font-size: 20px !important;
     }
 }
 </style>
