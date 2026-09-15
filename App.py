@@ -2648,6 +2648,43 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         min-width: 0 !important;
         padding: 15px !important;
     }
+    
+    /* =================================================================
+       STEP 16: Layout Stacking (Pitch, Planner, Transfers)
+       Force stacking on iPads and large phones (up to 820px)
+       ================================================================= */
+}
+
+@media (max-width: 820px) {
+    /* Pitch Rows Horizontal Scrolling to prevent squishing */
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 10px !important; /* Space for scrollbar */
+    }
+    div[data-testid="stVerticalBlock"]:has(.pitch-anchor) div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        min-width: 75px !important; /* Prevents cards from getting microscopic */
+        flex: 0 0 auto !important;
+    }
+
+    /* Force Planner Pitch & Fixtures to stack vertically instead of side-by-side */
+    div[data-testid="stHorizontalBlock"]:has(> div > div > div > div > .pitch-anchor) {
+        flex-direction: column !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(> div > div > div > div > .pitch-anchor) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    
+    /* Transfer Lab In/Out columns stacking */
+    div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) {
+        flex-direction: column !important;
+    }
+    div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) > div[data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
 }
 </style>
 """
@@ -3862,6 +3899,8 @@ with t_transfers:
         flag = "🚑 " if (p["status"] != "a" or p["chance"] < 100) else ("⚠️ " if mark_priority(p) else "")
         return f"{flag}{p['name']} ({pos_str} - {p['team']}) | £{p['cost']}m | xP: {p['xp']}"
 
+    # Add anchor for mobile layout targeting
+    st.markdown('<div class="transfer-lab-anchor"></div>', unsafe_allow_html=True)
     col_out, col_in = st.columns(2)
     with col_out:
         st.markdown(f"#### {t('t2_out_header')}")
@@ -5372,11 +5411,10 @@ with t_leagues:
                         my_diffs_str = ', '.join(my_diffs[:6]) if my_diffs else t("t7_h2h_none")
                         rival_diffs_str = ', '.join(rival_diffs[:6]) if rival_diffs else t("t7_h2h_none")
 
-                        col_spy1, col_spy2 = st.columns(2)
-                        with col_spy1:
-                            st.markdown(
-                                f"""
-                                <div class="accessible-card">
+                        st.markdown(
+                            f"""
+                            <div class="responsive-grid-2" style="display: grid; gap: 10px; margin-bottom: 10px;">
+                                <div class="accessible-card" style="margin-bottom: 0 !important;">
                                     <div class="split-box">
                                         <b style="color:var(--text-primary); font-size:13.5px;">{t('t7_rival_details')}</b>
                                         <span class="meta-chip" style="color:var(--accent-cyan);">GW {next_gw - 1}</span>
@@ -5386,25 +5424,18 @@ with t_leagues:
                                         {t('t7_rival_chip')} <span class="ltr-tag" style="background:rgba(16, 185, 129, 0.12); color:#10b981; padding:1px 6px; border-radius:4px; font-weight:700;">{chip_txt}</span>
                                     </div>
                                 </div>
-                                """,
-                                unsafe_allow_html=True,
-                            )
-                        with col_spy2:
-                            st.markdown(
-                                f"""
-                                <div class="accessible-card">
+                                <div class="accessible-card" style="margin-bottom: 0 !important;">
                                     <div class="split-box">
-                                        <b style="color:var(--text-primary); font-size:13.5px;">{t('t7_differentials')}</b>
-                                        <span class="meta-chip" style="color:#10b981; background:rgba(16, 185, 129, 0.12); border:1px solid rgba(16, 185, 129, 0.3);">H2H Edge</span>
+                                        <b style="color:var(--text-primary); font-size:13.5px;">{t('t7_h2h_diffs')}</b>
                                     </div>
-                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px;">{t('t7_you_have')}</div>
-                                    <div style="color:#10b981; font-size:12px; font-weight:700; background:rgba(16, 185, 129, 0.1); border:1px solid rgba(16, 185, 129, 0.25); padding:5px 8px; border-radius:6px; margin-bottom:8px;">{my_diffs_str}</div>
-                                    <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom:4px;">{t('t7_rival_has')}</div>
-                                    <div style="color:#ef4444; font-size:12px; font-weight:700; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.25); padding:5px 8px; border-radius:6px;">{rival_diffs_str}</div>
+                                    <div style="font-size:12.5px; color:var(--text-secondary); line-height:1.6; margin-top:4px;">
+                                        <span style="color:#10b981; font-weight:600;">{t('t7_h2h_me')}:</span> {my_diffs_str}<br>
+                                        <span style="color:#ef4444; font-weight:600;">{t('t7_h2h_them')}:</span> {rival_diffs_str}
+                                    </div>
                                 </div>
-                                """,
-                                unsafe_allow_html=True,
-                            )
+                            </div>
+                            """, unsafe_allow_html=True
+                        )
             else:
                 st.info(t("t7_no_results"))
         else:
