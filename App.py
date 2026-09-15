@@ -351,8 +351,9 @@ TRANSLATIONS = {
         "th_player": "שחקן",
         "th_pos": "עמדה",
         "th_team": "קבוצה",
-        "th_defcon": "DEFCON",
-        "th_next_match": "משחק קרוב",
+        "th_defcon": "ממוצע BPS",
+        "th_true_defcon": "DEFCON",
+        "th_next_match": "משחק הבא",
         "th_fdr": "FDR",
         "th_start_prob": "סבירות לפתוח",
         "th_season_pts": "נק' עונה",
@@ -589,7 +590,8 @@ TRANSLATIONS = {
         "th_player": "Player",
         "th_pos": "Pos",
         "th_team": "Team",
-        "th_defcon": "DEFCON",
+        "th_defcon": "Avg BPS",
+        "th_true_defcon": "DEFCON",
         "th_next_match": "Next Match",
         "th_fdr": "FDR",
         "th_start_prob": "Start Prob",
@@ -2530,6 +2532,17 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) {
         flex-direction: column !important;
     }
+
+    @media (max-width: 900px) {
+        /* Force Planner Pitch & Fixtures to stack vertically on mobile/tablet */
+        div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) {
+            flex-direction: column !important;
+        }
+        div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) > div[data-testid="column"] {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+    }
     div[data-testid="stHorizontalBlock"]:has(.transfer-lab-anchor) > div[data-testid="column"] {
         width: 100% !important;
         min-width: 100% !important;
@@ -2922,6 +2935,9 @@ def fetch_league_data():
             games_played = 0
             
         avg_bps_per_game = round(el.get("bps", 0) / games_played) if games_played > 0 else 0
+        cbi = el.get("clearances_blocks_interceptions", 0)
+        recoveries = el.get("recoveries", 0)
+        true_defcon = round((cbi + recoveries) / games_played, 1) if games_played > 0 else 0
 
         processed[el_id] = {
             "id": el_id,
@@ -2946,6 +2962,7 @@ def fetch_league_data():
             "reason_he": reason_he,
             "reason_en": reason_en,
             "defcon": avg_bps_per_game,
+            "true_defcon": true_defcon,
             "threat": threat,
             "status": status,
             "chance": chance,
@@ -4135,6 +4152,7 @@ with t_analysis:
         t("th_fdr"),
         t("th_start_prob"),
         t("th_defcon"),
+        t("th_true_defcon"),
         t("th_season_pts"),
         t("th_xp"),
     ]
@@ -4167,6 +4185,7 @@ with t_analysis:
             f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
             f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
             f'<span class="ltr-tag">{p.get("defcon", 0)}</span>',
+            f'<span class="ltr-tag" style="color:var(--text-secondary);">{p.get("true_defcon", 0)}</span>',
             f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
             f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
         ])
@@ -4183,6 +4202,7 @@ with t_analysis:
             t("th_xa"),
             t("th_xgc"),
             t("th_defcon"),
+            t("th_true_defcon"),
             t("th_mins_played"),
             t("th_proj_mins")
         ]
@@ -4217,6 +4237,7 @@ with t_analysis:
                 f'<span class="ltr-tag" style="color:{"#10b981" if xa_val >= 0.3 else "var(--text-primary)"};">{xa_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{xgc_color};">{xgc_val:.2f}</span>',
                 f'<span class="ltr-tag" style="color:{"#10b981" if p.get("defcon", 0) >= 20 else "var(--text-primary)"};">{p.get("defcon", 0)}</span>',
+                f'<span class="ltr-tag" style="color:var(--text-secondary);">{p.get("true_defcon", 0)}</span>',
                 f'<span class="ltr-tag">{mins_val}</span>',
                 f'<span class="ltr-tag" style="font-weight:700;">{proj_mins}</span>',
             ])
