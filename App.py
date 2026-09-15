@@ -2784,10 +2784,74 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         width: 100% !important;
         max-width: 100% !important;
 
-        padding-left: max(8px, env(safe-area-inset-left)) !important;
-        padding-right: max(8px, env(safe-area-inset-right)) !important;
+        padding-left: max(10px, env(safe-area-inset-left)) !important;
+        padding-right: max(10px, env(safe-area-inset-right)) !important;
 
         box-sizing: border-box !important;
+    }
+
+
+    /* Pitch row */
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(96px, 118px)
+        ) !important;
+
+        column-gap: 8px !important;
+        row-gap: 10px !important;
+    }
+
+
+    /* Bench row */
+
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(96px, 118px)
+        ) !important;
+
+        column-gap: 8px !important;
+        row-gap: 10px !important;
+    }
+}
+
+
+/* ================================================================
+   VERY SMALL PHONES
+   ================================================================ */
+
+@media (max-width: 359px) {
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+
+        grid-template-columns: repeat(
+            auto-fit,
+            minmax(92px, 104px)
+        ) !important;
+
+        column-gap: 6px !important;
+        row-gap: 8px !important;
+    }
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        max-width: 104px !important;
+    }
+
+    .st-key-fpl_pitch .p-card-fpl,
+    .st-key-fpl_pitch_planner .p-card-fpl,
+    .st-key-fpl_bench .card-bench,
+    .st-key-fpl_bench_planner .card-bench {
+        max-width: 104px !important;
     }
 }
 
@@ -2821,14 +2885,15 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 
 /* ================================================================
-   FINAL MOBILE PITCH - EXACT WIDTH / NO DRIFT
+   FINAL MOBILE PITCH - CENTERED FPL STYLE
    ================================================================ */
 
 @media (max-width: 900px) {
 
-    /* ------------------------------------------------------------
-       Future Planner: pitch first, fixtures below
-       ------------------------------------------------------------ */
+    /* ============================================================
+       FUTURE PLANNER
+       Pitch above fixtures
+       ============================================================ */
 
     div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) {
         display: flex !important;
@@ -2856,148 +2921,70 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 100% !important;
         flex: 0 0 auto !important;
     }
+}
 
 
-    /* ------------------------------------------------------------
-       Pitch container
-       ------------------------------------------------------------ */
+@media (max-width: 640px) {
+
+    /* ============================================================
+       PITCH CONTAINER
+       ============================================================ */
 
     .st-key-fpl_pitch,
     .st-key-fpl_pitch_planner {
-
         width: 100% !important;
-        max-width: 390px !important;
-
+        max-width: 360px !important;
         margin-left: auto !important;
         margin-right: auto !important;
 
-        padding: 4px 2px !important;
-        box-sizing: border-box !important;
+        padding: 5px 3px !important;
 
-        overflow: visible !important;
+        border-radius: 10px !important;
+        box-sizing: border-box !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Every player row uses the full available width
-       ------------------------------------------------------------ */
+    /* ============================================================
+       PLAYER ROWS
+       Important: each position row is centered independently
+       ============================================================ */
 
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
 
-        display: grid !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+
+        justify-content: center !important;
+        align-items: flex-start !important;
 
         width: 100% !important;
         max-width: 100% !important;
 
-        margin: 0 !important;
-        padding: 0 !important;
+        column-gap: 4px !important;
+        row-gap: 5px !important;
 
-        justify-content: center !important;
-        justify-items: center !important;
-        align-items: start !important;
-
-        gap: 4px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
 
         overflow: visible !important;
         box-sizing: border-box !important;
     }
 
 
-    /* ------------------------------------------------------------
-       5-player rows
-       DEF / MID
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_pitch
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(5):last-child),
-
-    .st-key-fpl_pitch_planner
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(5):last-child) {
-
-        grid-template-columns:
-            repeat(5, minmax(0, 1fr)) !important;
-    }
-
-
-    /* ------------------------------------------------------------
-       4-player rows
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_pitch
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(5))),
-
-    .st-key-fpl_pitch_planner
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(5))) {
-
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr)) !important;
-    }
-
-
-    /* ------------------------------------------------------------
-       3-player rows
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_pitch
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(4))),
-
-    .st-key-fpl_pitch_planner
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(4))) {
-
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr)) !important;
-    }
-
-
-    /* ------------------------------------------------------------
-       2-player rows
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_pitch
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(3))),
-
-    .st-key-fpl_pitch_planner
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child)
-    :not(:has(> div[data-testid="column"]:nth-child(3))) {
-
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr)) !important;
-    }
-
-
-    /* ------------------------------------------------------------
-       1-player row
-       ------------------------------------------------------------ */
-
-    .st-key-fpl_pitch
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:only-child),
-
-    .st-key-fpl_pitch_planner
-    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:only-child) {
-
-        grid-template-columns:
-            minmax(0, 1fr) !important;
-    }
-
-
-    /* ------------------------------------------------------------
-       Column itself
-       ------------------------------------------------------------ */
+    /* ============================================================
+       PLAYER COLUMN
+       ============================================================ */
 
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
+        flex: 0 0 68px !important;
 
-        flex: none !important;
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
 
         padding: 0 !important;
         margin: 0 !important;
@@ -3006,217 +2993,246 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 
 
-    /* ------------------------------------------------------------
-       Card itself
-       ------------------------------------------------------------ */
+    /* ============================================================
+       PLAYER CARD
+       ============================================================ */
 
     .st-key-fpl_pitch .p-card-fpl,
     .st-key-fpl_pitch_planner .p-card-fpl {
 
-        width: min(100%, 64px) !important;
+        width: 68px !important;
+        max-width: 68px !important;
+        min-width: 68px !important;
 
-        max-width: 64px !important;
-        min-width: 0 !important;
+        height: 92px !important;
+        min-height: 92px !important;
+        max-height: 92px !important;
 
-        height: 88px !important;
-        min-height: 88px !important;
-        max-height: 88px !important;
-
-        margin: 0 auto !important;
         padding: 2px 1px !important;
+        margin: 0 auto !important;
+
+        border-radius: 6px 6px 0 0 !important;
 
         box-sizing: border-box !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Shirt
-       ------------------------------------------------------------ */
+    /* ============================================================
+       SHIRT
+       ============================================================ */
 
     .st-key-fpl_pitch .p-card-fpl svg,
     .st-key-fpl_pitch_planner .p-card-fpl svg {
 
-        width: 24px !important;
-        height: 22px !important;
+        width: 27px !important;
+        height: 24px !important;
 
-        max-width: 24px !important;
-        max-height: 22px !important;
+        max-width: 27px !important;
+        max-height: 24px !important;
+
+        margin: 0 auto !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Name
-       ------------------------------------------------------------ */
+    /* ============================================================
+       PLAYER NAME
+       ============================================================ */
 
     .st-key-fpl_pitch .p-name-plate,
     .st-key-fpl_pitch_planner .p-name-plate {
 
         width: 94% !important;
+        max-width: 100% !important;
+
+        min-height: 13px !important;
 
         padding: 1px 2px !important;
-        margin: 1px auto !important;
-
-        min-height: 12px !important;
+        margin: 1px 0 !important;
 
         border-radius: 3px !important;
+
+        box-sizing: border-box !important;
     }
 
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
 
-        font-size: 7px !important;
+        font-size: 7.5px !important;
         line-height: 1 !important;
 
         max-width: 100% !important;
 
         overflow: hidden !important;
-        white-space: nowrap !important;
         text-overflow: ellipsis !important;
+        white-space: nowrap !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Fixture / FDR
-       ------------------------------------------------------------ */
+    /* ============================================================
+       NEXT FIXTURE / FDR
+       ============================================================ */
+
+    .st-key-fpl_pitch .mini-fxt-container,
+    .st-key-fpl_pitch_planner .mini-fxt-container {
+        gap: 1px !important;
+        margin: 1px auto 0 auto !important;
+    }
 
     .st-key-fpl_pitch .mini-fxt,
     .st-key-fpl_pitch_planner .mini-fxt {
-
-        font-size: 5px !important;
+        font-size: 5.5px !important;
         padding: 1px 2px !important;
         line-height: 1 !important;
+        border-radius: 2px !important;
     }
 
     .st-key-fpl_pitch .badge-fdr,
     .st-key-fpl_pitch_planner .badge-fdr {
-
-        font-size: 5px !important;
+        font-size: 5.5px !important;
         padding: 1px 2px !important;
         line-height: 1 !important;
+        border-radius: 2px !important;
     }
+
+
+    /* ============================================================
+       PROBABILITY
+       ============================================================ */
 
     .st-key-fpl_pitch .prob-badge,
     .st-key-fpl_pitch_planner .prob-badge {
-
-        font-size: 5px !important;
+        font-size: 5.5px !important;
         padding: 1px 2px !important;
+        margin-top: 1px !important;
         line-height: 1 !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Footer
-       ------------------------------------------------------------ */
+    /* ============================================================
+       FOOTER
+       ============================================================ */
 
     .st-key-fpl_pitch .p-card-footer,
     .st-key-fpl_pitch_planner .p-card-footer {
-
         width: 94% !important;
-        margin-top: auto !important;
         padding-top: 1px !important;
+        margin-top: auto !important;
     }
 
     .st-key-fpl_pitch .p-card-cost,
     .st-key-fpl_pitch_planner .p-card-cost {
-        font-size: 5.5px !important;
+        font-size: 6px !important;
     }
 
     .st-key-fpl_pitch .p-card-xp,
     .st-key-fpl_pitch_planner .p-card-xp {
-        font-size: 6.5px !important;
+        font-size: 7px !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Action button
-       ------------------------------------------------------------ */
+    /* ============================================================
+       CAPTAIN / VC
+       ============================================================ */
+
+    .st-key-fpl_pitch .badge-c,
+    .st-key-fpl_pitch .badge-vc,
+    .st-key-fpl_pitch_planner .badge-c,
+    .st-key-fpl_pitch_planner .badge-vc {
+        font-size: 5px !important;
+        padding: 1px 2px !important;
+        border-radius: 2px !important;
+        margin-left: 1px !important;
+    }
+
+
+    /* ============================================================
+       ACTION BUTTON
+       ============================================================ */
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
 
-        width: min(100%, 64px) !important;
-        max-width: 64px !important;
+        width: 68px !important;
+        max-width: 68px !important;
 
-        height: 17px !important;
-        min-height: 17px !important;
+        height: 19px !important;
+        min-height: 19px !important;
 
         padding: 0 !important;
-        margin: 0 auto !important;
 
-        font-size: 5.5px !important;
+        border-radius: 0 0 6px 6px !important;
+
+        font-size: 6.5px !important;
         line-height: 1 !important;
 
-        border-radius: 0 0 5px 5px !important;
+        box-shadow: none !important;
     }
 
 
-    /* ------------------------------------------------------------
-       Bench
-       ------------------------------------------------------------ */
+    /* ============================================================
+       BENCH
+       ============================================================ */
 
     .st-key-fpl_bench,
     .st-key-fpl_bench_planner {
-
         width: 100% !important;
-        max-width: 390px !important;
+        max-width: 360px !important;
 
         margin-left: auto !important;
         margin-right: auto !important;
 
-        padding: 4px 2px !important;
-        box-sizing: border-box !important;
+        padding: 5px 3px !important;
+        border-radius: 10px !important;
     }
 
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
 
-        display: grid !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
 
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr)) !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
 
-        gap: 4px !important;
+        column-gap: 4px !important;
+        row-gap: 5px !important;
 
         width: 100% !important;
         max-width: 100% !important;
-
-        justify-content: center !important;
-        justify-items: center !important;
     }
 
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
-        width: auto !important;
-        min-width: 0 !important;
-        max-width: none !important;
+        flex: 0 0 68px !important;
+
+        width: 68px !important;
+        min-width: 68px !important;
+        max-width: 68px !important;
 
         padding: 0 !important;
         margin: 0 !important;
-
-        flex: none !important;
     }
 
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        width: min(100%, 64px) !important;
+        width: 68px !important;
+        max-width: 68px !important;
+        min-width: 68px !important;
 
-        max-width: 64px !important;
-        min-width: 0 !important;
+        height: 92px !important;
+        min-height: 92px !important;
+        max-height: 92px !important;
 
-        height: 88px !important;
-        min-height: 88px !important;
-        max-height: 88px !important;
-
-        margin: 0 auto !important;
         padding: 2px 1px !important;
     }
 }
 
 
 /* ================================================================
-   SMALL PHONES
+   VERY SMALL PHONES
    ================================================================ */
 
 @media (max-width: 359px) {
@@ -3228,113 +3244,63 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 340px !important;
     }
 
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
+
+        column-gap: 3px !important;
+        row-gap: 4px !important;
+    }
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+
+        flex-basis: 62px !important;
+        width: 62px !important;
+        min-width: 62px !important;
+        max-width: 62px !important;
+    }
+
     .st-key-fpl_pitch .p-card-fpl,
     .st-key-fpl_pitch_planner .p-card-fpl,
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        max-width: 58px !important;
-        height: 80px !important;
-        min-height: 80px !important;
-        max-height: 80px !important;
-    }
-}
-/* =========================================================
-   MOBILE FPL ROWS - TRUE HORIZONTAL LAYOUT
-   ========================================================= */
+        width: 62px !important;
+        max-width: 62px !important;
+        min-width: 62px !important;
 
-.st-key-fpl_fwd,
-.st-key-fpl_mid,
-.st-key-fpl_def,
-.st-key-fpl_gk,
-.st-key-fpl_bench {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-.st-key-fpl_fwd > div,
-.st-key-fpl_mid > div,
-.st-key-fpl_def > div,
-.st-key-fpl_gk > div,
-.st-key-fpl_bench > div {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-.st-key-fpl_fwd div[data-testid="stHorizontalBlock"],
-.st-key-fpl_mid div[data-testid="stHorizontalBlock"],
-.st-key-fpl_def div[data-testid="stHorizontalBlock"],
-.st-key-fpl_gk div[data-testid="stHorizontalBlock"],
-.st-key-fpl_bench div[data-testid="stHorizontalBlock"] {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    justify-content: center !important;
-    align-items: flex-end !important;
-    gap: 6px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    overflow: visible !important;
-}
-
-.st-key-fpl_fwd div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
-.st-key-fpl_mid div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
-.st-key-fpl_def div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
-.st-key-fpl_gk div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"],
-.st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="stVerticalBlock"] {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    min-width: 0 !important;
-    max-width: none !important;
-}
-
-@media (max-width: 640px) {
-
-    .st-key-fpl_fwd,
-    .st-key-fpl_mid,
-    .st-key-fpl_def,
-    .st-key-fpl_gk,
-    .st-key-fpl_bench {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        height: 84px !important;
+        min-height: 84px !important;
+        max-height: 84px !important;
     }
 
-    .st-key-fpl_fwd div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_mid div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_def div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_gk div[data-testid="stHorizontalBlock"],
-    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] {
-        gap: 4px !important;
+    .st-key-fpl_pitch .p-card-fpl svg,
+    .st-key-fpl_pitch_planner .p-card-fpl svg {
+        width: 24px !important;
+        height: 21px !important;
     }
 
-    .st-key-fpl_fwd .p-card-fpl,
-    .st-key-fpl_mid .p-card-fpl,
-    .st-key-fpl_def .p-card-fpl,
-    .st-key-fpl_gk .p-card-fpl,
-    .st-key-fpl_bench .p-card-fpl {
-        width: 58px !important;
-        min-width: 58px !important;
-        max-width: 58px !important;
-        height: 88px !important;
-        min-height: 88px !important;
-        max-height: 88px !important;
+    .st-key-fpl_pitch .p-name-txt,
+    .st-key-fpl_pitch_planner .p-name-txt {
+        font-size: 7px !important;
     }
 
-    .st-key-fpl_fwd div[data-testid="stButton"] button,
-    .st-key-fpl_mid div[data-testid="stButton"] button,
-    .st-key-fpl_def div[data-testid="stButton"] button,
-    .st-key-fpl_gk div[data-testid="stButton"] button,
-    .st-key-fpl_bench div[data-testid="stButton"] button {
-        width: 58px !important;
-        min-width: 58px !important;
-        max-width: 58px !important;
-        padding: 2px 3px !important;
-        font-size: 8px !important;
+    .st-key-fpl_pitch div[data-testid="stButton"] button,
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
+
+        width: 62px !important;
+        max-width: 62px !important;
+
+        height: 17px !important;
+        min-height: 17px !important;
+
+        font-size: 6px !important;
     }
 }
-
 </style>
 """
 
@@ -4420,78 +4386,31 @@ with t_squad:
                     st.session_state.squad_selected_id = None
                     st.rerun()
 
-def render_clean_squad_row(player_list, is_bench=False, row_id="row"):
-    if not player_list:
-        return
+    def render_clean_squad_row(player_list, is_bench=False):
+        if not player_list:
+            return
+        cols = st.columns(len(player_list))
 
-    with st.container(
-        key=f"fpl_{row_id}",
-        horizontal=True,
-        horizontal_alignment="center",
-        vertical_alignment="bottom",
-        gap="small",
-        width="stretch",
-    ):
-        for p in player_list:
-            with st.container(
-                width="content",
-                horizontal_alignment="center",
-            ):
-                is_this_selected = (
-                    st.session_state.squad_selected_id == p["id"]
-                )
-
-                st.markdown(
-                    render_player_card_html(
-                        p,
-                        is_bench=is_bench,
-                        is_selected=is_this_selected,
-                    ),
-                    unsafe_allow_html=True,
-                )
-
+        for i, p in enumerate(player_list):
+            with cols[i]:
+                is_this_selected = (st.session_state.squad_selected_id == p["id"])
+                st.markdown(render_player_card_html(p, is_bench=is_bench, is_selected=is_this_selected), unsafe_allow_html=True)
+                
                 if st.session_state.squad_swap_active:
                     if is_this_selected:
-                        if st.button(
-                            t("btn_cancel"),
-                            key=f"sq_b_{p['id']}",
-                            use_container_width=True,
-                            type="secondary",
-                        ):
+                        if st.button(t("btn_cancel"), key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
                             st.session_state.squad_swap_active = False
                             st.session_state.squad_selected_id = None
                             st.rerun()
                     else:
-                        legal, reason = is_swap_legal(
-                            st.session_state.squad_selected_id,
-                            p["id"],
-                            st.session_state.user_squad,
-                        )
-
+                        legal, reason = is_swap_legal(st.session_state.squad_selected_id, p["id"], st.session_state.user_squad)
                         if legal:
-                            if st.button(
-                                t("btn_swap_here"),
-                                key=f"sq_b_{p['id']}",
-                                use_container_width=True,
-                                type="primary",
-                            ):
-                                execute_squad_swap(
-                                    st.session_state.squad_selected_id,
-                                    p["id"]
-                                )
+                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
+                                execute_squad_swap(st.session_state.squad_selected_id, p["id"])
                         else:
-                            st.button(
-                                reason,
-                                key=f"sq_b_{p['id']}",
-                                use_container_width=True,
-                                disabled=True,
-                            )
+                            st.button(reason, key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(
-                        t("btn_sub_single"),
-                        key=f"sq_b_{p['id']}",
-                        use_container_width=True,
-                    ):
+                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True):
                         st.session_state.squad_selected_id = p["id"]
                         st.session_state.squad_swap_active = True
                         st.session_state.squad_transfer_active = False
@@ -4500,33 +4419,15 @@ def render_clean_squad_row(player_list, is_bench=False, row_id="row"):
     # מגרש
     with st.container(key="fpl_pitch"):
         st.markdown('<div class="pitch-anchor"></div>', unsafe_allow_html=True)
-render_clean_squad_row(
-    [p for p in starters if p["pos_code"] == 4],
-    row_id="fwd",
-)
-
-st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-
-render_clean_squad_row(
-    [p for p in starters if p["pos_code"] == 3],
-    row_id="mid",
-)
-
-st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-
-render_clean_squad_row(
-    [p for p in starters if p["pos_code"] == 2],
-    row_id="def",
-)
-
-st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
-
-gks = [p for p in starters if p["pos_code"] == 1]
-if gks:
-    render_clean_squad_row(
-        gks,
-        row_id="gk",
-    )
+        render_clean_squad_row([p for p in starters if p["pos_code"] == 4])
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+        render_clean_squad_row([p for p in starters if p["pos_code"] == 3])
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+        render_clean_squad_row([p for p in starters if p["pos_code"] == 2])
+        st.markdown('<div style="height:4px;"></div>', unsafe_allow_html=True)
+        gks = [p for p in starters if p["pos_code"] == 1]
+        if gks:
+            render_clean_squad_row(gks)
 
     # חלון העברות שוק במגרש (נפתח לפי דרישה)
     with st.expander(t("transfer_market_expander")):
@@ -4625,11 +4526,7 @@ if gks:
             """,
             unsafe_allow_html=True,
         )
-        render_clean_squad_row(
-    bench,
-    is_bench=True,
-    row_id="bench",
-)
+        render_clean_squad_row(bench, is_bench=True)
 
 # ---------------------------------------------------------------------
 # טאב 2: מעבדת חילופים (Transfers Lab)
@@ -5607,12 +5504,7 @@ with t_planner:
     def render_clean_planner_row(player_list, is_bench=False):
         if not player_list:
             return
-        cols = st.columns(
-    len(player_list),
-    gap=None,
-    vertical_alignment="bottom",
-    width="stretch",
-)
+        cols = st.columns(len(player_list))
 
         for i, p in enumerate(player_list):
             with cols[i]:
