@@ -3000,9 +3000,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch .p-card-fpl,
     .st-key-fpl_pitch_planner .p-card-fpl {
 
-        width: 68px !important;
-        max-width: 68px !important;
-        min-width: 68px !important;
+        width: 48px !important;
+        max-width: 56px !important;
+        min-width: 56px !important;
 
         height: 92px !important;
         min-height: 92px !important;
