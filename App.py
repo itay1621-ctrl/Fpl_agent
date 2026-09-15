@@ -2807,7 +2807,7 @@ def fetch_league_data():
             "xa_90": round(xa_90, 2),
             "mins_played": mins,
             "proj_mins": round(proj_mins, 1),
-            "defcon": get_defcon_level(team_short, is_home="(H)" in (upcoming[0] if upcoming else ""), next_fdr),
+            "defcon": get_defcon_level(team_short, "(H)" in (upcoming[0] if upcoming else ""), next_fdr),
             "selected_by": float(el["selected_by_percent"]),
             "score": round(score, 2),
             "xp": pred_xp,
