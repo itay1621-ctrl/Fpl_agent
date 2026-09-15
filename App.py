@@ -348,6 +348,7 @@ TRANSLATIONS = {
         "next_match_lbl": "משחק קרוב:",
         "left_in_bank": "נשאר בבנק:",
         "starting_11_title": "11 שחקני ההרכב הפותח",
+        "bench_players_title": "4 שחקני הספסל (לפי סדר חילוף)",
         "th_player": "שחקן",
         "th_pos": "עמדה",
         "th_team": "קבוצה",
@@ -587,6 +588,7 @@ TRANSLATIONS = {
         "next_match_lbl": "Next Match:",
         "left_in_bank": "In the Bank:",
         "starting_11_title": "Starting XI Players",
+        "bench_players_title": "Bench Players (4 Subs by Order)",
         "th_player": "Player",
         "th_pos": "Pos",
         "th_team": "Team",
@@ -4209,6 +4211,45 @@ with t_analysis:
         ])
     
     render_styled_table(headers_s11, rows_s11, is_rtl=(st.session_state.app_lang == "he"))
+
+    st.write("")
+    st.markdown(f"#### {t('bench_players_title')}")
+    sorted_bench = sorted(bench, key=lambda x: x.get("position", 99))
+    rows_bench = []
+    for p in sorted_bench:
+        if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
+            health_icon = '<span style="color:#ef4444; font-weight:700;">🚑 </span>'
+        elif p["chance"] <= 75 or p["status"] == "d":
+            health_icon = '<span style="color:#f59e0b; font-weight:700;">🩹 </span>'
+        else:
+            health_icon = ""
+
+        b_pos = p.get("position", 12)
+        if b_pos == 12:
+            sub_lbl = "GK Sub" if is_en else "שוער מחליף"
+        else:
+            sub_num = b_pos - 12
+            sub_lbl = f"Sub {sub_num}" if is_en else f"מחליף {sub_num}"
+        sub_tag = f'<span class="meta-chip" style="font-size:10.5px; padding:1px 6px; margin-right:4px; margin-left:4px; vertical-align:middle; background:var(--badge-mint-bg); color:var(--accent-mint); border:1px solid var(--badge-mint-border); font-weight:800;">{sub_lbl}</span>'
+
+        pos_str = t(f"pos_{p['pos_code']}")
+        prob_color = "#10b981" if p["start_prob"] == 100 else "#f59e0b"
+        xp_calc = round(p["xp"], 1)
+
+        rows_bench.append([
+            f"{health_icon}<b>{p['name']}</b> {sub_tag}",
+            f'<span style="font-weight:700; font-size:12px;">{pos_str}</span>',
+            f'<span class="ltr-tag" style="font-weight:700;">{p["team"]}</span>',
+            f'<span class="badge-fdr fdr-{p["next_fdr"]}"><span class="ltr-tag">{p["next_match"]}</span></span>',
+            f'<span class="ltr-tag" style="font-weight:800;">{p["next_fdr"]}</span>',
+            f'<span style="color:{prob_color}; font-weight:700;">{p["start_prob"]}%</span>',
+            f'<span class="ltr-tag">{p.get("defcon", 0)}</span>',
+            f'<span class="ltr-tag" style="color:var(--text-secondary);">{p.get("true_defcon", 0)}</span>',
+            f'<span class="ltr-tag" style="font-weight:700;">{p["total_points"]}</span>',
+            f'<span class="ltr-tag" style="color:var(--accent-mint); font-weight:800; font-size:13.5px;">{xp_calc}</span>',
+        ])
+
+    render_styled_table(headers_s11, rows_bench, is_rtl=(st.session_state.app_lang == "he"))
 
     st.write("")
     with st.expander(f"{t('deep_stats_title')}", expanded=False):
