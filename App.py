@@ -2821,71 +2821,183 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 }
 
 /* ================================================================
-   FINAL COMPACT FPL MOBILE PITCH
+   FINAL MOBILE PITCH - EXACT WIDTH / NO DRIFT
    ================================================================ */
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
 
-    /* ============================================================
-       PITCH WIDTH
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Future Planner: pitch first, fixtures below
+       ------------------------------------------------------------ */
+
+    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 10px !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor)
+    > div[data-testid="column"]:has(.pitch-anchor) {
+        order: 1 !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 auto !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor)
+    > div[data-testid="column"]:has(.gw-fixtures-card) {
+        order: 2 !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 auto !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       Pitch container
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch,
     .st-key-fpl_pitch_planner {
 
         width: 100% !important;
-        max-width: 350px !important;
+        max-width: 390px !important;
 
         margin-left: auto !important;
         margin-right: auto !important;
 
         padding: 4px 2px !important;
-
         box-sizing: border-box !important;
+
+        overflow: visible !important;
     }
 
 
-    /* ============================================================
-       POSITION ROW
-       No wrapping - every position stays on one centered line
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Every player row uses the full available width
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
 
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-
-        justify-content: center !important;
-        align-items: flex-start !important;
+        display: grid !important;
 
         width: 100% !important;
         max-width: 100% !important;
 
-        gap: 3px !important;
-
+        margin: 0 !important;
         padding: 0 !important;
-        margin: 0 auto !important;
+
+        justify-content: center !important;
+        justify-items: center !important;
+        align-items: start !important;
+
+        gap: 4px !important;
 
         overflow: visible !important;
-
         box-sizing: border-box !important;
     }
 
 
-    /* ============================================================
-       COLUMN
-       ============================================================ */
+    /* ------------------------------------------------------------
+       5-player rows
+       DEF / MID
+       ------------------------------------------------------------ */
+
+    .st-key-fpl_pitch
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(5):last-child),
+
+    .st-key-fpl_pitch_planner
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(5):last-child) {
+
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr)) !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       4-player rows
+       ------------------------------------------------------------ */
+
+    .st-key-fpl_pitch
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(5))),
+
+    .st-key-fpl_pitch_planner
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(4):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(5))) {
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       3-player rows
+       ------------------------------------------------------------ */
+
+    .st-key-fpl_pitch
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(4))),
+
+    .st-key-fpl_pitch_planner
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(3):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(4))) {
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr)) !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       2-player rows
+       ------------------------------------------------------------ */
+
+    .st-key-fpl_pitch
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(3))),
+
+    .st-key-fpl_pitch_planner
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:nth-child(2):last-child)
+    :not(:has(> div[data-testid="column"]:nth-child(3))) {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       1-player row
+       ------------------------------------------------------------ */
+
+    .st-key-fpl_pitch
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:only-child),
+
+    .st-key-fpl_pitch_planner
+    div[data-testid="stHorizontalBlock"]:has(> div[data-testid="column"]:only-child) {
+
+        grid-template-columns:
+            minmax(0, 1fr) !important;
+    }
+
+
+    /* ------------------------------------------------------------
+       Column itself
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
-        flex: 0 0 54px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
 
-        width: 54px !important;
-        min-width: 54px !important;
-        max-width: 54px !important;
+        flex: none !important;
 
         padding: 0 !important;
         margin: 0 !important;
@@ -2894,282 +3006,217 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 
 
-    /* ============================================================
-       PLAYER CARD
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Card itself
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch .p-card-fpl,
     .st-key-fpl_pitch_planner .p-card-fpl {
 
-        width: 54px !important;
-        min-width: 54px !important;
-        max-width: 54px !important;
+        width: min(100%, 64px) !important;
 
-        height: 76px !important;
-        min-height: 76px !important;
-        max-height: 76px !important;
+        max-width: 64px !important;
+        min-width: 0 !important;
 
-        padding: 1px !important;
+        height: 88px !important;
+        min-height: 88px !important;
+        max-height: 88px !important;
 
         margin: 0 auto !important;
-
-        border-radius: 5px 5px 0 0 !important;
+        padding: 2px 1px !important;
 
         box-sizing: border-box !important;
     }
 
 
-    /* ============================================================
-       SHIRT
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Shirt
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch .p-card-fpl svg,
     .st-key-fpl_pitch_planner .p-card-fpl svg {
 
-        width: 22px !important;
-        height: 20px !important;
+        width: 24px !important;
+        height: 22px !important;
 
-        max-width: 22px !important;
-        max-height: 20px !important;
-
-        margin: 0 auto !important;
+        max-width: 24px !important;
+        max-height: 22px !important;
     }
 
 
-    /* ============================================================
-       NAME PLATE
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Name
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch .p-name-plate,
     .st-key-fpl_pitch_planner .p-name-plate {
 
         width: 94% !important;
 
-        min-height: 11px !important;
-
-        padding: 1px !important;
-
+        padding: 1px 2px !important;
         margin: 1px auto !important;
 
-        border-radius: 2px !important;
+        min-height: 12px !important;
+
+        border-radius: 3px !important;
     }
 
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
 
-        font-size: 6.5px !important;
-
+        font-size: 7px !important;
         line-height: 1 !important;
 
         max-width: 100% !important;
 
-        white-space: nowrap !important;
         overflow: hidden !important;
+        white-space: nowrap !important;
         text-overflow: ellipsis !important;
     }
 
 
-    /* ============================================================
-       SUB
-       ============================================================ */
-
-    .st-key-fpl_pitch .p-sub,
-    .st-key-fpl_pitch_planner .p-sub {
-
-        font-size: 5px !important;
-        line-height: 1 !important;
-
-        margin: 0 !important;
-    }
-
-
-    /* ============================================================
-       FIXTURE
-       ============================================================ */
-
-    .st-key-fpl_pitch .mini-fxt-container,
-    .st-key-fpl_pitch_planner .mini-fxt-container {
-
-        gap: 1px !important;
-
-        margin: 1px auto 0 !important;
-    }
+    /* ------------------------------------------------------------
+       Fixture / FDR
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch .mini-fxt,
     .st-key-fpl_pitch_planner .mini-fxt {
 
-        font-size: 4.5px !important;
-
-        padding: 1px !important;
-
+        font-size: 5px !important;
+        padding: 1px 2px !important;
         line-height: 1 !important;
-
-        border-radius: 1px !important;
     }
 
     .st-key-fpl_pitch .badge-fdr,
     .st-key-fpl_pitch_planner .badge-fdr {
 
-        font-size: 4.5px !important;
-
+        font-size: 5px !important;
         padding: 1px 2px !important;
+        line-height: 1 !important;
+    }
 
+    .st-key-fpl_pitch .prob-badge,
+    .st-key-fpl_pitch_planner .prob-badge {
+
+        font-size: 5px !important;
+        padding: 1px 2px !important;
         line-height: 1 !important;
     }
 
 
-    /* ============================================================
-       XP / PRICE
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Footer
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch .p-card-footer,
     .st-key-fpl_pitch_planner .p-card-footer {
 
         width: 94% !important;
-
-        padding-top: 1px !important;
-
         margin-top: auto !important;
+        padding-top: 1px !important;
     }
 
     .st-key-fpl_pitch .p-card-cost,
     .st-key-fpl_pitch_planner .p-card-cost {
-
-        font-size: 5px !important;
+        font-size: 5.5px !important;
     }
 
     .st-key-fpl_pitch .p-card-xp,
     .st-key-fpl_pitch_planner .p-card-xp {
-
-        font-size: 5.5px !important;
+        font-size: 6.5px !important;
     }
 
 
-    /* ============================================================
-       ACTION BUTTON
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Action button
+       ------------------------------------------------------------ */
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
 
-        width: 54px !important;
-        min-width: 54px !important;
-        max-width: 54px !important;
+        width: min(100%, 64px) !important;
+        max-width: 64px !important;
 
-        height: 15px !important;
-        min-height: 15px !important;
+        height: 17px !important;
+        min-height: 17px !important;
 
         padding: 0 !important;
         margin: 0 auto !important;
 
         font-size: 5.5px !important;
-
         line-height: 1 !important;
 
         border-radius: 0 0 5px 5px !important;
-
-        box-shadow: none !important;
     }
 
 
-    /* ============================================================
-       BENCH
-       ============================================================ */
+    /* ------------------------------------------------------------
+       Bench
+       ------------------------------------------------------------ */
 
     .st-key-fpl_bench,
     .st-key-fpl_bench_planner {
 
         width: 100% !important;
-        max-width: 350px !important;
+        max-width: 390px !important;
 
         margin-left: auto !important;
         margin-right: auto !important;
 
         padding: 4px 2px !important;
+        box-sizing: border-box !important;
     }
 
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
 
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        display: grid !important;
 
-        justify-content: center !important;
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr)) !important;
 
-        gap: 3px !important;
+        gap: 4px !important;
 
         width: 100% !important;
+        max-width: 100% !important;
+
+        justify-content: center !important;
+        justify-items: center !important;
     }
 
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
-        flex: 0 0 54px !important;
-
-        width: 54px !important;
-        min-width: 54px !important;
-        max-width: 54px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
 
         padding: 0 !important;
         margin: 0 !important;
+
+        flex: none !important;
     }
 
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        width: 54px !important;
-        min-width: 54px !important;
-        max-width: 54px !important;
+        width: min(100%, 64px) !important;
 
-        height: 76px !important;
-        min-height: 76px !important;
-        max-height: 76px !important;
+        max-width: 64px !important;
+        min-width: 0 !important;
 
-        padding: 1px !important;
-    }
+        height: 88px !important;
+        min-height: 88px !important;
+        max-height: 88px !important;
 
-
-    /* ============================================================
-       FUTURE PLANNER
-       ============================================================ */
-
-    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor) {
-
-        display: flex !important;
-        flex-direction: column !important;
-        flex-wrap: nowrap !important;
-
-        gap: 10px !important;
-
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor)
-    > div[data-testid="column"]:has(.pitch-anchor) {
-
-        order: 1 !important;
-
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    div[data-testid="stHorizontalBlock"]:has(.planner-split-anchor)
-    > div[data-testid="column"]:has(.gw-fixtures-card) {
-
-        order: 2 !important;
-
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 2px 1px !important;
     }
 }
 
 
 /* ================================================================
-   VERY SMALL PHONES
+   SMALL PHONES
    ================================================================ */
 
 @media (max-width: 359px) {
@@ -3178,20 +3225,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch_planner,
     .st-key-fpl_bench,
     .st-key-fpl_bench_planner {
-
-        max-width: 320px !important;
-    }
-
-    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
-    .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-
-        flex-basis: 50px !important;
-
-        width: 50px !important;
-        min-width: 50px !important;
-        max-width: 50px !important;
+        max-width: 340px !important;
     }
 
     .st-key-fpl_pitch .p-card-fpl,
@@ -3199,26 +3233,10 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        width: 50px !important;
-        min-width: 50px !important;
-        max-width: 50px !important;
-
-        height: 70px !important;
-        min-height: 70px !important;
-        max-height: 70px !important;
-    }
-
-    .st-key-fpl_pitch div[data-testid="stButton"] button,
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-
-        width: 50px !important;
-        min-width: 50px !important;
-        max-width: 50px !important;
-
-        height: 14px !important;
-        min-height: 14px !important;
-
-        font-size: 5px !important;
+        max-width: 58px !important;
+        height: 80px !important;
+        min-height: 80px !important;
+        max-height: 80px !important;
     }
 }
 </style>
