@@ -1769,6 +1769,9 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    -webkit-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+    text-overflow: ellipsis !important;
     line-height: 1.2 !important;
     text-align: center !important;
     direction: ltr !important;
@@ -2797,11 +2800,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] {
         grid-template-columns: repeat(
             auto-fit,
-            minmax(96px, 118px)
+            minmax(58px, 76px)
         ) !important;
 
-        column-gap: 8px !important;
-        row-gap: 10px !important;
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+    }
+
+    .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
+    .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        max-width: 76px !important;
     }
 
 
@@ -2811,7 +2819,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] {
         grid-template-columns: repeat(
             auto-fit,
-            minmax(96px, 118px)
+            minmax(58px, 76px)
         ) !important;
 
         column-gap: 8px !important;
@@ -2833,18 +2841,18 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
         grid-template-columns: repeat(
             auto-fit,
-            minmax(92px, 104px)
+            minmax(52px, 66px)
         ) !important;
 
-        column-gap: 6px !important;
-        row-gap: 8px !important;
+        column-gap: 4px !important;
+        row-gap: 6px !important;
     }
 
     .st-key-fpl_pitch div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        max-width: 72px !important;
+        max-width: 66px !important;
     }
 
     .st-key-fpl_pitch .p-card-fpl,
@@ -3057,7 +3065,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
 
-        font-size: 4.8px !important;
+        font-size: 8px !important;
+        letter-spacing: -0.3px !important;
         line-height: 1 !important;
 
         max-width: 100% !important;
@@ -3065,6 +3074,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
+        -webkit-text-size-adjust: none !important;
+        text-size-adjust: none !important;
     }
 
 
@@ -3286,7 +3297,10 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
-        font-size: 4.5px !important;
+        font-size: 7.5px !important;
+        letter-spacing: -0.3px !important;
+        -webkit-text-size-adjust: none !important;
+        text-size-adjust: none !important;
     }
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
