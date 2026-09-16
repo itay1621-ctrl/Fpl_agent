@@ -3343,6 +3343,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         box-shadow: none !important;
     }
 }
+}
 </style>
 """
 
