@@ -1629,13 +1629,15 @@ div[data-testid="stButton"] button[kind="primary"] {
 }
 
 /* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
-div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
-div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.pitch-anchor) [data-testid="column"] div[data-testid="stButton"] button,
-div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="column"] div[data-testid="stButton"] button {
+.st-key-fpl_pitch div[data-testid="stButton"] button,
+.st-key-fpl_bench div[data-testid="stButton"] button,
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button,
+.st-key-fpl_bench_planner div[data-testid="stButton"] button {
     height: 18px !important;
     min-height: 18px !important;
+    max-height: 18px !important;
     width: 18px !important;
+    min-width: 18px !important;
     max-width: 18px !important;
     line-height: 1 !important;
     font-size: 10px !important;
@@ -1648,18 +1650,18 @@ div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="column"] div
     justify-content: center !important;
     background: var(--p-card-btn-bg) !important;
     border: 1px solid var(--p-card-btn-border) !important;
-    border-top: none !important;
     color: var(--p-card-btn-text) !important;
-    width: 100% !important;
-    max-width: 126px !important;
-    min-width: 0 !important;
-    text-align: center !important;
-    justify-content: center !important;
-    display: flex !important;
-    align-items: center !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06) !important;
-    transition: all 0.15s ease !important;
 }
+.st-key-fpl_pitch div[data-testid="stButton"] button p,
+.st-key-fpl_bench div[data-testid="stButton"] button p,
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button p,
+.st-key-fpl_bench_planner div[data-testid="stButton"] button p {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+}
+
 
 /* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור תחת שחקן */
 div[data-testid="column"]:has(.p-card-fpl):hover .p-card-fpl {
@@ -2424,17 +2426,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     }
 
     /* Touch Targets */
-    button, div[data-testid="stButton"] button, [data-testid="stDownloadButton"] button {
+    [data-testid="stDownloadButton"] button {
         min-height: 44px !important;
-    }
-
-    /* Keep player card sub/swap button compact and fitted */
-    .st-key-fpl_pitch div[data-testid="stButton"] button,
-    .st-key-fpl_bench div[data-testid="stButton"] button,
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button,
-    .st-key-fpl_bench_planner div[data-testid="stButton"] button {
-        min-height: 32px !important;
-        height: 32px !important;
     }
 
     /* Native Horizontal Scrolling for Tables with pan-x pan-y touch action */
