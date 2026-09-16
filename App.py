@@ -524,8 +524,8 @@ TRANSLATIONS = {
         "btn_selected": "Selected",
         "btn_captain": "Captain (C)",
         "btn_vc": "Vice (VC)",
-        "btn_sub": "Sub",
-        "btn_sub_single": "Sub",
+        "btn_sub": "🔄",
+        "btn_sub_single": "🔄",
         "cap_select_label": "Captain (C):",
         "vc_select_label": "Vice-Captain (VC):",
         "swap_active_hint_prefix": "Click target player",
@@ -1008,6 +1008,19 @@ div[data-testid="stHorizontalBlock"] > div {
     direction: __DIR__ !important;
     text-align: __ALIGN__ !important;
     line-height: 1.5;
+    color: var(--text-primary) !important;
+}
+
+/* Toast Notifications - Match Theme and Override Markdown Global Text Color */
+div[data-testid="stToast"] {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--accent-mint) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+div[data-testid="stToast"] * {
+    color: var(--text-primary) !important;
+}
+div[data-testid="stToast"] [data-testid="stMarkdownContainer"] {
     color: var(--text-primary) !important;
 }
 
@@ -5475,7 +5488,7 @@ with t_planner:
                         else:
                             st.button(f"✕ {reason}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(f"🔄 {t('btn_sub_single')}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
+                    if st.button(t("btn_sub_single"), key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
                         st.session_state.planner_selected_id = p["id"]
                         st.session_state.planner_swap_active = True
                         st.session_state.planner_transfer_out = None
