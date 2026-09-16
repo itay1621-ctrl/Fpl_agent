@@ -1629,10 +1629,10 @@ div[data-testid="stButton"] button[kind="primary"] {
 }
 
 /* כפתור החילוף (רק Secondary) */
-.st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
-.st-key-fpl_bench div[data-testid="stButton"] button[kind="secondary"],
-.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"],
-.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="secondary"] {
+.st-key-fpl_pitch div[data-testid="stButton"] button[kind="primary"],
+.st-key-fpl_bench div[data-testid="stButton"] button[kind="primary"],
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="primary"],
+.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="primary"] {
     height: 32px !important;
     min-height: 32px !important;
     max-height: 32px !important;
@@ -1655,10 +1655,10 @@ div[data-testid="stButton"] button[kind="primary"] {
     color: var(--p-card-btn-text) !important;
 }
 
-.st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"] p,
-.st-key-fpl_bench div[data-testid="stButton"] button[kind="secondary"] p,
-.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] p,
-.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="secondary"] p {
+.st-key-fpl_pitch div[data-testid="stButton"] button[kind="primary"] p,
+.st-key-fpl_bench div[data-testid="stButton"] button[kind="primary"] p,
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="primary"] p,
+.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="primary"] p {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 20px !important;
@@ -1704,14 +1704,7 @@ div[data-testid="column"]:has(.p-card-fpl):hover div[data-testid="stButton"] but
     box-shadow: 0 0 18px rgba(225, 29, 72, 0.6) !important;
 }
 
-div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button[kind="primary"] {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border: 1.5px solid #10b981 !important;
-    border-top: none !important;
-    color: #ffffff !important;
-    font-weight: 900 !important;
-    box-shadow: 0 0 16px rgba(16, 185, 129, 0.5) !important;
-}
+
 
 /* כרטיסים וכפתורים בספסל */
 .card-bench {
@@ -3169,8 +3162,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
        ACTION BUTTON
        ============================================================ */
 
-    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] {
+    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="primary"],
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="primary"] {
         width: 28px !important;
         max-width: 28px !important;
         height: 28px !important;
@@ -3313,8 +3306,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         text-size-adjust: none !important;
     }
 
-    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] {
+    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="primary"],
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="primary"] {
         width: 24px !important;
         max-width: 24px !important;
         height: 24px !important;
@@ -4294,7 +4287,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div style="display:flex; justify-content:center; align-items:center; width:100%;">{jersey_svg}</div>'
         f'<div class="p-name-plate" style="background:#fff; border-radius:3px; padding:1px 2px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:-2px; z-index:2; position:relative; width:90%;"><span class="p-name-txt" style="color:#111;">{cap_badge}{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top:1px;">{fixture_html}</div>'
-        f'<div style="font-size:10px; font-weight:900; color:#ffffff !important; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);"><span class="ltr-tag" style="color:#ffffff !important;">£{p["cost"]}m | xP {xp_val}</span></div>'
+        f'<div class="price-xp-text"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
         f'{status_pill}'
         f'</div>'
     )
@@ -4434,12 +4427,12 @@ with t_squad:
                     else:
                         legal, reason = is_swap_legal(st.session_state.squad_selected_id, p["id"], st.session_state.user_squad)
                         if legal:
-                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
+                            if st.button(t("btn_swap_here"), key=f"sq_b_{p['id']}", use_container_width=True, type="secondary"):
                                 execute_squad_swap(st.session_state.squad_selected_id, p["id"])
                         else:
                             st.button(reason, key=f"sq_b_{p['id']}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True):
+                    if st.button(t("btn_sub_single"), key=f"sq_b_{p['id']}", use_container_width=True, type="primary"):
                         st.session_state.squad_selected_id = p["id"]
                         st.session_state.squad_swap_active = True
                         st.session_state.squad_transfer_active = False
@@ -5472,12 +5465,12 @@ with t_planner:
                     else:
                         legal, reason = is_swap_legal(st.session_state.planner_selected_id, p["id"], cur_gw_sim["squad_snapshot"])
                         if legal:
-                            if st.button(t("btn_swap_here"), key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
+                            if st.button(t("btn_swap_here"), key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="secondary"):
                                 execute_planner_bench_swap(st.session_state.planner_selected_id, p["id"])
                         else:
                             st.button(f"✕ {reason}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, disabled=True)
                 else:
-                    if st.button(f"⇄ {t('btn_sub_single')}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True):
+                    if st.button(f"🔄 {t('btn_sub_single')}", key=f"pl_b_{p['id']}_{selected_gw}", use_container_width=True, type="primary"):
                         st.session_state.planner_selected_id = p["id"]
                         st.session_state.planner_swap_active = True
                         st.session_state.planner_transfer_out = None
