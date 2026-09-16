@@ -1677,6 +1677,11 @@ div[data-testid="stButton"] button[kind="primary"] {
     text-shadow: 0px 1px 3px rgba(0,0,0,0.9), 0px 0px 6px rgba(0,0,0,0.8), 0px -1px 2px rgba(0,0,0,0.6) !important;
     background: transparent !important;
 }
+.price-xp-text span,
+.price-xp-text .ltr-tag {
+    color: #ffffff !important;
+    text-shadow: 0px 1px 3px rgba(0,0,0,0.9), 0px 0px 6px rgba(0,0,0,0.8), 0px -1px 2px rgba(0,0,0,0.6) !important;
+}
 
 
 /* הבהוב והרמה במעבר עכבר - איחוד מלא בין הכרטיס לכפתור תחת שחקן */
