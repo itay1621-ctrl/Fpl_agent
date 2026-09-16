@@ -1633,16 +1633,19 @@ div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button,
 div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button,
 div[data-testid="stVerticalBlock"]:has(.pitch-anchor) [data-testid="column"] div[data-testid="stButton"] button,
 div[data-testid="stVerticalBlock"]:has(.bench-anchor) [data-testid="column"] div[data-testid="stButton"] button {
-    height: 20px !important;
-    min-height: 20px !important;
-    width: 28px !important;
-    max-width: 28px !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    width: 18px !important;
+    max-width: 18px !important;
     line-height: 1 !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     padding: 0 !important;
-    border-radius: 6px !important;
-    margin: 4px auto 0 auto !important;
+    border-radius: 50% !important;
+    margin: 2px auto 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     background: var(--p-card-btn-bg) !important;
     border: 1px solid var(--p-card-btn-border) !important;
     border-top: none !important;
@@ -3159,14 +3162,17 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 24px !important;
-        max-width: 24px !important;
-        height: 14px !important;
-        min-height: 14px !important;
+        width: 16px !important;
+        max-width: 16px !important;
+        height: 16px !important;
+        min-height: 16px !important;
         padding: 0 !important;
-        border-radius: 4px !important;
+        border-radius: 50% !important;
         font-size: 8px !important;
-        margin-top: 2px !important;
+        margin: 2px auto 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         line-height: 1 !important;
 
         box-shadow: none !important;
@@ -3298,11 +3304,16 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 20px !important;
-        max-width: 20px !important;
-        height: 12px !important;
-        min-height: 12px !important;
-
+        width: 14px !important;
+        max-width: 14px !important;
+        height: 14px !important;
+        min-height: 14px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        margin: 2px auto 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         font-size: 6px !important;
     }
 }
@@ -4268,7 +4279,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div style="display:flex; justify-content:center; align-items:center; width:100%;">{jersey_svg}</div>'
         f'<div class="p-name-plate" style="background:#fff; border-radius:3px; padding:1px 2px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:-2px; z-index:2; position:relative; width:90%;"><span class="p-name-txt" style="color:#111;">{cap_badge}{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top:1px;">{fixture_html}</div>'
-        f'<div style="font-size:9px; font-weight:700; color:var(--text-secondary); margin-top:2px; display:inline-flex; justify-content:center; width:100%;"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
+        f'<div style="font-size:9px; font-weight:800; color:#ffffff; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0px 1px 2px rgba(0,0,0,0.6);"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
         f'{status_pill}'
         f'</div>'
     )
