@@ -1584,9 +1584,9 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] {
     width: 100% !important;
     max-width: 126px !important;
     min-width: 0 !important;
-    height: 164px !important;
-    min-height: 164px !important;
-    max-height: 164px !important;
+    height: 124px !important;
+    min-height: 124px !important;
+    max-height: 124px !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -3057,7 +3057,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
 
-        font-size: 5.8px !important;
+        font-size: 4.8px !important;
         line-height: 1 !important;
 
         max-width: 100% !important;
@@ -3269,13 +3269,13 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        width: 62px !important;
-        max-width: 62px !important;
-        min-width: 62px !important;
+        width: 44px !important;
+        max-width: 44px !important;
+        min-width: 44px !important;
 
-        height: 84px !important;
-        min-height: 84px !important;
-        max-height: 84px !important;
+        height: 74px !important;
+        min-height: 74px !important;
+        max-height: 74px !important;
     }
 
     .st-key-fpl_pitch .p-card-fpl svg,
@@ -3286,7 +3286,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
-        font-size: 5.5px !important;
+        font-size: 4.5px !important;
     }
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
