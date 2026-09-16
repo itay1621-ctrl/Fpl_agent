@@ -778,7 +778,7 @@ if is_light:
     --gate-border: #10b981;
     --gate-shadow: 0 12px 28px rgba(0,0,0,0.06), 0 0 16px rgba(16, 185, 129, 0.08);
     --pitch-border: #15803d;
-    --pitch-bg: radial-gradient(ellipse at 50% 50%, #15803d 0%, #166534 100%), repeating-linear-gradient(0deg, #166534 0px, #166534 48px, #14532d 48px, #14532d 96px);
+    --pitch-bg: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Crect x='2' y='2' width='96' height='96' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Cline x1='2' y1='50' x2='98' y2='50' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='12' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Crect x='25' y='2' width='50' height='16' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Crect x='35' y='2' width='30' height='6' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Crect x='25' y='82' width='50' height='16' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Crect x='35' y='92' width='30' height='6' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Cpath d='M 40 18 A 10 10 0 0 0 60 18' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3Cpath d='M 40 82 A 10 10 0 0 1 60 82' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3C/svg%3E") center/100% 100% no-repeat, radial-gradient(ellipse at 50% 50%, rgba(21,128,61,0.7) 0%, rgba(22,101,52,0.9) 100%), repeating-linear-gradient(0deg, #166534 0px, #166534 48px, #14532d 48px, #14532d 96px);
     --pitch-shadow: 0 10px 28px rgba(22, 101, 52, 0.16);
     --pitch-line: rgba(255, 255, 255, 0.45);
     --bench-bg: #ffffff;
@@ -869,7 +869,7 @@ else:
     --gate-border: rgba(0, 255, 135, 0.4);
     --gate-shadow: 0 16px 36px rgba(0,0,0,0.7), 0 0 28px rgba(0, 255, 135, 0.15);
     --pitch-border: rgba(0, 255, 135, 0.45);
-    --pitch-bg: radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.9) 0%, rgba(6, 44, 20, 0.98) 100%), repeating-linear-gradient(0deg, #104822 0px, #104822 48px, #0c3b1b 48px, #0c3b1b 96px);
+    --pitch-bg: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Crect x='2' y='2' width='96' height='96' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Cline x1='2' y1='50' x2='98' y2='50' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='12' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Crect x='25' y='2' width='50' height='16' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Crect x='35' y='2' width='30' height='6' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Crect x='25' y='82' width='50' height='16' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Crect x='35' y='92' width='30' height='6' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Cpath d='M 40 18 A 10 10 0 0 0 60 18' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3Cpath d='M 40 82 A 10 10 0 0 1 60 82' fill='none' stroke='rgba(255,255,255,0.2)' stroke-width='0.5'/%3E%3C/svg%3E") center/100% 100% no-repeat, radial-gradient(ellipse at 50% 50%, rgba(16, 92, 45, 0.7) 0%, rgba(6, 44, 20, 0.9) 100%), repeating-linear-gradient(0deg, #104822 0px, #104822 48px, #0c3b1b 48px, #0c3b1b 96px);
     --pitch-shadow: 0 16px 44px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 135, 0.12);
     --pitch-line: rgba(255, 255, 255, 0.22);
     --bench-bg: rgba(20, 10, 36, 0.92);
@@ -1633,14 +1633,14 @@ div[data-testid="stButton"] button[kind="primary"] {
 .st-key-fpl_bench div[data-testid="stButton"] button,
 .st-key-fpl_pitch_planner div[data-testid="stButton"] button,
 .st-key-fpl_bench_planner div[data-testid="stButton"] button {
-    height: 18px !important;
-    min-height: 18px !important;
-    max-height: 18px !important;
-    width: 18px !important;
-    min-width: 18px !important;
-    max-width: 18px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    max-width: 24px !important;
     line-height: 1 !important;
-    font-size: 10px !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
     padding: 0 !important;
     border-radius: 50% !important;
@@ -1648,8 +1648,9 @@ div[data-testid="stButton"] button[kind="primary"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: var(--p-card-btn-bg) !important;
-    border: 1px solid var(--p-card-btn-border) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     color: var(--p-card-btn-text) !important;
 }
 .st-key-fpl_pitch div[data-testid="stButton"] button p,
@@ -3155,19 +3156,20 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 16px !important;
-        max-width: 16px !important;
-        height: 16px !important;
-        min-height: 16px !important;
+        width: 22px !important;
+        max-width: 22px !important;
+        height: 22px !important;
+        min-height: 22px !important;
         padding: 0 !important;
         border-radius: 50% !important;
-        font-size: 8px !important;
+        font-size: 14px !important;
         margin: 2px auto 0 auto !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         line-height: 1 !important;
-
+        background: transparent !important;
+        border: none !important;
         box-shadow: none !important;
     }
 
@@ -3297,17 +3299,20 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 14px !important;
-        max-width: 14px !important;
-        height: 14px !important;
-        min-height: 14px !important;
+        width: 20px !important;
+        max-width: 20px !important;
+        height: 20px !important;
+        min-height: 20px !important;
         border-radius: 50% !important;
         padding: 0 !important;
         margin: 2px auto 0 auto !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        font-size: 6px !important;
+        font-size: 12px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 }
 </style>
@@ -4272,7 +4277,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div style="display:flex; justify-content:center; align-items:center; width:100%;">{jersey_svg}</div>'
         f'<div class="p-name-plate" style="background:#fff; border-radius:3px; padding:1px 2px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:-2px; z-index:2; position:relative; width:90%;"><span class="p-name-txt" style="color:#111;">{cap_badge}{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top:1px;">{fixture_html}</div>'
-        f'<div style="font-size:9px; font-weight:800; color:#ffffff; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0px 1px 2px rgba(0,0,0,0.6);"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
+        f'<div style="font-size:10px; font-weight:900; color:#ffffff; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
         f'{status_pill}'
         f'</div>'
     )
