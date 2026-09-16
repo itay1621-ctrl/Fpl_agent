@@ -1628,11 +1628,11 @@ div[data-testid="stButton"] button[kind="primary"] {
     box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4) !important;
 }
 
-/* כפתור פעולה תחתון מחובר ומותאם אך ורק לכרטיסי שחקנים במגרש (Bottom Plaque Action Strip) */
-.st-key-fpl_pitch div[data-testid="stButton"] button,
-.st-key-fpl_bench div[data-testid="stButton"] button,
-.st-key-fpl_pitch_planner div[data-testid="stButton"] button,
-.st-key-fpl_bench_planner div[data-testid="stButton"] button {
+/* כפתור החילוף (רק Secondary) */
+.st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
+.st-key-fpl_bench div[data-testid="stButton"] button[kind="secondary"],
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"],
+.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="secondary"] {
     height: 32px !important;
     min-height: 32px !important;
     max-height: 32px !important;
@@ -1644,23 +1644,38 @@ div[data-testid="stButton"] button[kind="primary"] {
     font-weight: 700 !important;
     padding: 0 !important;
     border-radius: 50% !important;
-    margin: 2px auto 0 auto !important;
+    margin: 4px auto 0 auto !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     background: transparent !important;
+    background-color: transparent !important;
     border: none !important;
     box-shadow: none !important;
     color: var(--p-card-btn-text) !important;
 }
-.st-key-fpl_pitch div[data-testid="stButton"] button p,
-.st-key-fpl_bench div[data-testid="stButton"] button p,
-.st-key-fpl_pitch_planner div[data-testid="stButton"] button p,
-.st-key-fpl_bench_planner div[data-testid="stButton"] button p {
+
+.st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"] p,
+.st-key-fpl_bench div[data-testid="stButton"] button[kind="secondary"] p,
+.st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] p,
+.st-key-fpl_bench_planner div[data-testid="stButton"] button[kind="secondary"] p {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 20px !important;
     line-height: 1 !important;
+}
+
+/* טקסט מחיר ונקודות צפויות חזק וברור */
+.price-xp-text {
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    margin-top: 4px !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    text-shadow: 0px 1px 3px rgba(0,0,0,0.9), 0px 0px 6px rgba(0,0,0,0.8), 0px -1px 2px rgba(0,0,0,0.6) !important;
+    background: transparent !important;
 }
 
 
@@ -3154,8 +3169,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
        ACTION BUTTON
        ============================================================ */
 
-    .st-key-fpl_pitch div[data-testid="stButton"] button,
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
+    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] {
         width: 28px !important;
         max-width: 28px !important;
         height: 28px !important;
@@ -3169,6 +3184,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         justify-content: center !important;
         line-height: 1 !important;
         background: transparent !important;
+        background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }
@@ -3297,8 +3313,8 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         text-size-adjust: none !important;
     }
 
-    .st-key-fpl_pitch div[data-testid="stButton"] button,
-    .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
+    .st-key-fpl_pitch div[data-testid="stButton"] button[kind="secondary"],
+    .st-key-fpl_pitch_planner div[data-testid="stButton"] button[kind="secondary"] {
         width: 24px !important;
         max-width: 24px !important;
         height: 24px !important;
@@ -3311,6 +3327,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         justify-content: center !important;
         font-size: 16px !important;
         background: transparent !important;
+        background-color: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }
