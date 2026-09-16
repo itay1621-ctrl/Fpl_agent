@@ -3721,7 +3721,7 @@ elif "user_team_id" not in st.session_state:
 if not st.session_state.user_team_id:
     with st.container():
         st.markdown('<div class="gate-header-anchor"></div>', unsafe_allow_html=True)
-        c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([4, 1.2, 1])
+        c_gate_top1, c_gate_theme, c_gate_top2 = st.columns([2, 1, 1])
         with c_gate_theme:
             theme_btn_lbl = t("theme_dark") if st.session_state.get("app_theme", "light") == "light" else t("theme_light")
             if st.button(theme_btn_lbl, key="gate_theme_btn", use_container_width=True):
@@ -4024,7 +4024,7 @@ rating_color = (
 # =====================================================================
 with st.container():
     st.markdown('<div class="app-header-anchor"></div>', unsafe_allow_html=True)
-    h_col1, h_col_theme, h_col2, h_col3 = st.columns([3, 1.1, 1, 1])
+    h_col1, h_col_theme, h_col2, h_col3 = st.columns([1.5, 1, 1, 1])
     with h_col1:
         render_html(
             f"""
