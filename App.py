@@ -1569,24 +1569,23 @@ div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] {
 
 /* --- 6.1 כרטיס שחקן עליון (Top Plaque) - מוגדל ומרווח --- */
 .p-card-fpl {
-    background: var(--p-card-bg) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid var(--p-card-border) !important;
-    border-bottom: 1px solid var(--p-card-border-bottom) !important;
-    border-radius: 12px 12px 0 0 !important;
-    padding: 5px 4px !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 2px !important;
     text-align: center !important;
-    box-shadow: var(--p-card-shadow) !important;
+    box-shadow: none !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     overflow: hidden !important;
     position: relative !important;
     width: 100% !important;
     max-width: 126px !important;
     min-width: 0 !important;
-    height: 124px !important;
-    min-height: 124px !important;
-    max-height: 124px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
     box-sizing: border-box !important;
     margin: 0 auto !important;
     display: flex !important;
@@ -1696,10 +1695,9 @@ div[data-testid="column"]:has(.p-card-fpl) div[data-testid="stButton"] button[ki
 
 /* כרטיסים וכפתורים בספסל */
 .card-bench {
-    background: var(--card-bench-bg) !important;
-    border: 1.5px solid var(--card-bench-border) !important;
-    border-bottom: 1px solid var(--p-card-border-bottom) !important;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 div[data-testid="column"]:has(.card-bench) div[data-testid="stButton"] button {
     background: var(--card-bench-btn-bg) !important;
@@ -3012,9 +3010,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 48px !important;
         min-width: 48px !important;
 
-        height: 78px !important;
-        min-height: 78px !important;
-        max-height: 78px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
 
         padding: 2px 1px !important;
         margin: 0 auto !important;
@@ -3284,9 +3282,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         max-width: 44px !important;
         min-width: 44px !important;
 
-        height: 74px !important;
-        min-height: 74px !important;
-        max-height: 74px !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
     }
 
     .st-key-fpl_pitch .p-card-fpl svg,
@@ -4274,15 +4272,10 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
 
     card_html = (
         f'<div class="p-card-fpl {status_class} {bench_class} {sel_class}">'
-        f'{top_color_bar}'
-        f'<div style="display:flex; justify-content:center; align-items:center; width:100%; margin:1px 0;">{jersey_svg}</div>'
-        f'<div class="p-name-plate">{cap_badge}<span class="p-name-txt">{p["name"]}</span></div>'
-        f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin:1px 0;">{fixture_html}</div>'
+        f'<div style="display:flex; justify-content:center; align-items:center; width:100%;">{jersey_svg}</div>'
+        f'<div class="p-name-plate" style="background:#fff; border-radius:3px; padding:1px 2px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:-2px; z-index:2; position:relative; width:90%;"><span class="p-name-txt" style="color:#111;">{cap_badge}{p["name"]}</span></div>'
+        f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top:1px;">{fixture_html}</div>'
         f'{status_pill}'
-        f'<div class="p-card-footer">'
-        f'<span class="p-card-cost"><span class="ltr-tag">£{p["cost"]}m</span></span>'
-        f'<span class="p-card-xp"><span class="ltr-tag">xP {xp_val}</span></span>'
-        f'</div>'
         f'</div>'
     )
     return "".join(line.strip() for line in card_html.splitlines())
@@ -4445,87 +4438,7 @@ with t_squad:
         if gks:
             render_clean_squad_row(gks)
 
-    # חלון העברות שוק במגרש (נפתח לפי דרישה)
-    with st.expander(t("transfer_market_expander")):
-        all_cur_squad = starters + bench
-        p_tr_options = {p["id"]: f"{p['name']} ({get_player_pos(p)} | £{p['cost']}m | {p['team']})" for p in all_cur_squad}
-        sel_tr_out_id = st.selectbox(t("selling_player"), list(p_tr_options.keys()), format_func=lambda x: p_tr_options[x], key="sq_tr_expander_sel")
-        p_tr_out = all_players.get(sel_tr_out_id)
-        if not p_tr_out:
-            st.error("Player data unavailable")
-            st.stop()
-        max_budget = round(p_tr_out["cost"] + st.session_state.user_bank, 1)
-        cur_pids = [x["element"] for x in st.session_state.user_squad]
-        pos_name = get_player_pos(p_tr_out)
-        st.caption(f"{t('selling_player')} **{p_tr_out['name']}** ({pos_name} - £{p_tr_out['cost']}m) | {t('max_budget')} **£{max_budget:.1f}m** | {t('in_bank')}: **£{st.session_state.user_bank:.1f}m**")
 
-        tr_search_q = st.text_input(t("search_placeholder"), key="sq_tr_search_inp").strip().lower()
-        t1_rem_teams = {}
-        for sp in st.session_state.user_squad:
-            if sp["element"] != sel_tr_out_id:
-                p_item = all_players.get(sp["element"])
-                if p_item:
-                    t_code = p_item["team"]
-                    t1_rem_teams[t_code] = t1_rem_teams.get(t_code, 0) + 1
-
-        cands = [
-            p for p in all_players.values()
-            if p["pos_code"] == p_tr_out["pos_code"]
-            and p["id"] not in cur_pids
-            and p["cost"] <= max_budget
-            and p["status"] == "a"
-            and t1_rem_teams.get(p["team"], 0) < 3
-        ]
-        if tr_search_q:
-            cands = [p for p in cands if tr_search_q in p["name"].lower() or tr_search_q in p["team"].lower()]
-        
-        recs = sorted(cands, key=lambda x: x["score"], reverse=True)[:3]
-        if recs:
-            st.markdown(f"##### {t('rec_header')}")
-            r_cols = st.columns(len(recs))
-            for r_i, r_p in enumerate(recs):
-                with r_cols[r_i]:
-                    r_j = get_jersey_svg(r_p["team"], is_gk=(r_p["pos_code"] == 1))
-                    render_html(
-                        f"""
-                        <div class="accessible-card" style="text-align:center; padding:10px;">
-                            {r_j}
-                            <b>{r_p['name']}</b> ({r_p['team']})<br>
-                            <span class="ltr-tag" style="color:var(--accent-cyan);">£{r_p['cost']:.1f}m | xP: {r_p['xp']}</span>
-                            <div style="font-size:10px; color:var(--text-secondary); margin:4px 0;">{get_player_reason(r_p)}</div>
-                            <div class="badge-fdr fdr-{r_p['next_fdr']}"><span class="ltr-tag">{r_p['next_match']}</span></div>
-                        </div>
-                        """
-                    )
-                    if st.button(f"{t('buy_player_btn')} {r_p['name']}", key=f"buy_rec_t1_{r_p['id']}", use_container_width=True):
-                        for sp in st.session_state.user_squad:
-                            if sp["element"] == p_tr_out["id"]:
-                                sp["element"] = r_p["id"]
-                                break
-                        st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - r_p["cost"], 1)
-                        st.session_state.transfers_log.append(f"{p_tr_out['name']} -> {r_p['name']}")
-                        st.toast(f"{p_tr_out['name']} -> {r_p['name']}")
-                        st.rerun()
-
-        st.write("")
-        all_sorted = sorted(cands, key=lambda x: x["total_points"], reverse=True)
-        if all_sorted:
-            cand_map = {p["id"]: f"{p['name']} ({p['team']}) | £{p['cost']:.1f}m | {p['total_points']} {t('pts')} | xP: {p['xp']} | {t('against')} {p['next_match']}" for p in all_sorted}
-            c_c1, c_c2 = st.columns([3, 1])
-            with c_c1:
-                chosen_p_id = st.selectbox(t("all_cands_label"), list(cand_map.keys()), format_func=lambda x: cand_map[x], key="sq_tr_pool_sel")
-            with c_c2:
-                st.write("")
-                if st.button(t("confirm_transfer_btn"), key="sq_confirm_pool_tr", use_container_width=True):
-                    chosen_p = all_players[chosen_p_id]
-                    for sp in st.session_state.user_squad:
-                        if sp["element"] == p_tr_out["id"]:
-                            sp["element"] = chosen_p_id
-                            break
-                    st.session_state.user_bank = round(st.session_state.user_bank + p_tr_out["cost"] - chosen_p["cost"], 1)
-                    st.session_state.transfers_log.append(f"{p_tr_out['name']} -> {chosen_p['name']}")
-                    st.toast(f"{p_tr_out['name']} -> {chosen_p['name']}")
-                    st.rerun()
 
     # ספסל מואר ומובלט בעיצוב Dugout
     st.write("")
