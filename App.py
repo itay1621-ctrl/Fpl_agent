@@ -3001,12 +3001,12 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch_planner .p-card-fpl {
 
         width: 48px !important;
-        max-width: 56px !important;
-        min-width: 56px !important;
+        max-width: 48px !important;
+        min-width: 48px !important;
 
-        height: 92px !important;
-        min-height: 92px !important;
-        max-height: 92px !important;
+        height: 78px !important;
+        min-height: 78px !important;
+        max-height: 78px !important;
 
         padding: 2px 1px !important;
         margin: 0 auto !important;
@@ -3057,7 +3057,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
 
-        font-size: 7.5px !important;
+        font-size: 5.8px !important;
         line-height: 1 !important;
 
         max-width: 100% !important;
@@ -3152,11 +3152,11 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
 
-        width: 68px !important;
-        max-width: 68px !important;
+        width: 48px !important;
+        max-width: 48px !important;
 
-        height: 19px !important;
-        min-height: 19px !important;
+        height: 16px !important;
+        min-height: 16px !important;
 
         padding: 0 !important;
 
@@ -3205,11 +3205,11 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
-        flex: 0 0 68px !important;
+        flex: 0 0 48px !important;
 
-        width: 68px !important;
-        min-width: 68px !important;
-        max-width: 68px !important;
+        width: 48px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
 
         padding: 0 !important;
         margin: 0 !important;
@@ -3218,13 +3218,13 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_bench .card-bench,
     .st-key-fpl_bench_planner .card-bench {
 
-        width: 68px !important;
-        max-width: 68px !important;
-        min-width: 68px !important;
+        width: 48px !important;
+        max-width: 48px !important;
+        min-width: 48px !important;
 
-        height: 92px !important;
-        min-height: 92px !important;
-        max-height: 92px !important;
+        height: 78px !important;
+        min-height: 78px !important;
+        max-height: 78px !important;
 
         padding: 2px 1px !important;
     
@@ -3286,17 +3286,17 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch .p-name-txt,
     .st-key-fpl_pitch_planner .p-name-txt {
-        font-size: 7px !important;
+        font-size: 5.5px !important;
     }
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
 
-        width: 62px !important;
-        max-width: 62px !important;
+        width: 44px !important;
+        max-width: 44px !important;
 
-        height: 17px !important;
-        min-height: 17px !important;
+        height: 14px !important;
+        min-height: 14px !important;
 
         font-size: 6px !important;
     }
