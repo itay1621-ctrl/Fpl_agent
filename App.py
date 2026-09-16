@@ -284,8 +284,8 @@ TRANSLATIONS = {
         "btn_selected": "נבחר",
         "btn_captain": "קפטן (C)",
         "btn_vc": "סגן (VC)",
-        "btn_sub": "חילוף",
-        "btn_sub_single": "חילוף",
+        "btn_sub": "🔄",
+        "btn_sub_single": "🔄",
         "cap_select_label": "קפטן (C):",
         "vc_select_label": "סגן קפטן (VC):",
         "swap_active_hint_prefix": "לחץ על שחקן יעד",
@@ -2844,7 +2844,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     .st-key-fpl_pitch_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench div[data-testid="stHorizontalBlock"] > div[data-testid="column"],
     .st-key-fpl_bench_planner div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        max-width: 104px !important;
+        max-width: 72px !important;
     }
 
     .st-key-fpl_pitch .p-card-fpl,
@@ -3874,6 +3874,8 @@ for p in st.session_state.user_squad:
     else:
         bench.append(item)
 
+bench = sorted(bench, key=lambda x: (x["pos_code"] != 1, x["position"]))
+
 pos_counts = {1: 0, 2: 0, 3: 0, 4: 0}
 for p in starters:
     pos_counts[p["pos_code"]] += 1
@@ -4822,7 +4824,7 @@ with t_analysis:
 
     st.write("")
     st.markdown(f"#### {t('bench_players_title')}")
-    sorted_bench = sorted(bench, key=lambda x: x.get("position", 99))
+    sorted_bench = sorted(bench, key=lambda x: (x.get("pos_code", 0) != 1, x.get("position", 99)))
     rows_bench = []
     for p in sorted_bench:
         if p["chance"] <= 25 or p["status"] in ["i", "s", "u"]:
@@ -5308,6 +5310,8 @@ with t_planner:
                 gw_starters.append(item)
             else:
                 gw_bench.append(item)
+        
+        gw_bench = sorted(gw_bench, key=lambda x: (x["pos_code"] != 1, x["position"]))
 
         cap_mult = 3 if active_chip == "Triple Captain" else 2
         gw_xp = sum(p["xp"] * (cap_mult if p.get("is_cap") else 1) for p in gw_starters)
