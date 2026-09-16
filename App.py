@@ -1633,14 +1633,14 @@ div[data-testid="stButton"] button[kind="primary"] {
 .st-key-fpl_bench div[data-testid="stButton"] button,
 .st-key-fpl_pitch_planner div[data-testid="stButton"] button,
 .st-key-fpl_bench_planner div[data-testid="stButton"] button {
-    height: 24px !important;
-    min-height: 24px !important;
-    max-height: 24px !important;
-    width: 24px !important;
-    min-width: 24px !important;
-    max-width: 24px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
     line-height: 1 !important;
-    font-size: 16px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     padding: 0 !important;
     border-radius: 50% !important;
@@ -1659,7 +1659,7 @@ div[data-testid="stButton"] button[kind="primary"] {
 .st-key-fpl_bench_planner div[data-testid="stButton"] button p {
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 10px !important;
+    font-size: 20px !important;
     line-height: 1 !important;
 }
 
@@ -3156,13 +3156,13 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 22px !important;
-        max-width: 22px !important;
-        height: 22px !important;
-        min-height: 22px !important;
+        width: 28px !important;
+        max-width: 28px !important;
+        height: 28px !important;
+        min-height: 28px !important;
         padding: 0 !important;
         border-radius: 50% !important;
-        font-size: 14px !important;
+        font-size: 18px !important;
         margin: 2px auto 0 auto !important;
         display: flex !important;
         align-items: center !important;
@@ -3299,17 +3299,17 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
 
     .st-key-fpl_pitch div[data-testid="stButton"] button,
     .st-key-fpl_pitch_planner div[data-testid="stButton"] button {
-        width: 20px !important;
-        max-width: 20px !important;
-        height: 20px !important;
-        min-height: 20px !important;
+        width: 24px !important;
+        max-width: 24px !important;
+        height: 24px !important;
+        min-height: 24px !important;
         border-radius: 50% !important;
         padding: 0 !important;
         margin: 2px auto 0 auto !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        font-size: 12px !important;
+        font-size: 16px !important;
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
@@ -4277,7 +4277,7 @@ def render_player_card_html(p, is_bench=False, is_selected=False, is_transfer_se
         f'<div style="display:flex; justify-content:center; align-items:center; width:100%;">{jersey_svg}</div>'
         f'<div class="p-name-plate" style="background:#fff; border-radius:3px; padding:1px 2px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,0.3); margin-top:-2px; z-index:2; position:relative; width:90%;"><span class="p-name-txt" style="color:#111;">{cap_badge}{p["name"]}</span></div>'
         f'<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top:1px;">{fixture_html}</div>'
-        f'<div style="font-size:10px; font-weight:900; color:#ffffff; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);"><span class="ltr-tag">£{p["cost"]}m | xP {xp_val}</span></div>'
+        f'<div style="font-size:10px; font-weight:900; color:#ffffff !important; margin-top:3px; display:inline-flex; justify-content:center; width:100%; text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);"><span class="ltr-tag" style="color:#ffffff !important;">£{p["cost"]}m | xP {xp_val}</span></div>'
         f'{status_pill}'
         f'</div>'
     )
