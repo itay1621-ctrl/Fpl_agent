@@ -283,6 +283,7 @@ export default function Home() {
       setData(originalData);
       setSwapSourceId(null);
       setTransferOutId(null);
+      localStorage.removeItem(`fpl_plan_${originalData.team_id}`);
     }
   };
 
@@ -584,7 +585,28 @@ export default function Home() {
             <div className="mb-8 text-center">
               <h1 className="text-5xl md:text-6xl font-black mb-2 text-[#01fc7a] tracking-tight">FPL Elite Scout</h1>
               <p className="text-purple-200 font-medium text-lg">{isEnglish ? 'Next-Gen AI Squad Planner' : 'מערכת תכנון סגל מבוססת AI'}</p>
-            </div>
+        
+      {!isBench && onCaptainClick && onViceClick && !transferMode && (
+        <div className="flex justify-center gap-1 mt-1 w-[110%] z-20">
+          <button 
+            onClick={() => onCaptainClick(player.id)}
+            disabled={activeId !== null}
+            title="Set Captain"
+            className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded shadow transition-colors ${activeId !== null ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'} ${player.is_captain ? 'bg-black text-yellow-400 border border-yellow-400' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}
+          >
+            <span className="text-[8px] sm:text-xs font-black">C</span>
+          </button>
+          <button 
+            onClick={() => onViceClick(player.id)}
+            disabled={activeId !== null}
+            title="Set Vice Captain"
+            className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded shadow transition-colors ${activeId !== null ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'} ${player.is_vice_captain ? 'bg-white text-black border border-black' : 'bg-gray-100 text-gray-700 border border-gray-300'}`}
+          >
+            <span className="text-[8px] sm:text-xs font-black">V</span>
+          </button>
+        </div>
+      )}
+    </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-xl w-full text-[#37003c]" dir={isEnglish ? "ltr" : "rtl"}>
               <h2 className="text-xl font-bold mb-6 text-center text-[#37003c]">{t.enterId}</h2>
@@ -598,7 +620,7 @@ export default function Home() {
                   onKeyDown={(e) => e.key === 'Enter' && fetchTeam()} 
                 />
                 <button 
-                  onClick={() => fetchTeam()} 
+                  onClick={handleReset} 
                   disabled={loading || !teamId} 
                   className="w-full bg-[#01fc7a] hover:bg-[#00e36d] text-[#37003c] px-6 py-4 rounded-xl font-black text-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                 >
@@ -682,34 +704,12 @@ export default function Home() {
             <button onClick={() => setActiveTab('tips')} className={`${activeTab === 'tips' ? `${textHighlight} border-b-2 border-red-500` : `${textMuted} hover:opacity-80`}`}>{t.tipsTab}</button>
           </div>
 
-          {/* Captain / VC Selectors & Reset Squad */}
+          {/* Reset Squad */}
           {activeTab === 'pitch' && (
-            <div className="flex flex-col md:flex-row gap-4 md:gap-8 mb-6 items-end">
-              <div className="flex-1 w-full">
-                <label className={`block text-xs font-bold mb-0 sm:mb-1 ${textMuted} ${isEnglish ? 'text-left' : 'text-right'}`}>{t.cap}</label>
-                <select 
-                  className={`w-full border rounded-md p-2 text-sm ${bgCard}`}
-                  value={currentCaptain?.id || ''}
-                  onChange={(e) => handleSetCaptain(Number(e.target.value))}
-                >
-                  {data.squad.map((p: any) => <option key={p.id} value={p.id}>{p.name} ({p.team}) — xP: {p.xp}</option>)}
-                </select>
-              </div>
-              <div className="flex-1 w-full">
-                <label className={`block text-xs font-bold mb-0 sm:mb-1 ${textMuted} ${isEnglish ? 'text-left' : 'text-right'}`}>{t.vcap}</label>
-                <select 
-                  className={`w-full border rounded-md p-2 text-sm ${bgCard}`}
-                  value={currentVice?.id || ''}
-                  onChange={(e) => handleSetViceCaptain(Number(e.target.value))}
-                >
-                  {data.squad.map((p: any) => <option key={p.id} value={p.id}>{p.name} ({p.team}) — xP: {p.xp}</option>)}
-                </select>
-              </div>
-              <div className="flex-none">
-                <button onClick={() => fetchTeam()} className={`w-full md:w-auto px-6 py-2 border rounded-md text-sm font-bold hover:opacity-80 transition-opacity text-white bg-red-600 border-red-700 shadow-md`}>
-                  {isEnglish ? '🔄 Reset Virtual Changes' : '🔄 איפוס סגל וחילופים'}
-                </button>
-              </div>
+            <div className="flex justify-end mb-4">
+              <button onClick={handleReset} className={`w-full md:w-auto px-6 py-2 border rounded-md text-sm font-bold hover:opacity-80 transition-opacity text-white bg-red-600 border-red-700 shadow-md`}>
+                {isEnglish ? '🔄 Reset Virtual Changes' : '🔄 איפוס שינויים וירטואליים'}
+              </button>
             </div>
           )}
           {/* FPL Pitch Area */}
@@ -735,22 +735,22 @@ export default function Home() {
                 
                 <div className="flex justify-center z-10">
                   {starters.filter((p: any) => p.pos_code === 1).map((p: any) => (
-                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} />
+                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} onCaptainClick={handleSetCaptain} onViceClick={handleSetViceCaptain} />
                   ))}
                 </div>
                 <div className="flex justify-center gap-0 sm:gap-6 z-10 mt-3 sm:mt-6">
                   {starters.filter((p: any) => p.pos_code === 2).map((p: any) => (
-                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} />
+                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} onCaptainClick={handleSetCaptain} onViceClick={handleSetViceCaptain} />
                   ))}
                 </div>
                 <div className="flex justify-center gap-0 sm:gap-6 z-10 mt-3 sm:mt-6">
                   {starters.filter((p: any) => p.pos_code === 3).map((p: any) => (
-                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} />
+                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} onCaptainClick={handleSetCaptain} onViceClick={handleSetViceCaptain} />
                   ))}
                 </div>
                 <div className="flex justify-center gap-0 sm:gap-6 z-10 mt-3 sm:mt-6">
                   {starters.filter((p: any) => p.pos_code === 4).map((p: any) => (
-                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} />
+                    <PlayerCard key={p.id} player={p} activeId={swapSourceId} onActionClick={handleSwapClick} onCaptainClick={handleSetCaptain} onViceClick={handleSetViceCaptain} />
                   ))}
                 </div>
               </div>
@@ -1349,13 +1349,17 @@ function PlayerCard({
   isBench = false, 
   activeId, 
   onActionClick,
-  transferMode = false
+  transferMode = false,
+  onCaptainClick,
+  onViceClick
 }: { 
   player: any, 
   isBench?: boolean, 
   activeId: number | null,
   onActionClick: (id: number) => void,
-  transferMode?: boolean
+  transferMode?: boolean,
+  onCaptainClick?: (id: number) => void,
+  onViceClick?: (id: number) => void
 }) {
   const shirtImg = `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${player.team_code}-66.webp`;
   
@@ -1387,7 +1391,11 @@ function PlayerCard({
       </button>
 
       {/* Shirt */}
-      <img src={shirtImg} alt={player.name} className={`w-10 sm:w-14 h-auto drop-shadow-md transition-transform ${isSelected ? 'brightness-110 drop-shadow-xl' : ''}`} />
+      <div className="relative">
+        <img src={shirtImg} alt={player.name} className={`w-10 sm:w-14 h-auto drop-shadow-md transition-transform ${isSelected ? 'brightness-110 drop-shadow-xl' : ''}`} />
+        {player.is_captain && <div className="absolute -bottom-1 -right-1 sm:-right-2 bg-black text-white text-[8px] sm:text-[10px] font-bold w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center border border-yellow-400 shadow z-10">C</div>}
+        {player.is_vice_captain && <div className="absolute -bottom-1 -right-1 sm:-right-2 bg-white text-black text-[8px] sm:text-[10px] font-bold w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center border border-black shadow z-10">V</div>}
+      </div>
       
       {/* Name */}
       <div 
